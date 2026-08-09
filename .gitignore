@@ -15,3 +15,6 @@ addons/*
 dev-libs/
 *.sum
 .vs/
+
+oxipng.exe
+Run Oxipng on All Images.bat
