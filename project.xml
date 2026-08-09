@@ -49,9 +49,6 @@
 
 	<!-- _________________________________ Engine Settings _______________________________ -->
 
-	<!-- Comment this out to disable updates !-->
-	<define name="UPDATE_CHECKING" unless="web || hl || neko || debug"/>
-
 	<!-- Comment this out to disable Discord RPC !-->
 	<section if="cpp">
 		<define name="DISCORD_RPC" if="desktop"/>
@@ -160,14 +157,10 @@
 	<library name="assets"    preload="false" if="NO_PRELOAD_ALL" />
 
 	<section unless="TEST_BUILD">
-		<assets path="assets/"    rename="assets"	exclude="*.ogg" if="web"/>
-		<assets path="assets/"    rename="assets"	exclude="*.mp3" unless="web"/>
-
+		<assets path="assets/"    rename="assets"/>
 		<!-- TODO: make it copy this manually, instead of using assets node, so it doesn't manually check for fonts -->
 		<assets path='mods' rename='mods' embed='false' />
 	</section>
-
-	<assets path='art/readme.txt' rename='do NOT readme.txt' />
 
 	<!-- OpenAL config -->
 	<section if="desktop">
