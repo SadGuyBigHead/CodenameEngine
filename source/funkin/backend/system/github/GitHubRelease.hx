@@ -1,6 +1,7 @@
 package funkin.backend.system.github;
 
-typedef GitHubRelease = {
+typedef GitHubRelease =
+{
 	/**
 	 * Body of the GitHub request (Markdown)
 	 */

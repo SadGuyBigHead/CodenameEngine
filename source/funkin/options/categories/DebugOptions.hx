@@ -1,7 +1,9 @@
 package funkin.options.categories;
 
-class DebugOptions extends TreeMenuScreen {
-	public function new() {
+class DebugOptions extends TreeMenuScreen
+{
+	public function new()
+	{
 		super('DebugOptions.title', 'DebugOptions.desc', 'DebugOptions.');
 
 		#if windows
@@ -16,7 +18,7 @@ class DebugOptions extends TreeMenuScreen {
 		add(new Checkbox(getNameID("charterSwapEventSides"), getDescID("charterSwapEventSides"), "charterSwapEventSides"));
 		add(new Checkbox(getNameID("intensiveBlur"), getDescID("intensiveBlur"), "intensiveBlur"));
 		add(new Checkbox(getNameID("charterAutoSaves"), getDescID("charterAutoSaves"), "charterAutoSaves"));
-		add(new NumOption(getNameID("charterAutoSaveTime"), getDescID("charterAutoSaveTime"), 60, 60*10, 1, "charterAutoSaveTime"));
+		add(new NumOption(getNameID("charterAutoSaveTime"), getDescID("charterAutoSaveTime"), 60, 60 * 10, 1, "charterAutoSaveTime"));
 		add(new NumOption(getNameID("charterAutoSaveWarningTime"), getDescID("charterAutoSaveWarningTime"), 0, 15, 1, "charterAutoSaveWarningTime"));
 		add(new Checkbox(getNameID("charterAutoSavesSeparateFolder"), getDescID("charterAutoSavesSeparateFolder"), "charterAutoSavesSeparateFolder"));
 		add(new Checkbox(getNameID("songOffsetAffectEditors"), getDescID("songOffsetAffectEditors"), "songOffsetAffectEditors"));

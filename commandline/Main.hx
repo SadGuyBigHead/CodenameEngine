@@ -2,12 +2,14 @@ package;
 
 import commands.*;
 
-class Main {
+class Main
+{
 	public static var commands:Array<Command> = [];
 
 	public static var curCommand:Command;
 
-	public static function initCommands() {
+	public static function initCommands()
+	{
 		commands = [
 			{
 				names: ["setup"],
@@ -131,7 +133,8 @@ class Main {
 		];
 	}
 
-	public static function main() {
+	public static function main()
+	{
 		initCommands();
 		final args = Sys.args();
 		var commandName = args.shift();
@@ -140,8 +143,10 @@ class Main {
 		else
 			commandName = "help";
 
-		for(c in commands) {
-			if (c.names.contains(commandName)) {
+		for (c in commands)
+		{
+			if (c.names.contains(commandName))
+			{
 				curCommand = c;
 				c.func(args);
 				return;
@@ -149,23 +154,28 @@ class Main {
 		}
 	}
 
-	public static function help(args:Array<String>) {
+	public static function help(args:Array<String>)
+	{
 		var cmdName = args.shift();
-		if (cmdName != null) {
+		if (cmdName != null)
+		{
 			cmdName = cmdName.toLowerCase();
 
 			var matchingCommand = null;
-			for(c in commands) if (c.names.contains(cmdName)) {
-				matchingCommand = c;
-				break;
-			}
+			for (c in commands)
+				if (c.names.contains(cmdName))
+				{
+					matchingCommand = c;
+					break;
+				}
 
-			if (matchingCommand == null) {
+			if (matchingCommand == null)
+			{
 				Sys.println('help - Command named ${cmdName} not found.');
 				return;
 			}
 
-			Sys.println('Command: ${matchingCommand.names.filter(v->v != null).join(", ")}');
+			Sys.println('Command: ${matchingCommand.names.filter(v -> v != null).join(", ")}');
 			Sys.println("---");
 			Sys.println(matchingCommand.dDoc);
 
@@ -174,14 +184,17 @@ class Main {
 		// shows help
 		Sys.println("Codename Engine Command Line utility");
 		Sys.println('Available commands (${commands.length}):\n');
-		for(line in commands) {
-			if(line.names.contains(null)) line.names.remove(null);
+		for (line in commands)
+		{
+			if (line.names.contains(null))
+				line.names.remove(null);
 			Sys.println('${line.names.join(", ")} - ${line.doc}');
 		}
 	}
 }
 
-typedef Command = {
+typedef Command =
+{
 	var names:Array<String>;
 	var func:Array<String>->Void;
 	var ?doc:String;

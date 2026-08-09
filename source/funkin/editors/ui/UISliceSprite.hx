@@ -2,14 +2,16 @@ package funkin.editors.ui;
 
 import flixel.graphics.frames.FlxFrame;
 
-class UISliceSprite extends UISprite {
+class UISliceSprite extends UISprite
+{
 	public var bWidth:Int = 120;
 	public var bHeight:Int = 20;
 	public var framesOffset(default, set):Int = 0;
 
 	public var incorporeal:Bool = false;
 
-	public function new(x:Float, y:Float, w:Int, h:Int, path:String) {
+	public function new(x:Float, y:Float, w:Int, h:Int, path:String)
+	{
 		super(x, y);
 
 		frames = Paths.getFrames(path);
@@ -17,13 +19,16 @@ class UISliceSprite extends UISprite {
 		calculateFrames();
 	}
 
-	public override function updateButton() {
-		if (incorporeal) return;
+	public override function updateButton()
+	{
+		if (incorporeal)
+			return;
 		__rect.set(x, y, bWidth, bHeight);
 		UIState.state.updateRectButtonHandler(this, __rect, onHovered);
 	}
 
-	public function resize(w:Int, h:Int) {
+	public function resize(w:Int, h:Int)
+	{
 		bWidth = w;
 		bHeight = h;
 	}
@@ -51,22 +56,27 @@ class UISliceSprite extends UISprite {
 	public var leftWidth:Int = 0;
 	public var rightWidth:Int = 0;
 
-	override function set_frames(val) {
+	override function set_frames(val)
+	{
 		super.set_frames(val);
 		calculateFrames();
 		return val;
 	}
 
-	function set_framesOffset(value:Int) {
-		if(value != framesOffset) {
+	function set_framesOffset(value:Int)
+	{
+		if (value != framesOffset)
+		{
 			framesOffset = value;
 			calculateFrames();
 		}
 		return value;
 	}
 
-	function calculateFrames() {
-		if(frames == null) return;
+	function calculateFrames()
+	{
+		if (frames == null)
+			return;
 		topleft = frames.frames[framesOffset];
 		top = frames.frames[framesOffset + 1];
 		topright = frames.frames[framesOffset + 2];
@@ -83,13 +93,15 @@ class UISliceSprite extends UISprite {
 		bottomHeight = Std.int(MathUtil.maxSmart(topleft.frame.height, top.frame.height, topright.frame.height));
 	}
 
-	@:pure private static inline function getFixedSize(value:Float, total:Float):Float {
+	@:pure private static inline function getFixedSize(value:Float, total:Float):Float
+	{
 		return value * Math.min(total / (value * 2), 1);
 	}
 
 	public override function draw() @:privateAccess {
 		var lastPixelPerfect:Bool = cameras[0] != null ? cameras[0].pixelPerfectRender : false;
-		if (cameras[0] != null) cameras[0].pixelPerfectRender = false;
+		if (cameras[0] != null)
+			cameras[0].pixelPerfectRender = false;
 
 		var topLeft = (flipX ? (flipY ? bottomright : topright) : (flipY ? bottomleft : topleft));
 		var topMiddle = (flipY ? bottom : top);
@@ -103,63 +115,60 @@ class UISliceSprite extends UISprite {
 		var x:Float = this.x;
 		var y:Float = this.y;
 
-		if (visible && !(bWidth == 0 || bHeight == 0)) {
+		if (visible && !(bWidth == 0 || bHeight == 0))
+		{
 			var topLeftWidth:Float = getFixedSize(topLeft.frame.width, bWidth);
 			var topLeftHeight:Float = getFixedSize(topLeft.frame.height, bHeight);
-			//var topMiddleWidth:Float = getFixedSize(topMiddle.frame.width, bWidth);
+			// var topMiddleWidth:Float = getFixedSize(topMiddle.frame.width, bWidth);
 			var topMiddleHeight:Float = getFixedSize(topMiddle.frame.height, bHeight);
 			var topRightWidth:Float = getFixedSize(topRight.frame.width, bWidth);
 			var topRightHeight:Float = getFixedSize(topRight.frame.height, bHeight);
 			var middleLeftWidth:Float = getFixedSize(middleLeft.frame.width, bWidth);
-			//var middleLeftHeight:Float = getFixedSize(middleLeft.frame.height, bHeight);
-			//var middleMiddleWidth:Float = getFixedSize(middle.frame.width, bWidth);
-			//var middleMiddleHeight:Float = getFixedSize(middle.frame.height, bHeight);
+			// var middleLeftHeight:Float = getFixedSize(middleLeft.frame.height, bHeight);
+			// var middleMiddleWidth:Float = getFixedSize(middle.frame.width, bWidth);
+			// var middleMiddleHeight:Float = getFixedSize(middle.frame.height, bHeight);
 			var middleRightWidth:Float = getFixedSize(middleRight.frame.width, bWidth);
-			//var middleRightHeight:Float = getFixedSize(middleRight.frame.height, bHeight);
+			// var middleRightHeight:Float = getFixedSize(middleRight.frame.height, bHeight);
 			var bottomLeftWidth:Float = getFixedSize(bottomLeft.frame.width, bWidth);
 			var bottomLeftHeight:Float = getFixedSize(bottomLeft.frame.height, bHeight);
-			//var bottomMiddleWidth:Float = getFixedSize(bottomMiddle.frame.width, bWidth);
+			// var bottomMiddleWidth:Float = getFixedSize(bottomMiddle.frame.width, bWidth);
 			var bottomMiddleHeight:Float = getFixedSize(bottomMiddle.frame.height, bHeight);
 			var bottomRightWidth:Float = getFixedSize(bottomRight.frame.width, bWidth);
 			var bottomRightHeight:Float = getFixedSize(bottomRight.frame.height, bHeight);
 
 			var oldAlpha = alpha;
 			// TOP
-			if (drawTop) {
+			if (drawTop)
+			{
 				// TOP LEFT
-				if(topAlpha != null) alpha = topAlpha;
+				if (topAlpha != null)
+					alpha = topAlpha;
 				frame = topLeft;
 				setPosition(x, y);
-				__setSize(
-					topLeftWidth,
-					topLeftHeight
-				);
+				__setSize(topLeftWidth, topLeftHeight);
 				super.drawSuper();
 
 				// TOP
-				if (bWidth > topLeft.frame.width + topRight.frame.width) {
+				if (bWidth > topLeft.frame.width + topRight.frame.width)
+				{
 					frame = topMiddle;
 					setPosition(x + topLeft.frame.width, y);
-					__setSize(
-						bWidth - topLeft.frame.width - topRight.frame.width,
-						topMiddleHeight
-					);
+					__setSize(bWidth - topLeft.frame.width - topRight.frame.width, topMiddleHeight);
 					super.drawSuper();
 				}
 
 				// TOP RIGHT
 				setPosition(x + bWidth - topRightWidth, y);
 				frame = topRight;
-				__setSize(
-					topRightWidth,
-					topRightHeight
-				);
+				__setSize(topRightWidth, topRightHeight);
 				super.drawSuper();
 			}
 
 			// MIDDLE
-			if (drawMiddle && bHeight > topMiddle.frame.height + bottomMiddle.frame.height) {
-				if(middleAlpha != null) alpha = middleAlpha;
+			if (drawMiddle && bHeight > topMiddle.frame.height + bottomMiddle.frame.height)
+			{
+				if (middleAlpha != null)
+					alpha = middleAlpha;
 				var middleHeight:Float = bHeight - topLeftHeight - bottomLeftHeight;
 
 				// MIDDLE LEFT
@@ -168,7 +177,8 @@ class UISliceSprite extends UISprite {
 				__setSize(middleLeftWidth, middleHeight);
 				super.drawSuper();
 
-				if (bWidth > (middleLeftWidth) + middleRight.frame.width) {
+				if (bWidth > (middleLeftWidth) + middleRight.frame.width)
+				{
 					// MIDDLE
 					frame = middle;
 					setPosition(x + topLeft.frame.width, y + topMiddle.frame.height);
@@ -184,18 +194,18 @@ class UISliceSprite extends UISprite {
 			}
 
 			// BOTTOM
-			if (drawBottom) {
-				if(bottomAlpha != null) alpha = bottomAlpha;
+			if (drawBottom)
+			{
+				if (bottomAlpha != null)
+					alpha = bottomAlpha;
 				// BOTTOM LEFT
 				frame = bottomLeft;
 				setPosition(x, y + bHeight - (bottomLeftHeight));
-				__setSize(
-					bottomLeftWidth,
-					bottomLeftHeight
-				);
+				__setSize(bottomLeftWidth, bottomLeftHeight);
 				super.drawSuper();
 
-				if (bWidth > bottomLeft.frame.width + bottomRight.frame.width) {
+				if (bWidth > bottomLeft.frame.width + bottomRight.frame.width)
+				{
 					// BOTTOM
 					frame = bottomMiddle;
 					setPosition(x + bottomLeft.frame.width, y + bHeight - (bottomMiddleHeight));
@@ -206,26 +216,21 @@ class UISliceSprite extends UISprite {
 				// BOTTOM RIGHT
 				frame = bottomRight;
 
-				setPosition(
-					x + bWidth - (bottomRightWidth),
-					y + bHeight - (bottomRightHeight)
-				);
-				__setSize(
-					bottomRightWidth,
-					bottomRightHeight
-				);
+				setPosition(x + bWidth - (bottomRightWidth), y + bHeight - (bottomRightHeight));
+				__setSize(bottomRightWidth, bottomRightHeight);
 				super.drawSuper();
-
 			}
 			alpha = oldAlpha;
 		}
-		if (cameras[0] != null) cameras[0].pixelPerfectRender = lastPixelPerfect;
+		if (cameras[0] != null)
+			cameras[0].pixelPerfectRender = lastPixelPerfect;
 
 		setPosition(x, y);
 		super.drawMembers();
 	}
 
-	private function __setSize(Width:Float, Height:Float) {
+	private function __setSize(Width:Float, Height:Float)
+	{
 		var newScaleX:Float = Width / frameWidth;
 		var newScaleY:Float = Height / frameHeight;
 		scale.set(newScaleX, newScaleY);

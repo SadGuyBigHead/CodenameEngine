@@ -10,7 +10,8 @@ import haxe.xml.Access;
 import haxe.xml.Printer;
 
 @:access(funkin.menus.ui.Alphabet)
-class AlphabetEditor extends UIState {
+class AlphabetEditor extends UIState
+{
 	static var __typeface:String;
 
 	public static var instance(get, null):AlphabetEditor;
@@ -26,9 +27,11 @@ class AlphabetEditor extends UIState {
 	var editorCamera:FlxCamera;
 	var uiCamera:FlxCamera;
 
-	public function new(typeface:String) {
+	public function new(typeface:String)
+	{
 		super();
-		if (typeface != null) __typeface = typeface;
+		if (typeface != null)
+			__typeface = typeface;
 	}
 
 	inline function translate(id:String, ?args:Array<Dynamic>)
@@ -56,12 +59,16 @@ class AlphabetEditor extends UIState {
 	public var defaultTmr:Float = 0.0;
 	public var charsForDefault:Array<Array<String>> = [];
 
-	public override function create() {
+	public override function create()
+	{
 		super.create();
 
 		WindowUtils.suffix = " (" + translate("name") + ")";
 		SaveWarning.selectionClass = AlphabetSelection;
-		SaveWarning.saveFunc = () -> {_file_save(null);};
+		SaveWarning.saveFunc = () ->
+		{
+			_file_save(null);
+		};
 
 		topMenu = [
 			{
@@ -90,16 +97,15 @@ class AlphabetEditor extends UIState {
 				childs: [
 					// TODO: add redo and undo
 					/*{
-						label: translate("edit.undo"),
-						onSelect: null
-					},
-					{
-						label: translate("edit.redo"),
-						onSelect: null
+							label: translate("edit.undo"),
+							onSelect: null
+						},
+						{
+							label: translate("edit.redo"),
+							onSelect: null
 					},*/
 					{
 						label: translate("glyph.deleteCurGlyph"),
-						
 					},
 					{
 						label: "Edit Main Data", // TODO: add translations
@@ -113,17 +119,17 @@ class AlphabetEditor extends UIState {
 					{
 						label: translate("view.zoomIn"),
 						keybind: [CONTROL, NUMPADPLUS],
-						//onSelect: _view_zoomin
+						// onSelect: _view_zoomin
 					},
 					{
 						label: translate("view.zoomOut"),
 						keybind: [CONTROL, NUMPADMINUS],
-						//onSelect: _view_zoomout
+						// onSelect: _view_zoomout
 					},
 					{
 						label: translate("view.resetZoom"),
 						keybind: [CONTROL, NUMPADZERO],
-						//onSelect: _view_zoomreset
+						// onSelect: _view_zoomreset
 					},
 				]
 			},
@@ -159,12 +165,12 @@ class AlphabetEditor extends UIState {
 
 		topMenuSpr = new UITopMenu(topMenu);
 		topMenuSpr.cameras = uiGroup.cameras = [uiCamera];
-		
+
 		tape = new Alphabet(0, 70, "", __typeface);
 		tape.alignment = CENTER;
 		tape.renderMode = MONOSPACE;
 		add(tape);
-		
+
 		bigLetter = new Alphabet(0, 0, "", "<SKIP>");
 		bigLetter.copyData(tape);
 		bigLetter.alignment = CENTER;
@@ -188,18 +194,23 @@ class AlphabetEditor extends UIState {
 		glyphChar = new UITextBox(glyphCreateWindow.x + 15, glyphCreateWindow.y + 15, "", glyphCreateWindow.bWidth - 30);
 		glyphCreateWindow.members.push(glyphChar);
 
-		confirmGlyph = new UIButton(glyphChar.x, glyphChar.y + glyphChar.bHeight + 15, translate("glyph.newGlyph"), function() {
-			if (deleteGlyph.selectable) {
+		confirmGlyph = new UIButton(glyphChar.x, glyphChar.y + glyphChar.bHeight + 15, translate("glyph.newGlyph"), function()
+		{
+			if (deleteGlyph.selectable)
+			{
 				curLetter = tape.manualLetters.indexOf(lastChar) + charsForDefault.length;
 				changeLetter(0);
-			} else {
+			}
+			else
+			{
 				tape.manualLetters.push(lastChar);
 				tape.text = "";
 				for (def in charsForDefault)
 					tape.text += def[Std.int(Math.floor(defaultTmr) % def.length)] + " ";
 				tape.text += tape.manualLetters.join(" ");
 
-				for (i in 0...tape.fastGetData(lastChar).components.length) {
+				for (i in 0...tape.fastGetData(lastChar).components.length)
+				{
 					var anim = bigLetter.text + i;
 					bigLetter.animation.remove(anim);
 					tape.animation.remove(anim);
@@ -220,7 +231,8 @@ class AlphabetEditor extends UIState {
 		confirmGlyph.selectable = false;
 		glyphCreateWindow.members.push(confirmGlyph);
 
-		deleteGlyph = new UIButton(glyphChar.x, confirmGlyph.y + confirmGlyph.bHeight + 5, translate("glyph.deleteGlyph"), function() {
+		deleteGlyph = new UIButton(glyphChar.x, confirmGlyph.y + confirmGlyph.bHeight + 5, translate("glyph.deleteGlyph"), function()
+		{
 			final charIdx = tape.manualLetters.indexOf(lastChar);
 
 			tape.manualLetters.splice(charIdx, 1);
@@ -229,7 +241,8 @@ class AlphabetEditor extends UIState {
 				tape.text += def[Std.int(Math.floor(defaultTmr) % def.length)] + " ";
 			tape.text += tape.manualLetters.join(" ");
 
-			for (i in 0...tape.fastGetData(lastChar).components.length) {
+			for (i in 0...tape.fastGetData(lastChar).components.length)
+			{
 				var anim = bigLetter.text + i;
 				bigLetter.animation.remove(anim);
 				tape.animation.remove(anim);
@@ -246,10 +259,12 @@ class AlphabetEditor extends UIState {
 		uiGroup.add(infoWindow);
 
 		componentList = new UIButtonList<ComponentButton>(0, 720 - 170 - 30, 230, 170, "Components:", FlxPoint.get(230, 50), FlxPoint.get(0, 0), 0);
-		componentList.dragCallback = (button, oldID, newID) -> {
+		componentList.dragCallback = (button, oldID, newID) ->
+		{
 			queueReorder = true; // not do it for every button reordered
 		}
-		componentList.addButton.callback = () -> {
+		componentList.addButton.callback = () ->
+		{
 			curSelectedComponent = {
 				anim: "",
 				x: 0,
@@ -262,7 +277,7 @@ class AlphabetEditor extends UIState {
 
 				scaleX: 1,
 				scaleY: 1,
-				
+
 				flipX: false,
 				flipY: false,
 
@@ -283,7 +298,8 @@ class AlphabetEditor extends UIState {
 		add(topMenuSpr);
 		add(uiGroup);
 
-		if(Framerate.isLoaded) {
+		if (Framerate.isLoaded)
+		{
 			Framerate.fpsCounter.alpha = 0.4;
 			Framerate.memoryCounter.alpha = 0.4;
 			Framerate.codenameBuildField.alpha = 0.4;
@@ -292,9 +308,11 @@ class AlphabetEditor extends UIState {
 		DiscordUtil.call("onEditorLoaded", ["Alphabet Editor", __typeface]);
 	}
 
-	override function destroy() {
+	override function destroy()
+	{
 		super.destroy();
-		if(Framerate.isLoaded) {
+		if (Framerate.isLoaded)
+		{
 			Framerate.fpsCounter.alpha = 1;
 			Framerate.memoryCounter.alpha = 1;
 			Framerate.codenameBuildField.alpha = 1;
@@ -302,35 +320,45 @@ class AlphabetEditor extends UIState {
 	}
 
 	var lastChar:String = "";
-	public override function update(elapsed:Float) {
+
+	public override function update(elapsed:Float)
+	{
 		super.update(elapsed);
 
-		if (glyphChar.label.text != lastChar) {
-			if (glyphChar.label.text == "") {
+		if (glyphChar.label.text != lastChar)
+		{
+			if (glyphChar.label.text == "")
+			{
 				lastChar = "";
 				confirmGlyph.selectable = false;
 				deleteGlyph.selectable = false;
 				confirmGlyph.field.text = translate("glyph.newGlyph");
-			} else {
-				glyphChar.label.text = lastChar = switch (tape.forceCase) {
+			}
+			else
+			{
+				glyphChar.label.text = lastChar = switch (tape.forceCase)
+				{
 					case UPPER: glyphChar.label.text.charAt(glyphChar.label.text.length - 1).toUpperCase();
 					case LOWER: glyphChar.label.text.charAt(glyphChar.label.text.length - 1).toLowerCase();
 					case NONE: glyphChar.label.text.charAt(glyphChar.label.text.length - 1);
 				};
-				
+
 				confirmGlyph.selectable = true;
 				deleteGlyph.selectable = tape.manualLetters.contains(lastChar);
 				confirmGlyph.field.text = translate(deleteGlyph.selectable ? "glyph.editGlyph" : "glyph.newGlyph");
 			}
 		}
 
-		if (queueReorder) {
+		if (queueReorder)
+		{
 			queueReorder = false;
 			var outlines = [];
 			var newList = [];
-			for (button in componentList.buttons.members) {
+			for (button in componentList.buttons.members)
+			{
 				var com = button.component;
-				if (com.outIndex != null) {
+				if (com.outIndex != null)
+				{
 					var out = curSelectedData.components[com.outIndex];
 					out.refIndex = newList.length;
 					com.outIndex = outlines.length;
@@ -341,37 +369,44 @@ class AlphabetEditor extends UIState {
 			curSelectedData.components = outlines.concat(newList);
 
 			findOutline();
-			for (i in 0...curSelectedData.components.length) {
+			for (i in 0...curSelectedData.components.length)
+			{
 				var anim = bigLetter.text + i;
 				bigLetter.animation.remove(anim);
 				tape.animation.remove(anim);
 			}
 		}
 
-		if (currentFocus == null) {
-			if(FlxG.keys.justPressed.ANY)
+		if (currentFocus == null)
+		{
+			if (FlxG.keys.justPressed.ANY)
 				UIUtil.processShortcuts(topMenu);
-			
-			if(curSelectedComponent != null) {
-				if(FlxG.keys.pressed.K) {
+
+			if (curSelectedComponent != null)
+			{
+				if (FlxG.keys.pressed.K)
+				{
 					curSelectedComponent.y -= 100 * elapsed;
 				}
-				if(FlxG.keys.pressed.I) {
+				if (FlxG.keys.pressed.I)
+				{
 					curSelectedComponent.y += 100 * elapsed;
 				}
-				if(FlxG.keys.pressed.L) {
+				if (FlxG.keys.pressed.L)
+				{
 					curSelectedComponent.x -= 100 * elapsed;
 				}
-				if(FlxG.keys.pressed.J) {
+				if (FlxG.keys.pressed.J)
+				{
 					curSelectedComponent.x += 100 * elapsed;
 				}
 			}
 		}
 
-
 		var lastIdx = Math.floor(defaultTmr);
 		defaultTmr += elapsed * 0.5;
-		if (lastIdx != (lastIdx = Math.floor(defaultTmr))) {
+		if (lastIdx != (lastIdx = Math.floor(defaultTmr)))
+		{
 			tape.text = "";
 			for (def in charsForDefault)
 				tape.text += def[Std.int(lastIdx % def.length)] + " ";
@@ -380,15 +415,19 @@ class AlphabetEditor extends UIState {
 		tape.x = lerp(tape.x, targetX, 0.25);
 	}
 
-	function updateTape() {
+	function updateTape()
+	{
 		charsForDefault = [[], [], []];
 
-		for (i in 33...127) {
+		for (i in 33...127)
+		{
 			var letter = String.fromCharCode(i);
-			if (tape.manualLetters.contains(letter)) continue;
+			if (tape.manualLetters.contains(letter))
+				continue;
 
 			var data = tape.fastGetData(letter);
-			for (i => com in data.components) {
+			for (i => com in data.components)
+			{
 				if (tape.fastGetLetterAnim(letter, data, com, i) == null)
 					continue;
 			}
@@ -402,7 +441,8 @@ class AlphabetEditor extends UIState {
 		}
 
 		var i = charsForDefault.length - 1;
-		while (i >= 0) {
+		while (i >= 0)
+		{
 			if (charsForDefault[i].length <= 0)
 				charsForDefault.splice(i, 1);
 			--i;
@@ -415,7 +455,8 @@ class AlphabetEditor extends UIState {
 		changeLetter(0);
 	}
 
-	function changeLetter(inc:Int) {
+	function changeLetter(inc:Int)
+	{
 		curLetter = CoolUtil.positiveModuloInt(curLetter + inc, tape.manualLetters.length + charsForDefault.length);
 		targetX = FlxG.width * 0.5 - tape.defaultAdvance * (0.5 + curLetter * 2);
 		bigLetter.text = (curLetter < charsForDefault.length) ? charsForDefault[curLetter][0] : tape.manualLetters[curLetter - charsForDefault.length];
@@ -424,10 +465,11 @@ class AlphabetEditor extends UIState {
 		bigLetter.screenCenter();
 
 		checkForFailed();
-		
+
 		while (componentList.buttons.members.length > 0)
 			componentList.remove(componentList.buttons.members[0]);
-		for (i in curSelectedData.startIndex...curSelectedData.components.length) {
+		for (i in curSelectedData.startIndex...curSelectedData.components.length)
+		{
 			var newButton = new ComponentButton(curSelectedData.components[i]);
 			componentList.add(newButton);
 			newButton.ID = componentList.buttons.members.length - 1; // readjust it because UIButtonList doesnt generate the id properly
@@ -437,9 +479,11 @@ class AlphabetEditor extends UIState {
 		infoWindow.updateInfo();
 	}
 
-	public function findOutline() {
+	public function findOutline()
+	{
 		outlineIdx = -1;
-		for (i in curSelectedData.startIndex...curSelectedData.components.length) {
+		for (i in curSelectedData.startIndex...curSelectedData.components.length)
+		{
 			var com = curSelectedData.components[i];
 			if (com.outIndex != null)
 				outlineIdx = com.outIndex;
@@ -449,7 +493,8 @@ class AlphabetEditor extends UIState {
 		++outlineIdx;
 	}
 
-	public function checkForFailed() {
+	public function checkForFailed()
+	{
 		bigLetter.failedLetters.remove(bigLetter.text);
 		curSelectedData = bigLetter.fastGetData(bigLetter.text);
 		brokenWarning.text = "";
@@ -457,7 +502,8 @@ class AlphabetEditor extends UIState {
 		if (!bigLetter.failedLetters.contains(bigLetter.text))
 			return false;
 
-		for (i in 0...curSelectedData.components.length) {
+		for (i in 0...curSelectedData.components.length)
+		{
 			var com = curSelectedData.components[i];
 			if (!bigLetter.animation.exists(bigLetter.text + Std.string(i)))
 				brokenWarning.text += " Unable to find: " + com.anim + "\n";
@@ -465,62 +511,67 @@ class AlphabetEditor extends UIState {
 		return true;
 	}
 
-	function _tape_left(_) {
+	function _tape_left(_)
+	{
 		changeLetter(-1);
 	}
-	function _tape_right(_) {
+
+	function _tape_right(_)
+	{
 		changeLetter(1);
 	}
 
-	function buildAlphabet() {
+	function buildAlphabet()
+	{
 		var tempPrettyPrint = true;
 		var xmlThingYea:String = "<!DOCTYPE codename-engine-alphabet-font>\n" + Printer.print(tape.buildXML(), tempPrettyPrint);
 		return tempPrettyPrint ? xmlThingYea : xmlThingYea.replace("\n", "");
 	}
 
-	function _file_save(_) {
+	function _file_save(_)
+	{
 		#if sys
-		CoolUtil.safeSaveFile(
-			'${Paths.getAssetsRoot()}/data/alphabet/${__typeface}.xml',
-			buildAlphabet()
-		);
+		CoolUtil.safeSaveFile('${Paths.getAssetsRoot()}/data/alphabet/${__typeface}.xml', buildAlphabet());
 		#else
 		_file_saveas(_);
 		#end
 	}
 
-	function _file_saveas(_) {
+	function _file_saveas(_)
+	{
 		openSubState(new SaveSubstate(buildAlphabet(), {
 			defaultSaveFile: '${__typeface}.xml'
 		}));
 	}
 
-	function _file_exit(_) {
+	function _file_exit(_)
+	{
 		/*if (undos.unsaved) SaveWarning.triggerWarning();
-		else */FlxG.switchState(new AlphabetSelection());
+			else */ FlxG.switchState(new AlphabetSelection());
 	}
 
-	function _edit_main(_) {
+	function _edit_main(_)
+	{
 		FlxG.state.openSubState(new AlphabetMainDataScreen());
 	}
 }
 
 /*
 
-/===============\
-| Components    |
-|===============|
-|[ Component 1 ]|
-|[ Component 2 ]|
-|[ Component 3 ]|
-|[ Component 4 ]|
-|[ Component 5 ]|
-|[ Add component]|
-\===============/
+	/===============\
+	| Components    |
+	|===============|
+	|[ Component 1 ]|
+	|[ Component 2 ]|
+	|[ Component 3 ]|
+	|[ Component 4 ]|
+	|[ Component 5 ]|
+	|[ Add component]|
+	\===============/
 
-*/
-
-class ComponentButton extends UIButton {
+ */
+class ComponentButton extends UIButton
+{
 	public var component:AlphabetComponent;
 
 	public var selected:Bool = false;
@@ -528,32 +579,38 @@ class ComponentButton extends UIButton {
 	public var deleteButton:UIButton;
 	public var deleteIcon:FlxSprite;
 
-	public function new(component:AlphabetComponent) {
-		super(0, 0, component.anim, function() {
+	public function new(component:AlphabetComponent)
+	{
+		super(0, 0, component.anim, function()
+		{
 			AlphabetEditor.instance.curSelectedComponent = component;
 			AlphabetEditor.instance.findOutline();
 			AlphabetEditor.instance.infoWindow.updateInfo();
 		}, 230, 50);
 		this.component = component;
 
-		deleteButton = new UIButton(bWidth - 32 - 10, 0, "", function() {
+		deleteButton = new UIButton(bWidth - 32 - 10, 0, "", function()
+		{
 			var data = AlphabetEditor.instance.curSelectedData;
 
 			var outlineDrop = (component.outIndex != null) ? 1 : 0;
 			var componentIndex = data.components.indexOf(component);
-			for (i in 0...data.components.length) {
+			for (i in 0...data.components.length)
+			{
 				var nextCompon = data.components[i];
 				var anim = AlphabetEditor.instance.bigLetter.text + i;
 				AlphabetEditor.instance.bigLetter.animation.remove(anim);
 				AlphabetEditor.instance.tape.animation.remove(anim);
 
-				if (i > componentIndex && nextCompon.outIndex != null) {
+				if (i > componentIndex && nextCompon.outIndex != null)
+				{
 					--data.components[nextCompon.outIndex].refIndex;
 					nextCompon.outIndex -= outlineDrop;
 				}
 			}
 
-			if (component.outIndex != null) {
+			if (component.outIndex != null)
+			{
 				data.components.splice(component.outIndex, 1);
 				--data.startIndex;
 			}
@@ -569,16 +626,17 @@ class ComponentButton extends UIButton {
 		deleteButton.autoAlpha = false;
 		members.push(deleteButton);
 
-		deleteIcon = new FlxSprite(deleteButton.x + (15/2), deleteButton.y + 8).loadGraphic(Paths.image('editors/delete-button'));
+		deleteIcon = new FlxSprite(deleteButton.x + (15 / 2), deleteButton.y + 8).loadGraphic(Paths.image('editors/delete-button'));
 		deleteIcon.antialiasing = false;
 		members.push(deleteIcon);
 	}
 
-	override function update(elapsed:Float) {
+	override function update(elapsed:Float)
+	{
 		super.update(elapsed);
 
 		deleteButton.y = y + 10;
-		deleteIcon.x = deleteButton.x + (15/2);
+		deleteIcon.x = deleteButton.x + (15 / 2);
 		deleteIcon.y = deleteButton.y + 8;
 	}
 }

@@ -44,14 +44,18 @@ class MultiFramesCollection extends FlxFramesCollection
 		return null;
 	}
 
-	public function addFrames(collection:FlxFramesCollection) {
-		if (collection == null || collection.frames == null) return;
+	public function addFrames(collection:FlxFramesCollection)
+	{
+		if (collection == null || collection.frames == null)
+			return;
 
 		collection.parent.useCount++;
 		parentedFrames.push(collection);
 
-		for(f in collection.frames) {
-			if (f != null) {
+		for (f in collection.frames)
+		{
+			if (f != null)
+			{
 				pushFrame(f);
 				f.parent = collection.parent;
 			}
@@ -60,9 +64,11 @@ class MultiFramesCollection extends FlxFramesCollection
 
 	public override function destroy():Void
 	{
-		if(parentedFrames != null) {
-			for(collection in parentedFrames) {
-				if(collection != null)
+		if (parentedFrames != null)
+		{
+			for (collection in parentedFrames)
+			{
+				if (collection != null)
 					collection.parent.useCount--;
 			}
 			parentedFrames = null;

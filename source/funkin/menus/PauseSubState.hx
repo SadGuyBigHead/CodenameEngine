@@ -34,19 +34,21 @@ class PauseSubState extends MusicBeatSubstate
 	var pauseMusic:FlxSound;
 
 	public var pauseScript:Script;
-	public var selectCall:NameEvent->Void;  // Mainly for extern stuff that aren't scripts  - Nex
+	public var selectCall:NameEvent->Void; // Mainly for extern stuff that aren't scripts  - Nex
 
 	public var game:PlayState = PlayState.instance; // shortcut
 
 	private var __cancelDefault:Bool = false;
 
-	public function new(?items:Array<String>, ?selectCall:NameEvent->Void) {
+	public function new(?items:Array<String>, ?selectCall:NameEvent->Void)
+	{
 		super();
 		menuItems = items != null ? items : Flags.DEFAULT_PAUSE_ITEMS.copy();
 		this.selectCall = selectCall;
 	}
 
 	var parentDisabler:FunkinParentDisabler;
+
 	override function create()
 	{
 		super.create();
@@ -65,14 +67,16 @@ class PauseSubState extends MusicBeatSubstate
 
 		menuItems = event.options;
 
-		if (Assets.exists(Paths.music(event.music))) {
+		if (Assets.exists(Paths.music(event.music)))
+		{
 			pauseMusic = FlxG.sound.load(Assets.getMusic(Paths.music(event.music)), 0, true);
 			pauseMusic.persist = false;
 			pauseMusic.group = FlxG.sound.defaultMusicGroup;
 			pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
 		}
 
-		if (__cancelDefault = event.cancelled) return;
+		if (__cancelDefault = event.cancelled)
+			return;
 
 		var bg:FlxSprite = new FlxSprite().makeSolid(FlxG.width + 100, FlxG.height + 100, FlxColor.BLACK);
 		bg.updateHitbox();
@@ -81,24 +85,24 @@ class PauseSubState extends MusicBeatSubstate
 		bg.scrollFactor.set();
 		add(bg);
 
-		var multiplayerInfo:String = PlayState.opponentMode ? 'pause.opponentMode' :
-									 PlayState.coopMode ? 'pause.coopMode' :
-									 null;
+		var multiplayerInfo:String = PlayState.opponentMode ? 'pause.opponentMode' : PlayState.coopMode ? 'pause.coopMode' : null;
 
 		levelInfo = new FunkinText(20, 15, 0, PlayState.SONG.meta.displayName, 32, false);
 		levelDifficulty = new FunkinText(20, 15, 0, TU.translateDiff(PlayState.difficulty).toUpperCase(), 32, false);
 		deathCounter = new FunkinText(20, 15, 0, TU.translate("pause.deathCounter", [PlayState.deathCounter]), 32, false);
 		multiplayerText = null;
-		if(multiplayerInfo != null)
+		if (multiplayerInfo != null)
 			multiplayerText = new FunkinText(20, 15, 0, TU.translate(multiplayerInfo), 32, false);
 
-		for(k=>label in [levelInfo, levelDifficulty, deathCounter, multiplayerText]) {
-			if(label == null) continue;
+		for (k => label in [levelInfo, levelDifficulty, deathCounter, multiplayerText])
+		{
+			if (label == null)
+				continue;
 			label.scrollFactor.set();
 			label.alpha = 0;
 			label.x = FlxG.width - (label.width + 20);
 			label.y = 15 + (32 * k);
-			FlxTween.tween(label, {alpha: 1, y: label.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3 * (k+1)});
+			FlxTween.tween(label, {alpha: 1, y: label.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3 * (k + 1)});
 			add(label);
 		}
 
@@ -123,7 +127,8 @@ class PauseSubState extends MusicBeatSubstate
 		FlxG.cameras.add(camera, false);
 	}
 
-	override function createPost() {
+	override function createPost()
+	{
 		super.createPost();
 		pauseScript.call("postCreate");
 		game.updateDiscordPresence();
@@ -138,24 +143,28 @@ class PauseSubState extends MusicBeatSubstate
 
 		pauseScript.call("update", [elapsed]);
 
-		if (__cancelDefault) return;
+		if (__cancelDefault)
+			return;
 
 		var upP = controls.UP_P;
 		var downP = controls.DOWN_P;
 		var scroll = FlxG.mouse.wheel;
 
-		if (upP || downP || scroll != 0)  // like this we wont break mods that expect a 0 change event when calling sometimes  - Nex
+		if (upP || downP || scroll != 0) // like this we wont break mods that expect a 0 change event when calling sometimes  - Nex
 			changeSelection((upP ? -1 : 0) + (downP ? 1 : 0) - scroll);
 
 		if (controls.ACCEPT)
 			selectOption();
 	}
 
-	public function selectOption() {
+	public function selectOption()
+	{
 		var event = EventManager.get(NameEvent).recycle(menuItems[curSelected]);
-		if (selectCall != null) selectCall(event);
+		if (selectCall != null)
+			selectCall(event);
 		pauseScript.call("onSelectOption", [event]);
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		switch (event.name)
 		{
@@ -175,8 +184,10 @@ class PauseSubState extends MusicBeatSubstate
 			case "Exit to menu":
 				if (PlayState.chartingMode && Charter.undos.unsaved)
 					game.saveWarn(false);
-				else {
-					if (Charter.instance != null) Charter.instance.__clearStatics();
+				else
+				{
+					if (Charter.instance != null)
+						Charter.instance.__clearStatics();
 
 					// prevents certain notes to disappear early when exiting  - Nex
 					game.strumLines.forEachAlive(function(grp) grp.notes.__forcedSongPos = Conductor.songPosition);
@@ -184,19 +195,21 @@ class PauseSubState extends MusicBeatSubstate
 					CoolUtil.playMenuSong();
 					FlxG.switchState(PlayState.isStoryMode ? new StoryMenuState() : new FreeplayState());
 				}
-
 		}
 	}
+
 	override function destroy()
 	{
-		if(camera != FlxG.camera && _cameras != null) {
-			if(FlxG.cameras.list.contains(camera))
+		if (camera != FlxG.camera && _cameras != null)
+		{
+			if (FlxG.cameras.list.contains(camera))
 				FlxG.cameras.remove(camera, true);
 		}
 		pauseScript.call("destroy");
 		pauseScript.destroy();
 
-		if(pauseMusic != null) {
+		if (pauseMusic != null)
+		{
 			@:privateAccess
 			FlxG.sound.destroySound(pauseMusic);
 		}
@@ -205,13 +218,14 @@ class PauseSubState extends MusicBeatSubstate
 
 	function changeSelection(change:Int = 0):Void
 	{
-		var event = EventManager.get(MenuChangeEvent).recycle(curSelected, FlxMath.wrap(curSelected + change, 0, menuItems.length-1), change, change != 0);
+		var event = EventManager.get(MenuChangeEvent).recycle(curSelected, FlxMath.wrap(curSelected + change, 0, menuItems.length - 1), change, change != 0);
 		pauseScript.call("onChangeItem", [event]);
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		curSelected = event.value;
 
-		for (i=>item in grpMenuShit.members)
+		for (i => item in grpMenuShit.members)
 		{
 			item.targetY = i - curSelected;
 

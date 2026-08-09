@@ -1,6 +1,7 @@
 package funkin.backend.assets;
 
-enum abstract AssetSource(Null<Int>)/* from Null<Bool>*/ from Null<Int> to Null<Int> {
+enum abstract AssetSource(Null<Int>) /* from Null<Bool>*/ from Null<Int> to Null<Int>
+{
 	var SOURCE = 0;
 	var MODS = 1;
 	var BOTH = -1;
@@ -17,16 +18,15 @@ enum abstract AssetSource(Null<Int>)/* from Null<Bool>*/ from Null<Int> to Null<
 	}
 
 	/*@:from public static function fromBool(b:Null<Bool>):AssetSource
-	{
-		return switch (b)
 		{
-			case true: SOURCE;
-			case false: MODS;
-			case null: BOTH;
-			default: MODS;
-		}
+			return switch (b)
+			{
+				case true: SOURCE;
+				case false: MODS;
+				case null: BOTH;
+				default: MODS;
+			}
 	}*/
-
 	@:to public inline function toString():String
 	{
 		return switch (this)

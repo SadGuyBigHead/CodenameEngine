@@ -3,7 +3,8 @@ package funkin.editors.ui;
 import lime.ui.KeyCode;
 import lime.ui.KeyModifier;
 
-interface IUIFocusable {
+interface IUIFocusable
+{
 	public function onKeyDown(e:KeyCode, modifier:KeyModifier):Void;
 	public function onKeyUp(e:KeyCode, modifier:KeyModifier):Void;
 	public function onTextInput(text:String):Void;

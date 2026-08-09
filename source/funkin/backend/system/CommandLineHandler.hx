@@ -2,11 +2,16 @@ package funkin.backend.system;
 
 #if sys
 import sys.FileSystem;
-final class CommandLineHandler {
-	public static function parseCommandLine(cmd:Array<String>) {
+
+final class CommandLineHandler
+{
+	public static function parseCommandLine(cmd:Array<String>)
+	{
 		var i:Int = 0;
-		while(i < cmd.length) {
-			switch(cmd[i]) {
+		while (i < cmd.length)
+		{
+			switch (cmd[i])
+			{
 				case null:
 					break;
 				case "-h" | "-help" | "help":
@@ -25,33 +30,46 @@ final class CommandLineHandler {
 				case "-m" | "-mod" | "-currentmod":
 					i++;
 					var arg = cmd[i];
-					if (arg == null) {
+					if (arg == null)
+					{
 						Sys.println("[ERROR] You need to specify the mod name");
 						Sys.exit(1);
-					} else {
+					}
+					else
+					{
 						Main.modToLoad = arg.trim();
 					}
 				case "-modfolder":
 					i++;
 					var arg = cmd[i];
-					if (arg == null) {
+					if (arg == null)
+					{
 						Sys.println("[ERROR] You need to specify the mod folder path");
 						Sys.exit(1);
-					} else if (FileSystem.exists(arg)) {
+					}
+					else if (FileSystem.exists(arg))
+					{
 						funkin.backend.assets.ModsFolder.modsPath = arg;
-					} else {
+					}
+					else
+					{
 						Sys.println('[ERROR] Mod folder at "${arg}" does not exist.');
 						Sys.exit(1);
 					}
 				case "-addonsfolder":
 					i++;
 					var arg = cmd[i];
-					if (arg == null) {
+					if (arg == null)
+					{
 						Sys.println("[ERROR] You need to specify the addon folder path");
 						Sys.exit(1);
-					} else if (FileSystem.exists(arg)) {
+					}
+					else if (FileSystem.exists(arg))
+					{
 						funkin.backend.assets.ModsFolder.addonsPath = arg;
-					} else {
+					}
+					else
+					{
 						Sys.println('[ERROR] Addons folder at "${arg}" does not exist.');
 						Sys.exit(1);
 					}

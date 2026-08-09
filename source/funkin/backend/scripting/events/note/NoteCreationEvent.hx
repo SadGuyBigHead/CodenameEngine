@@ -2,7 +2,8 @@ package funkin.backend.scripting.events.note;
 
 import funkin.game.Note;
 
-final class NoteCreationEvent extends CancellableEvent {
+final class NoteCreationEvent extends CancellableEvent
+{
 	/**
 	 * Note that is being created
 	 */

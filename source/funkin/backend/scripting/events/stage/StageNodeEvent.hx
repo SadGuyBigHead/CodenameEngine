@@ -3,7 +3,8 @@ package funkin.backend.scripting.events.stage;
 import funkin.game.Stage;
 import haxe.xml.Access;
 
-final class StageNodeEvent extends CancellableEvent {
+final class StageNodeEvent extends CancellableEvent
+{
 	/**
 	 * The stage instance
 	 */

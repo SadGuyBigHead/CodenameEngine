@@ -93,8 +93,10 @@ class NativeApplication
 		if (pauseTimer > -1)
 		{
 			var offset = System.getTimer() - pauseTimer;
-			for(timer in Timer.sRunningTimers) {
-				if(timer != null && timer.mRunning) timer.mFireAt += offset;
+			for (timer in Timer.sRunningTimers)
+			{
+				if (timer != null && timer.mRunning)
+					timer.mFireAt += offset;
 			}
 			pauseTimer = -1;
 		}
@@ -196,15 +198,18 @@ class NativeApplication
 		{
 			case AXIS_MOVE:
 				var gamepad = Gamepad.devices.get(gamepadEventInfo.id);
-				if (gamepad != null) gamepad.onAxisMove.dispatch(gamepadEventInfo.axis, gamepadEventInfo.axisValue);
+				if (gamepad != null)
+					gamepad.onAxisMove.dispatch(gamepadEventInfo.axis, gamepadEventInfo.axisValue);
 
 			case BUTTON_DOWN:
 				var gamepad = Gamepad.devices.get(gamepadEventInfo.id);
-				if (gamepad != null) gamepad.onButtonDown.dispatch(gamepadEventInfo.button);
+				if (gamepad != null)
+					gamepad.onButtonDown.dispatch(gamepadEventInfo.button);
 
 			case BUTTON_UP:
 				var gamepad = Gamepad.devices.get(gamepadEventInfo.id);
-				if (gamepad != null) gamepad.onButtonUp.dispatch(gamepadEventInfo.button);
+				if (gamepad != null)
+					gamepad.onButtonUp.dispatch(gamepadEventInfo.button);
 
 			case CONNECT:
 				Gamepad.__connect(gamepadEventInfo.id);
@@ -220,21 +225,25 @@ class NativeApplication
 		{
 			case AXIS_MOVE:
 				var joystick = Joystick.devices.get(joystickEventInfo.id);
-				if (joystick != null) joystick.onAxisMove.dispatch(joystickEventInfo.index, joystickEventInfo.x);
+				if (joystick != null)
+					joystick.onAxisMove.dispatch(joystickEventInfo.index, joystickEventInfo.x);
 
 			case HAT_MOVE:
 				var joystick = Joystick.devices.get(joystickEventInfo.id);
-				if (joystick != null) joystick.onHatMove.dispatch(joystickEventInfo.index, joystickEventInfo.eventValue);
+				if (joystick != null)
+					joystick.onHatMove.dispatch(joystickEventInfo.index, joystickEventInfo.eventValue);
 
 			case TRACKBALL_MOVE: // I guess this was just removed ??
 
 			case BUTTON_DOWN:
 				var joystick = Joystick.devices.get(joystickEventInfo.id);
-				if (joystick != null) joystick.onButtonDown.dispatch(joystickEventInfo.index);
+				if (joystick != null)
+					joystick.onButtonDown.dispatch(joystickEventInfo.index);
 
 			case BUTTON_UP:
 				var joystick = Joystick.devices.get(joystickEventInfo.id);
-				if (joystick != null) joystick.onButtonUp.dispatch(joystickEventInfo.index);
+				if (joystick != null)
+					joystick.onButtonUp.dispatch(joystickEventInfo.index);
 
 			case CONNECT:
 				Joystick.__connect(joystickEventInfo.id);
@@ -359,7 +368,8 @@ class NativeApplication
 
 		for (window in parent.__windows)
 		{
-			if (window == null) continue;
+			if (window == null)
+				continue;
 
 			// parent.renderer = renderer;
 
@@ -386,7 +396,8 @@ class NativeApplication
 								#if (lime_cffi && (lime_opengl || lime_opengles) && !display)
 								var gl = window.context.gl;
 								(gl : NativeOpenGLRenderContext).__contextLost();
-								if (GL.context == gl) GL.context = null;
+								if (GL.context == gl)
+									GL.context = null;
 								#end
 
 							default:
@@ -758,12 +769,12 @@ class NativeApplication
 
 @:keep /*private*/ class KeyEventInfo
 {
-	public var keyCode: Float;
+	public var keyCode:Float;
 	public var modifier:Int;
 	public var type:KeyEventType;
 	public var windowID:Int;
 
-	public function new(type:KeyEventType = null, windowID:Int = 0, keyCode: Float = 0, modifier:Int = 0)
+	public function new(type:KeyEventType = null, windowID:Int = 0, keyCode:Float = 0, modifier:Int = 0)
 	{
 		this.type = type;
 		this.windowID = windowID;
@@ -794,7 +805,8 @@ class NativeApplication
 	public var y:Float;
 	public var clickCount:Int;
 
-	public function new(type:MouseEventType = null, windowID:Int = 0, x:Float = 0, y:Float = 0, button:Int = 0, movementX:Float = 0, movementY:Float = 0, clickCount:Int = 0)
+	public function new(type:MouseEventType = null, windowID:Int = 0, x:Float = 0, y:Float = 0, button:Int = 0, movementX:Float = 0, movementY:Float = 0,
+			clickCount:Int = 0)
 	{
 		this.type = type;
 		this.windowID = 0;

@@ -4,10 +4,11 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import haxe.xml.Access;
 
-typedef WeekData = {
+typedef WeekData =
+{
 	var ?xml:Access;
-	var name:String;  // name SHOULD NOT be used for loading week highscores, its just the name on the right side of the week, remember that next time!!  - Nex
-	var id:String;  // id IS instead for saving and loading!!  - Nex
+	var name:String; // name SHOULD NOT be used for loading week highscores, its just the name on the right side of the week, remember that next time!!  - Nex
+	var id:String; // id IS instead for saving and loading!!  - Nex
 	var sprite:String;
 	var chars:Array<WeekCharacter>;
 	var songs:Array<WeekSong>;
@@ -15,7 +16,8 @@ typedef WeekData = {
 	var bgColor:FlxColor;
 }
 
-typedef WeekCharacter = {
+typedef WeekCharacter =
+{
 	var ?xml:Access;
 	var name:String;
 	var ?spritePath:String;
@@ -24,7 +26,8 @@ typedef WeekCharacter = {
 	// var frames:FlxFramesCollection;
 }
 
-typedef WeekSong = {
+typedef WeekSong =
+{
 	var name:String;
 	var ?hide:Bool;
 	var ?variation:String;

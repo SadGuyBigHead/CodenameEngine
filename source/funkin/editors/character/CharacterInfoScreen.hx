@@ -13,7 +13,8 @@ import funkin.editors.character.CharacterEditor;
 
 using funkin.backend.utils.BitmapUtil;
 
-typedef CharacterExtraInfo = {
+typedef CharacterExtraInfo =
+{
 	var icon:String;
 	var iconColor:Null<FlxColor>;
 	var holdTime:Float;
@@ -21,7 +22,8 @@ typedef CharacterExtraInfo = {
 	var customProperties:Map<String, Dynamic>;
 }
 
-class CharacterInfoScreen extends UISubstateWindow {
+class CharacterInfoScreen extends UISubstateWindow
+{
 	public var character:Character;
 
 	public var iconColorPicker:UIIconColorPicker;
@@ -40,7 +42,8 @@ class CharacterInfoScreen extends UISubstateWindow {
 
 	public var onSave:(info:CharacterExtraInfo) -> Void = null;
 
-	public function new(character:Character, onSave:(info:CharacterExtraInfo) -> Void) {
+	public function new(character:Character, onSave:(info:CharacterExtraInfo) -> Void)
+	{
 		this.character = character;
 		this.onSave = onSave;
 		super();
@@ -49,9 +52,11 @@ class CharacterInfoScreen extends UISubstateWindow {
 	inline function translate(id:String, ?args:Array<Dynamic>)
 		return TU.translate("characterInfoScreen." + id, args);
 
-	public override function create() {
+	public override function create()
+	{
 		winTitle = translate("win-title");
-		winWidth = 824; winHeight = 400;
+		winWidth = 824;
+		winHeight = 400;
 
 		super.create();
 
@@ -65,7 +70,7 @@ class CharacterInfoScreen extends UISubstateWindow {
 		add(iconColorPicker);
 		addLabelOn(iconColorPicker, translate("icon"));
 
-		iconColorWheel = new UIColorwheel(iconColorPicker.x+12+125+12+22, iconColorPicker.y, character.iconColor);
+		iconColorWheel = new UIColorwheel(iconColorPicker.x + 12 + 125 + 12 + 22, iconColorPicker.y, character.iconColor);
 		add(iconColorWheel);
 		addLabelOn(iconColorWheel, translate("iconColor"));
 
@@ -73,56 +78,71 @@ class CharacterInfoScreen extends UISubstateWindow {
 			iconColorWheel.colorChanged = true;
 		iconColorPicker.colorWheel = iconColorWheel;
 
-		durationStepper = new UINumericStepper(iconColorWheel.x, iconColorWheel.y + 125 + 36, character.holdTime == -1 ? 4 : character.holdTime, 0.001, 2, 0, 9999999, 74);
+		durationStepper = new UINumericStepper(iconColorWheel.x, iconColorWheel.y + 125 + 36, character.holdTime == -1 ? 4 : character.holdTime, 0.001, 2, 0,
+			9999999, 74);
 		add(durationStepper);
 		addLabelOn(durationStepper, translate("singDuration"));
 
-		useDurationCheckbox = new UICheckbox(durationStepper.x + durationStepper.bWidth + 20, durationStepper.y+6, translate("useSingDuration"), character.holdTime != -1);
-		useDurationCheckbox.onChecked = (checked:Bool) -> {durationStepper.selectable = checked;};
+		useDurationCheckbox = new UICheckbox(durationStepper.x + durationStepper.bWidth + 20, durationStepper.y + 6, translate("useSingDuration"),
+			character.holdTime != -1);
+		useDurationCheckbox.onChecked = (checked:Bool) ->
+		{
+			durationStepper.selectable = checked;
+		};
 		add(useDurationCheckbox);
 
 		durationStepper.selectable = useDurationCheckbox.checked;
 
-		defaultAimFPS = new UINumericStepper(iconColorPicker.x, durationStepper.y + durationStepper.height + 40, character.defaultAimFPS, 0.001, 2, 0, 9999999, 74);
+		defaultAimFPS = new UINumericStepper(iconColorPicker.x, durationStepper.y + durationStepper.height + 40, character.defaultAimFPS, 0.001, 2, 0,
+			9999999, 74);
 		add(defaultAimFPS);
 		addLabelOn(defaultAimFPS, translate("defaultFPS"));
 		oldDefFPS = character.defaultAimFPS;
 
-		customPropertiesButtonList = new UIButtonList<PropertyButton>(iconColorWheel.x+iconColorWheel.bWidth+22, iconColorWheel.y, 290, 200, '', FlxPoint.get(280, 35), null, 5);
+		customPropertiesButtonList = new UIButtonList<PropertyButton>(iconColorWheel.x + iconColorWheel.bWidth + 22, iconColorWheel.y, 290, 200, '',
+			FlxPoint.get(280, 35), null, 5);
 		customPropertiesButtonList.frames = Paths.getFrames('editors/ui/inputbox');
 		customPropertiesButtonList.cameraSpacing = 0;
-		customPropertiesButtonList.addButton.callback = function() {
+		customPropertiesButtonList.addButton.callback = function()
+		{
 			customPropertiesButtonList.add(new PropertyButton("newProperty", "valueHere", customPropertiesButtonList));
 		}
 
-		for (prop=>val in character.extra)
+		for (prop => val in character.extra)
 			if (prop != StageEditor.exID("bounds"))
 				customPropertiesButtonList.add(new PropertyButton(prop, val, customPropertiesButtonList));
 
 		add(customPropertiesButtonList);
 		addLabelOn(customPropertiesButtonList, translate("customValues"));
 
-		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20 - 125, windowSpr.y + windowSpr.bHeight - 16 - 32, TU.translate("editor.saveClose"), function() {
-			saveCharacterInfo();
-			close();
-		}, 125);
+		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20 - 125, windowSpr.y + windowSpr.bHeight - 16 - 32, TU.translate("editor.saveClose"),
+			function()
+			{
+				saveCharacterInfo();
+				close();
+			}, 125);
 		add(saveButton);
 
-		closeButton = new UIButton(saveButton.x - 20 - saveButton.bWidth, saveButton.y, TU.translate("editor.close"), function() {
+		closeButton = new UIButton(saveButton.x - 20 - saveButton.bWidth, saveButton.y, TU.translate("editor.close"), function()
+		{
 			close();
 		}, 125);
 		add(closeButton);
 		closeButton.color = 0xFFFF0000;
 	}
 
-	public function saveCharacterInfo() {
+	public function saveCharacterInfo()
+	{
 		UIUtil.confirmUISelections(this);
 
-		if (defaultAimFPS.value != oldDefFPS){
+		if (defaultAimFPS.value != oldDefFPS)
+		{
 			var daIDForButton:Int = 0;
-			for (anim in character.getAnimOrder()){
+			for (anim in character.getAnimOrder())
+			{
 				var animName = character.animDatas.get(anim);
-				if (animName.fps == oldDefFPS){
+				if (animName.fps == oldDefFPS)
+				{
 					var poop:CharacterAnimButton = CharacterEditor.instance.characterAnimsWindow.buttons.members[daIDForButton];
 					trace(poop);
 					poop.changeFPS(defaultAimFPS.value);
@@ -131,16 +151,16 @@ class CharacterInfoScreen extends UISubstateWindow {
 			}
 		}
 
-
-		if (onSave != null) onSave({
-			icon: iconColorPicker.iconTextBox.label.text,
-			iconColor: iconColorWheel.curColor,
-			holdTime: useDurationCheckbox.checked ? durationStepper.value : -1,
-			defaultAimFPS: defaultAimFPS.value,
-			customProperties: [
-				for (val in customPropertiesButtonList.buttons.members)
-					val.propertyText.label.text => val.valueText.label.text
-			]
-		});
+		if (onSave != null)
+			onSave({
+				icon: iconColorPicker.iconTextBox.label.text,
+				iconColor: iconColorWheel.curColor,
+				holdTime: useDurationCheckbox.checked ? durationStepper.value : -1,
+				defaultAimFPS: defaultAimFPS.value,
+				customProperties: [
+					for (val in customPropertiesButtonList.buttons.members)
+						val.propertyText.label.text => val.valueText.label.text
+				]
+			});
 	}
 }

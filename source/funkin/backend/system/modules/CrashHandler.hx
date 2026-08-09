@@ -7,8 +7,10 @@ import openfl.errors.Error;
 import openfl.events.ErrorEvent;
 import openfl.events.UncaughtErrorEvent;
 
-final class CrashHandler {
-	public static function init() {
+final class CrashHandler
+{
+	public static function init()
+	{
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onUncaughtError);
 		#if cpp
 		untyped __global__.__hxcpp_set_critical_error_handler(onError);
@@ -17,23 +19,32 @@ final class CrashHandler {
 		#end
 	}
 
-	public static function onUncaughtError(e:UncaughtErrorEvent) {
+	public static function onUncaughtError(e:UncaughtErrorEvent)
+	{
 		var m:String = e.error;
-		if (Std.isOfType(e.error, Error)) {
+		if (Std.isOfType(e.error, Error))
+		{
 			var err:Error = cast e.error;
 			m = '${err.message}';
-		} else if (Std.isOfType(e.error, ErrorEvent)) {
+		}
+		else if (Std.isOfType(e.error, ErrorEvent))
+		{
 			var err:ErrorEvent = cast e.error;
 			m = '${err.text}';
 		}
 		var stack = CallStack.exceptionStack();
 		var stackLabel:String = "";
-		for(e in stack) {
-			switch(e) {
-				case CFunction: stackLabel += "Non-Haxe (C) Function";
-				case Module(c): stackLabel += 'Module ${c}';
+		for (e in stack)
+		{
+			switch (e)
+			{
+				case CFunction:
+					stackLabel += "Non-Haxe (C) Function";
+				case Module(c):
+					stackLabel += 'Module ${c}';
 				case FilePos(parent, file, line, col):
-					switch(parent) {
+					switch (parent)
+					{
 						case Method(cla, func):
 							stackLabel += '(${file}) ${cla.split(".").last()}.$func() - line $line';
 						case _:

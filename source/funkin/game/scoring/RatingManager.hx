@@ -3,7 +3,6 @@ package funkin.game.scoring;
 import funkin.game.scoring.*;
 import funkin.game.scoring.HitWindowData.WindowPreset;
 import flixel.util.FlxSignal;
-
 import haxe.ds.StringMap;
 
 /**
@@ -53,22 +52,47 @@ class RatingManager
 			return windows.exists(name) ? windows.get(name) : -1;
 		}
 
-		addRating({name: "sick", window: getWindow("sick"), accuracy: 1, score: 300, splash: true});
-		addRating({name: "good", window: getWindow("good"), accuracy: 0.75, score: 200, health: 0.015});
-		addRating({name: "bad", window: getWindow("bad"), accuracy: 0.45, score: 100, health: 0});
-		addRating({name: "shit", window: getWindow("shit"), accuracy: 0.25, score: 50, health: -0.05, breaksCombo: Flags.SHITS_BREAK_COMBO});
+		addRating({
+			name: "sick",
+			window: getWindow("sick"),
+			accuracy: 1,
+			score: 300,
+			splash: true
+		});
+		addRating({
+			name: "good",
+			window: getWindow("good"),
+			accuracy: 0.75,
+			score: 200,
+			health: 0.015
+		});
+		addRating({
+			name: "bad",
+			window: getWindow("bad"),
+			accuracy: 0.45,
+			score: 100,
+			health: 0
+		});
+		addRating({
+			name: "shit",
+			window: getWindow("shit"),
+			accuracy: 0.25,
+			score: 50,
+			health: -0.05,
+			breaksCombo: Flags.SHITS_BREAK_COMBO
+		});
 	}
 
 	public function addRating(data:Dynamic)
 	{
-		if (data == null || data.name == null) return;
+		if (data == null || data.name == null)
+			return;
 
 		var name = data.name.toLowerCase();
-		var window = data.window != null
-			? data.window
-			: (hitWindows.exists(name) ? hitWindows.get(name) : -1);
+		var window = data.window != null ? data.window : (hitWindows.exists(name) ? hitWindows.get(name) : -1);
 
-		if (window > lastHitWindow) lastHitWindow = window;
+		if (window > lastHitWindow)
+			lastHitWindow = window;
 
 		var newRating:Rating = {
 			name: name,
@@ -97,10 +121,12 @@ class RatingManager
 
 	public function removeRating(name:String):Void
 	{
-		if (name == null) return;
+		if (name == null)
+			return;
 		name = name.toLowerCase();
 		var toRemove = ratingData.filter(r -> r.name == name);
-		for (rating in toRemove) {
+		for (rating in toRemove)
+		{
 			ratingData.remove(rating);
 			onRatingRemoved.dispatch(rating);
 		}

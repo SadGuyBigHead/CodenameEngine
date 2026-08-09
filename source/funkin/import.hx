@@ -11,9 +11,7 @@ import funkin.backend.system.Logs;
 import funkin.options.Options;
 import funkin.game.PlayState;
 import funkin.backend.scripting.EventManager;
-
 import openfl.utils.Assets;
-
 import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.FlxBasic;
@@ -22,10 +20,8 @@ import flixel.FlxObject;
 import flixel.math.FlxMath;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxDestroyUtil;
-
 import funkin.backend.system.Flags;
 import funkin.Types;
-
 import funkin.menus.ui.Alphabet;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;

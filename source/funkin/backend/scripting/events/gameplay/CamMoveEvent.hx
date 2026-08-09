@@ -3,7 +3,8 @@ package funkin.backend.scripting.events.gameplay;
 import flixel.math.FlxPoint;
 import funkin.game.StrumLine;
 
-final class CamMoveEvent extends CancellableEvent {
+final class CamMoveEvent extends CancellableEvent
+{
 	/**
 	 * Final camera position.
 	 */

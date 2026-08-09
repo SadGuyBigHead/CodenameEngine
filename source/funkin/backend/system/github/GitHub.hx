@@ -7,12 +7,14 @@ import haxe.Json;
 import haxe.Exception;
 
 // TODO: Document further and perhaps make this a Haxelib.
+
 /**
  * Set of functions to interact with GitHub.
  * Requires the `GITHUB_API` macro to be defined.
  * This has no authentication, so it's limited to unauthenticated requests, and rate limits.
 **/
-final class GitHub {
+final class GitHub
+{
 	/**
 	 * Gets all the releases from a specific GitHub repository using the GitHub API.
 	 * @param user The user/organization that owns the repository.
@@ -20,15 +22,19 @@ final class GitHub {
 	 * @param onError Error Callback.
 	 * @return Releases in Array.
 	 */
-	public static function getReleases(user:String, repository:String, ?onError:Exception->Void):Array<GitHubRelease> {
+	public static function getReleases(user:String, repository:String, ?onError:Exception->Void):Array<GitHubRelease>
+	{
 		#if GITHUB_API
-		try {
+		try
+		{
 			var data = Json.parse(HttpUtil.requestText('https://api.github.com/repos/${user}/${repository}/releases'));
 			if (!(data is Array))
 				throw __parseGitHubException(data);
 
 			return data;
-		} catch(e) {
+		}
+		catch (e)
+		{
 			if (onError != null)
 				onError(e);
 		}
@@ -43,14 +49,19 @@ final class GitHub {
 	 * @param onError Error Callback.
 	 * @return Contributors List as Array.
 	 */
-	public static function getContributors(user:String, repository:String, ?onError:Exception->Void):Array<GitHubContributor> {
+	public static function getContributors(user:String, repository:String, ?onError:Exception->Void):Array<GitHubContributor>
+	{
 		#if GITHUB_API
-		try {
+		try
+		{
 			var data = Json.parse(HttpUtil.requestText('https://api.github.com/repos/${user}/${repository}/contributors'));
-			if (!(data is Array)) throw __parseGitHubException(data);
+			if (!(data is Array))
+				throw __parseGitHubException(data);
 
 			return data;
-		} catch(e) {
+		}
+		catch (e)
+		{
 			if (onError != null)
 				onError(e);
 		}
@@ -64,14 +75,19 @@ final class GitHub {
 	 * @param onError Error Callback.
 	 * @return Organization.
 	 */
-	public static function getOrganization(org:String, ?onError:Exception->Void):GitHubOrganization {
+	public static function getOrganization(org:String, ?onError:Exception->Void):GitHubOrganization
+	{
 		#if GITHUB_API
-		try {
+		try
+		{
 			var data = Json.parse(HttpUtil.requestText('https://api.github.com/orgs/$org'));
-			if (Reflect.hasField(data, "documentation_url")) throw __parseGitHubException(data);
+			if (Reflect.hasField(data, "documentation_url"))
+				throw __parseGitHubException(data);
 
 			return data;
-		} catch(e) {
+		}
+		catch (e)
+		{
 			if (onError != null)
 				onError(e);
 		}
@@ -86,14 +102,19 @@ final class GitHub {
 	 * @param onError Error Callback.
 	 * @return Members List as Array
 	 */
-	public static function getOrganizationMembers(org:String, ?onError:Exception->Void):Array<GitHubContributor> {
+	public static function getOrganizationMembers(org:String, ?onError:Exception->Void):Array<GitHubContributor>
+	{
 		#if GITHUB_API
-		try {
+		try
+		{
 			var data = Json.parse(HttpUtil.requestText('https://api.github.com/orgs/$org/members'));
-			if (Reflect.hasField(data, "documentation_url")) throw __parseGitHubException(data);
+			if (Reflect.hasField(data, "documentation_url"))
+				throw __parseGitHubException(data);
 
 			return data;
-		} catch(e) {
+		}
+		catch (e)
+		{
 			if (onError != null)
 				onError(e);
 		}
@@ -108,14 +129,19 @@ final class GitHub {
 	 * @param onError Error Callback.
 	 * @return User/Organization.
 	 */
-	public static function getUser(user:String, ?onError:Exception->Void):GitHubUser {
+	public static function getUser(user:String, ?onError:Exception->Void):GitHubUser
+	{
 		#if GITHUB_API
-		try {
+		try
+		{
 			var data = Json.parse(HttpUtil.requestText('https://api.github.com/users/$user'));
-			if (Reflect.hasField(data, "documentation_url")) throw __parseGitHubException(data);
+			if (Reflect.hasField(data, "documentation_url"))
+				throw __parseGitHubException(data);
 
 			return data;
-		} catch(e) {
+		}
+		catch (e)
+		{
 			if (onError != null)
 				onError(e);
 		}
@@ -131,9 +157,15 @@ final class GitHub {
 	 * @return Filtered releases.
 	 */
 	public static inline function filterReleases(releases:Array<GitHubRelease>, keepPrereleases:Bool = true, keepDrafts:Bool = false)
-		return #if GITHUB_API [for(release in releases) if (release != null && (!release.prerelease || (release.prerelease && keepPrereleases)) && (!release.draft || (release.draft && keepDrafts))) release] #else releases #end;
+		return #if GITHUB_API [
+			for (release in releases)
+				if (release != null
+					&& (!release.prerelease || (release.prerelease && keepPrereleases))
+					&& (!release.draft || (release.draft && keepDrafts))) release
+		] #else releases #end;
 
-	private static function __parseGitHubException(obj:Dynamic):GitHubException {
+	private static function __parseGitHubException(obj:Dynamic):GitHubException
+	{
 		#if GITHUB_API
 		var msg:String = "(No message)";
 		var url:String = "(No API url)";

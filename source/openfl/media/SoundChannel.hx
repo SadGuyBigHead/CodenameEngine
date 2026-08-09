@@ -2,7 +2,6 @@ package openfl.media;
 
 #if !flash
 import haxe.Int64;
-
 import openfl.events.Event;
 import openfl.events.EventDispatcher;
 #if lime
@@ -40,7 +39,7 @@ import lime.media.openal.AL;
 		(full amplitude).
 	**/
 	public var leftPeak(get, null):Float;
-	
+
 	/**
 		The current amplitude(volume) of the right channel, from 0(silent) to 1
 		(full amplitude).
@@ -71,8 +70,9 @@ import lime.media.openal.AL;
 
 	/**
 		self explanatory
-	*/
+	 */
 	public var loopTime(get, set):Float;
+
 	public var endTime(get, set):Null<Float>;
 	public var pitch(get, set):Float;
 	public var loops(get, set):Int;
@@ -86,8 +86,8 @@ import lime.media.openal.AL;
 	#if lime
 	@:noCompletion private var __source:AudioSource;
 	@:noCompletion private var __audioSource(get, set):AudioSource; // forward??? compatibility??
-	#end
 
+	#end
 	#if openfljs
 	@:noCompletion private static function __init__()
 	{
@@ -108,8 +108,10 @@ import lime.media.openal.AL;
 	{
 		super(this);
 
-		if (soundTransform != null) __soundTransform = soundTransform;
-		else __soundTransform = new SoundTransform();
+		if (soundTransform != null)
+			__soundTransform = soundTransform;
+		else
+			__soundTransform = new SoundTransform();
 
 		__initAudioSource(source);
 
@@ -123,7 +125,8 @@ import lime.media.openal.AL;
 	{
 		SoundMixer.__unregisterSoundChannel(this);
 
-		if (!__isValid) return;
+		if (!__isValid)
+			return;
 
 		#if lime
 		__source.stop();
@@ -133,7 +136,8 @@ import lime.media.openal.AL;
 
 	@:noCompletion private function __dispose():Void
 	{
-		if (!__isValid) return;
+		if (!__isValid)
+			return;
 
 		#if lime
 		__source.onComplete.remove(source_onComplete);
@@ -150,32 +154,39 @@ import lime.media.openal.AL;
 
 	@:noCompletion private function __updatePeaks(time:Float):Bool
 	{
-		if (Math.abs(time - __lastPeakTime) < 8) return false;
+		if (Math.abs(time - __lastPeakTime) < 8)
+			return false;
 		__lastPeakTime = time;
 
 		#if !macro
-		if (!__isValid) return false;
+		if (!__isValid)
+			return false;
 
 		var buffer = __source.buffer;
-		var wordSize = buffer.bitsPerSample >> 3, byteSize = 1 << (buffer.bitsPerSample - 1);
+		var wordSize = buffer.bitsPerSample >> 3,
+			byteSize = 1 << (buffer.bitsPerSample - 1);
 		var pos = Math.floor(time * buffer.sampleRate / 1000 * buffer.channels * wordSize);
 		var leftMin = 0, leftMax = 0, rightMin = 0, rightMax = 0, size = 0, buf;
 
 		#if lime_cffi
 		var backend = __source.__backend, i = 0;
-		if (backend.streamed) {
+		if (backend.streamed)
+		{
 			size = backend.bufferLengths[i = backend.bufferLengths.length - backend.requestBuffers];
 			buf = backend.bufferDatas[i].buffer;
 			pos -= Math.floor(backend.bufferTimes[i] * buffer.sampleRate * buffer.channels * wordSize);
-			while (pos > size) {
-				if (++i >= backend.bufferLengths.length) return false;
+			while (pos > size)
+			{
+				if (++i >= backend.bufferLengths.length)
+					return false;
 				pos -= size;
 				buf = backend.bufferDatas[i].buffer;
 				size = backend.bufferLengths[i];
 			}
 		}
 		else
-		#end {
+		#end
+		{
 			buf = buffer.data #if !js .buffer #end;
 			size = #if js buf.byteLength #else buf.length #end;
 		}
@@ -183,26 +194,36 @@ import lime.media.openal.AL;
 		var s = Math.floor(Math.min(buffer.sampleRate / 80, 512)), c = 0, b;
 		pos -= pos % (buffer.channels * wordSize);
 
-		while (s > 0) {
+		while (s > 0)
+		{
 			b = funkin.backend.utils.AudioAnalyzer.getByte(buf, pos, wordSize);
-			if (c % 2 == 0) ((b > leftMax) ? (leftMax = b) : (if ((b = -b) > leftMin) (leftMin = b)));
-			else ((b > rightMax) ? (rightMax = b) : (if ((b = -b) > rightMin) (rightMin = b)));
-			if ((pos += wordSize) >= size) #if lime_cffi {
-				if (!backend.streamed || ++i >= backend.bufferLengths.length) break;
-				pos = 0;
-				buf = backend.bufferDatas[i].buffer;
-				size = backend.bufferLengths[i];
-			}
-			#else break; #end
-
-			if (++c > buffer.channels) {
-				c = 0;
-				s--;
-			}
+			if (c % 2 == 0)
+				((b > leftMax) ? (leftMax = b) : (if ((b = -b) > leftMin) (leftMin = b)));
+			else
+				((b > rightMax) ? (rightMax = b) : (if ((b = -b) > rightMin) (rightMin = b)));
+			if ((pos += wordSize) >= size)
+				#if lime_cffi
+				{
+					if (!backend.streamed || ++i >= backend.bufferLengths.length)
+						break;
+					pos = 0;
+					buf = backend.bufferDatas[i].buffer;
+					size = backend.bufferLengths[i];
+				}
+				#else
+				break;
+				#end
+				if (++c > buffer.channels)
+				{
+					c = 0;
+					s--;
+				}
 		}
 
-		if (buffer.channels == 1) __rightPeak = (__leftPeak = (leftMax + leftMin) / byteSize);
-		else {
+		if (buffer.channels == 1)
+			__rightPeak = (__leftPeak = (leftMax + leftMin) / byteSize);
+		else
+		{
 			__leftPeak = (leftMax + leftMin) / byteSize;
 			__rightPeak = (rightMax + rightMin) / byteSize;
 		}
@@ -230,7 +251,8 @@ import lime.media.openal.AL;
 	// Get & Set Methods
 	@:noCompletion private function get_position():Float
 	{
-		if (!__isValid) return 0;
+		if (!__isValid)
+			return 0;
 
 		#if lime
 		return __source.currentTime + __source.offset;
@@ -241,7 +263,8 @@ import lime.media.openal.AL;
 
 	@:noCompletion private function set_position(value:Float):Float
 	{
-		if (!__isValid) return 0;
+		if (!__isValid)
+			return 0;
 
 		#if lime
 		__source.currentTime = value - __source.offset;
@@ -263,8 +286,10 @@ import lime.media.openal.AL;
 
 			var pan = SoundMixer.__soundTransform.pan + __soundTransform.pan;
 
-			if (pan < -1) pan = -1;
-			if (pan > 1) pan = 1;
+			if (pan < -1)
+				pan = -1;
+			if (pan > 1)
+				pan = 1;
 
 			var volume = SoundMixer.__soundTransform.volume * __soundTransform.volume;
 
@@ -284,7 +309,8 @@ import lime.media.openal.AL;
 
 	@:noCompletion private function get_pitch():Float
 	{
-		if (!__isValid) return 1;
+		if (!__isValid)
+			return 1;
 
 		#if lime
 		return __source.pitch;
@@ -295,7 +321,8 @@ import lime.media.openal.AL;
 
 	@:noCompletion private function set_pitch(value:Float):Float
 	{
-		if (!__isValid) return 1;
+		if (!__isValid)
+			return 1;
 
 		#if lime
 		return __source.pitch = value;
@@ -306,7 +333,8 @@ import lime.media.openal.AL;
 
 	@:noCompletion private function get_loopTime():Float
 	{
-		if (!__isValid) return -1;
+		if (!__isValid)
+			return -1;
 
 		#if lime
 		return __source.loopTime;
@@ -317,7 +345,8 @@ import lime.media.openal.AL;
 
 	@:noCompletion private function set_loopTime(value:Float):Float
 	{
-		if (!__isValid) return -1;
+		if (!__isValid)
+			return -1;
 
 		#if lime
 		return __source.loopTime = value;
@@ -328,7 +357,8 @@ import lime.media.openal.AL;
 
 	@:noCompletion private function get_endTime():Null<Float>
 	{
-		if (!__isValid) return null;
+		if (!__isValid)
+			return null;
 
 		#if lime
 		return __source.length;
@@ -339,7 +369,8 @@ import lime.media.openal.AL;
 
 	@:noCompletion private function set_endTime(value:Null<Float>):Null<Float>
 	{
-		if (!__isValid) return null;
+		if (!__isValid)
+			return null;
 
 		#if lime
 		return __source.length = value;
@@ -350,7 +381,8 @@ import lime.media.openal.AL;
 
 	@:noCompletion private function get_loops():Int
 	{
-		if (!__isValid) return 0;
+		if (!__isValid)
+			return 0;
 
 		#if lime
 		return __source.loops;
@@ -361,7 +393,8 @@ import lime.media.openal.AL;
 
 	@:noCompletion private function set_loops(value:Int):Int
 	{
-		if (!__isValid) return 0;
+		if (!__isValid)
+			return 0;
 
 		#if lime
 		return __source.loops = value;
@@ -382,7 +415,6 @@ import lime.media.openal.AL;
 		return __rightPeak * (soundTransform == null ? 1 : soundTransform.volume);
 	}
 
-
 	// Event Handlers
 	@:noCompletion private function source_onComplete():Void
 	{
@@ -392,8 +424,11 @@ import lime.media.openal.AL;
 		dispatchEvent(new Event(Event.SOUND_COMPLETE));
 	}
 
-	@:noCompletion private function get___audioSource():AudioSource return __source;
-	@:noCompletion private function set___audioSource(source:AudioSource):AudioSource return __source = source;
+	@:noCompletion private function get___audioSource():AudioSource
+		return __source;
+
+	@:noCompletion private function set___audioSource(source:AudioSource):AudioSource
+		return __source = source;
 }
 #else
 typedef SoundChannel = flash.media.SoundChannel;

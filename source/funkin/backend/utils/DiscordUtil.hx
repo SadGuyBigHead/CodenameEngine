@@ -89,10 +89,13 @@ final class DiscordUtil
 		config.logoKey = config.logoKey.getDefault(Flags.DEFAULT_DISCORD_LOGO_KEY);
 		config.logoText = config.logoText.getDefault(Flags.DEFAULT_DISCORD_LOGO_TEXT);
 		config.clientID = config.clientID.getDefault(Flags.DEFAULT_DISCORD_CLIENT_ID);
-		
-		if (Flags.MOD_DISCORD_CLIENT_ID.length > 0) config.clientID = Flags.MOD_DISCORD_CLIENT_ID;
-		if (Flags.MOD_DISCORD_LOGO_KEY.length > 0) config.logoKey = Flags.MOD_DISCORD_LOGO_KEY;
-		if (Flags.MOD_DISCORD_LOGO_TEXT.length > 0) config.logoText = Flags.MOD_DISCORD_LOGO_TEXT;
+
+		if (Flags.MOD_DISCORD_CLIENT_ID.length > 0)
+			config.clientID = Flags.MOD_DISCORD_CLIENT_ID;
+		if (Flags.MOD_DISCORD_LOGO_KEY.length > 0)
+			config.logoKey = Flags.MOD_DISCORD_LOGO_KEY;
+		if (Flags.MOD_DISCORD_LOGO_TEXT.length > 0)
+			config.logoText = Flags.MOD_DISCORD_LOGO_TEXT;
 		currentID = config.clientID;
 		#end
 	}
@@ -338,10 +341,7 @@ final class DiscordUtil
 	{
 		var finalMsg:String = cast(message, String);
 
-		Logs.traceColored([
-			Logs.getPrefix("Discord"),
-			Logs.logText('Error ($errorCode: $finalMsg)', RED)
-		], ERROR);
+		Logs.traceColored([Logs.getPrefix("Discord"), Logs.logText('Error ($errorCode: $finalMsg)', RED)], ERROR);
 
 		call("onError", [errorCode, cast(finalMsg, String)]);
 	}
@@ -383,24 +383,30 @@ final class DiscordUtil
 	}
 	#end
 
-	private static function getUUID():String {
+	private static function getUUID():String
+	{
 		var uuid = new StringBuf();
-		for (i in 0...16) {
+		for (i in 0...16)
+		{
 			uuid.add(StringTools.hex(Math.floor(Math.random() * 16), 1));
 		}
 		return uuid.toString();
 	}
 
-	public static function sendCustomCommand(data:Dynamic) {
+	public static function sendCustomCommand(data:Dynamic)
+	{
 		#if DISCORD_RPC
-		if(data == null) return;
-		if(data.nonce == null) data.nonce = getUUID();
+		if (data == null)
+			return;
+		if (data.nonce == null)
+			data.nonce = getUUID();
 		var json = Json.stringify(data);
 		Discord.SendCustomCommand(json);
 		#end
 	}
 
-	public static function setDebugMode(mode:Bool) {
+	public static function setDebugMode(mode:Bool)
+	{
 		#if DISCORD_RPC
 		Discord.SetDebugMode(mode);
 		#end

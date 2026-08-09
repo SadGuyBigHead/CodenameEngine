@@ -8,19 +8,22 @@ import flixel.tweens.FlxTween;
 import funkin.backend.shaders.CustomShader;
 import openfl.filters.ShaderFilter;
 
-class UIWarningSubstate extends MusicBeatSubstate {
+class UIWarningSubstate extends MusicBeatSubstate
+{
 	var camShaders:Array<FlxCamera> = [];
-	var blurShader:CustomShader = {
-		var _ = new CustomShader(Options.intensiveBlur ? "engine/editorBlur" : "engine/editorBlurFast");
-		if(!Options.intensiveBlur) {
-			var noiseTexture:ShaderInput<openfl.display.BitmapData> = _.data.noiseTexture;
-			noiseTexture.input = Assets.getBitmapData("assets/shaders/noise256.png");
-			noiseTexture.wrap = REPEAT;
-			var noiseTextureSize:ShaderParameter<Float> = _.data.noiseTextureSize;
-			noiseTextureSize.value = [noiseTexture.input.width, noiseTexture.input.height];
-		}
-		_;
-	};
+	var blurShader:CustomShader =
+		{
+			var _ = new CustomShader(Options.intensiveBlur ? "engine/editorBlur" : "engine/editorBlurFast");
+			if (!Options.intensiveBlur)
+			{
+				var noiseTexture:ShaderInput<openfl.display.BitmapData> = _.data.noiseTexture;
+				noiseTexture.input = Assets.getBitmapData("assets/shaders/noise256.png");
+				noiseTexture.wrap = REPEAT;
+				var noiseTextureSize:ShaderParameter<Float> = _.data.noiseTextureSize;
+				noiseTextureSize.value = [noiseTexture.input.width, noiseTexture.input.height];
+			}
+			_;
+		};
 
 	public var bHeight:Int = 232;
 
@@ -34,31 +37,39 @@ class UIWarningSubstate extends MusicBeatSubstate {
 
 	var warnCam:FlxCamera;
 
-	public override function onSubstateOpen() {
+	public override function onSubstateOpen()
+	{
 		super.onSubstateOpen();
 		parent.persistentUpdate = false;
 		parent.persistentDraw = true;
 	}
 
-	public override function create() {
-		for(c in FlxG.cameras.list) {
+	public override function create()
+	{
+		for (c in FlxG.cameras.list)
+		{
 			// Prevent adding a shader if it already has one
-			@:privateAccess if(c._filters != null) {
+			@:privateAccess if (c._filters != null)
+			{
 				var shouldSkip = false;
-				for(filter in c._filters) {
-					if(filter is ShaderFilter) {
+				for (filter in c._filters)
+				{
+					if (filter is ShaderFilter)
+					{
 						var filter:ShaderFilter = cast filter;
-						if(filter.shader is CustomShader) {
+						if (filter.shader is CustomShader)
+						{
 							var shader:CustomShader = cast filter.shader;
 
-							if(shader.path == blurShader.path) {
+							if (shader.path == blurShader.path)
+							{
 								shouldSkip = true;
 								break;
 							}
 						}
 					}
 				}
-				if(shouldSkip)
+				if (shouldSkip)
 					continue;
 			}
 			camShaders.push(c);
@@ -71,22 +82,22 @@ class UIWarningSubstate extends MusicBeatSubstate {
 		warnCam.zoom = 0.1;
 		FlxG.cameras.add(warnCam, false);
 
-
 		var spr = new UISliceSprite(0, 0, CoolUtil.maxInt(560, 30 + (170 * buttons.length)), bHeight, 'editors/ui/${isError ? "normal" : "grayscale"}-popup');
 
 		var sprIcon:FlxSprite = new FlxSprite(spr.x + 18, spr.y + 28 + 26).loadGraphic(Paths.image('editors/warnings/${isError ? "error" : "warning"}'));
 		sprIcon.scale.set(1.4, 1.4);
 		sprIcon.updateHitbox();
 
-		messageSpr = new UIText(0,0, spr.bWidth - 100 - (26 * 2), message);
-		spr.bHeight = Std.int(bHeight + Math.abs(Math.min(sprIcon.height-messageSpr.height, 0)));
+		messageSpr = new UIText(0, 0, spr.bWidth - 100 - (26 * 2), message);
+		spr.bHeight = Std.int(bHeight + Math.abs(Math.min(sprIcon.height - messageSpr.height, 0)));
 
 		spr.x = (FlxG.width - spr.bWidth) / 2;
 		spr.y = (FlxG.height - spr.bHeight) / 2;
 		spr.color = isError ? 0xFFFF0000 : 0xFFFFFF00;
 		add(spr);
 
-		if(title != null) {
+		if (title != null)
+		{
 			add(titleSpr = new UIText(spr.x + 25, spr.y, spr.bWidth - 50, title, 15, -1));
 			titleSpr.y = spr.y + ((30 - titleSpr.height) / 2);
 		}
@@ -102,12 +113,15 @@ class UIWarningSubstate extends MusicBeatSubstate {
 		add(messageSpr);
 
 		var xPos = (FlxG.width - (30 + (170 * buttons.length))) / 2;
-		for(k=>b in buttons) {
-			var button = new UIButton(xPos + 20 + (170 * k), spr.y + spr.bHeight - (36 + 16), b.label, function() {
+		for (k => b in buttons)
+		{
+			var button = new UIButton(xPos + 20 + (170 * k), spr.y + spr.bHeight - (36 + 16), b.label, function()
+			{
 				b.onClick(this);
 				close();
 			}, 160, 30);
-			if (b.color != null) {
+			if (b.color != null)
+			{
 				button.frames = Paths.getFrames("editors/ui/grayscale-button");
 				button.color = b.color;
 			}
@@ -120,16 +134,18 @@ class UIWarningSubstate extends MusicBeatSubstate {
 		CoolUtil.playMenuSFX(WARNING);
 	}
 
-	public override function destroy() {
+	public override function destroy()
+	{
 		super.destroy();
-		for(e in camShaders)
+		for (e in camShaders)
 			e.removeShader(blurShader);
 
 		FlxTween.cancelTweensOf(warnCam);
 		FlxG.cameras.remove(warnCam);
 	}
 
-	public function new(title:String, message:String, buttons:Array<WarningButton>, ?isError:Bool = true) {
+	public function new(title:String, message:String, buttons:Array<WarningButton>, ?isError:Bool = true)
+	{
 		super();
 		this.title = title;
 		this.message = message;
@@ -138,7 +154,8 @@ class UIWarningSubstate extends MusicBeatSubstate {
 	}
 }
 
-typedef WarningButton = {
+typedef WarningButton =
+{
 	var label:String;
 	var ?color:Int;
 	var onClick:UIWarningSubstate->Void;

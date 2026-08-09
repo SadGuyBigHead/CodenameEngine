@@ -7,7 +7,8 @@ import haxe.macro.Expr;
 /**
  * Macro that automatically generates flush and load functions.
  */
-class FunkinSaveMacro {
+class FunkinSaveMacro
+{
 	/**
 	 * Generates flush and load functions.
 	 * @param saveFieldName Name of the save field (`save`)
@@ -15,20 +16,26 @@ class FunkinSaveMacro {
 	 * @param loadFuncName Name of the load func (`load`)
 	 * @return Array<Field>
 	 */
-	public static function build(saveFieldName:String = "save", saveFuncName:String = "flush", loadFuncName:String = "load"):Array<Field> {
+	public static function build(saveFieldName:String = "save", saveFuncName:String = "flush", loadFuncName:String = "load"):Array<Field>
+	{
 		var fields:Array<Field> = Context.getBuildFields();
 
 		var fieldNames:Array<String> = [];
-		for(field in fields) {
-			if (!field.access.contains(AStatic)) continue;
+		for (field in fields)
+		{
+			if (!field.access.contains(AStatic))
+				continue;
 
-			switch(field.kind) {
+			switch (field.kind)
+			{
 				case FVar(type, expr):
-					if (field.name == saveFieldName) continue;
+					if (field.name == saveFieldName)
+						continue;
 					var valid:Bool = true;
 					if (field.meta != null)
-						for(m in field.meta)
-							if (m.name == ":doNotSave") {
+						for (m in field.meta)
+							if (m.name == ":doNotSave")
+							{
 								valid = false;
 								break;
 							}
@@ -42,7 +49,7 @@ class FunkinSaveMacro {
 		/**
 		 * SAVE FUNCTION
 		 */
-		var saveFuncBlocks:Array<Expr> = [for(f in fieldNames) macro $i{saveFieldName}.data.$f = $i{f}];
+		var saveFuncBlocks:Array<Expr> = [for (f in fieldNames) macro $i{saveFieldName}.data.$f = $i{f}];
 		saveFuncBlocks.push(macro $i{saveFieldName}.flush());
 
 		fields.push({
@@ -58,7 +65,10 @@ class FunkinSaveMacro {
 			access: [APublic, AStatic]
 		});
 
-		var loadFuncBlocks:Array<Expr> = [for(f in fieldNames) macro if ($i{saveFieldName}.data.$f != null) $i{f} = $i{saveFieldName}.data.$f];
+		var loadFuncBlocks:Array<Expr> = [
+			for (f in fieldNames)
+				macro if ($i{saveFieldName}.data.$f != null) $i{f} = $i{saveFieldName}.data.$f
+		];
 
 		/**
 		 * LOAD FUNCTION

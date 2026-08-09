@@ -8,9 +8,10 @@ import openfl.utils.AssetCache;
 import lime.utils.Assets as LimeAssets;
 #end
 
-
-class FunkinCache extends AssetCache {
+class FunkinCache extends AssetCache
+{
 	public static var instance:FunkinCache;
+
 	/**
 		Internal
 	**/
@@ -26,25 +27,30 @@ class FunkinCache extends AssetCache {
 	**/
 	@:noCompletion @:dox(hide) public var sound2:Map<String, Sound>;
 
-	public function new() {
+	public function new()
+	{
 		super();
 		moveToSecondLayer();
 		instance = this;
 	}
 
-	public static function init() {
+	public static function init()
+	{
 		openfl.utils.Assets.cache = new FunkinCache();
 
-		FlxG.signals.preStateSwitch.add(function() {
+		FlxG.signals.preStateSwitch.add(function()
+		{
 			instance.moveToSecondLayer();
 		});
 
-		FlxG.signals.postStateSwitch.add(function() {
+		FlxG.signals.postStateSwitch.add(function()
+		{
 			instance.clearSecondLayer();
 		});
 	}
 
-	public function moveToSecondLayer() {
+	public function moveToSecondLayer()
+	{
 		bitmapData2 = bitmapData;
 		font2 = font;
 		sound2 = sound;
@@ -53,15 +59,19 @@ class FunkinCache extends AssetCache {
 		sound = [];
 	}
 
-	public function clearSecondLayer() {
-		for(k=>b in bitmapData2) {
+	public function clearSecondLayer()
+	{
+		for (k => b in bitmapData2)
+		{
 			FlxG.bitmap.removeByKey(k);
 			LimeAssets.cache.image.remove(k);
 		}
-		for(k=>f in font2) {
+		for (k => f in font2)
+		{
 			LimeAssets.cache.font.remove(k);
 		}
-		for(k=>s in sound2) {
+		for (k => s in sound2)
+		{
 			LimeAssets.cache.audio.remove(k);
 		}
 
@@ -82,7 +92,8 @@ class FunkinCache extends AssetCache {
 		if (s != null)
 			return s;
 		var s2 = bitmapData2.get(id);
-		if (s2 != null) {
+		if (s2 != null)
+		{
 			bitmapData2.remove(id);
 			bitmapData.set(id, s2);
 		}
@@ -101,7 +112,8 @@ class FunkinCache extends AssetCache {
 		if (s != null)
 			return s;
 		var s2 = font2.get(id);
-		if (s2 != null) {
+		if (s2 != null)
+		{
 			font2.remove(id);
 			font.set(id, s2);
 		}
@@ -120,7 +132,8 @@ class FunkinCache extends AssetCache {
 		if (s != null)
 			return s;
 		var s2 = sound2.get(id);
-		if (s2 != null) {
+		if (s2 != null)
+		{
 			sound2.remove(id);
 			sound.set(id, s2);
 		}
@@ -159,6 +172,7 @@ class FunkinCache extends AssetCache {
 	{
 		return sound.exists(id) || sound2.exists(id);
 	}
+
 	/**
 		Removes a BitmapData from the cache.
 

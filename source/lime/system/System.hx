@@ -128,7 +128,8 @@ class System
 	@:keep @:expose("lime.embed")
 	public static function embed(projectName:String, element:Dynamic, width:Null<Int> = null, height:Null<Int> = null, config:Dynamic = null):Void
 	{
-		if (__applicationEntryPoint == null) return;
+		if (__applicationEntryPoint == null)
+			return;
 
 		if (__applicationEntryPoint.exists(projectName))
 		{
@@ -163,7 +164,8 @@ class System
 				height = 0;
 			}
 
-			if (config == null) config = {};
+			if (config == null)
+				config = {};
 
 			if (Reflect.hasField(config, "background") && (config.background is String))
 			{
@@ -370,7 +372,8 @@ class System
 			// generally `xdg-open` should work in every distro
 			var cmd = Sys.command("xdg-open", [path, "&"]);
 			// run old command JUST IN CASE it fails, which it shouldn't
-			if (cmd != 0) cmd = Sys.command("/usr/bin/xdg-open", [path, "&"]);
+			if (cmd != 0)
+				cmd = Sys.command("/usr/bin/xdg-open", [path, "&"]);
 			#elseif (js && html5)
 			Browser.window.open(path, "_blank");
 			#elseif flash
@@ -408,7 +411,8 @@ class System
 
 	@:noCompletion private static function __copyMissingFields(target:Dynamic, source:Dynamic):Void
 	{
-		if (source == null || target == null) return;
+		if (source == null || target == null)
+			return;
 
 		for (field in Reflect.fields(source))
 		{
@@ -521,7 +525,8 @@ class System
 						argValue = stripQuotes.matched(1);
 					}
 
-					if (parameters == null) parameters = new Map<String, String>();
+					if (parameters == null)
+						parameters = new Map<String, String>();
 					parameters.set(argument.substr(0, equals), argValue);
 				}
 			}
@@ -529,8 +534,10 @@ class System
 
 		if (parameters != null)
 		{
-			if (attributes.parameters == null) attributes.parameters = {};
-			if (attributes.context == null) attributes.context = {};
+			if (attributes.parameters == null)
+				attributes.parameters = {};
+			if (attributes.context == null)
+				attributes.context = {};
 
 			for (parameter in parameters.keys())
 			{
@@ -621,14 +628,17 @@ class System
 		#if sys
 		try
 		{
-			if (args == null) args = [];
+			if (args == null)
+				args = [];
 
 			var process = new Process(command, args);
 			var value = StringTools.trim(process.stdout.readLine().toString());
 			process.close();
 			return value;
 		}
-		catch (e:Dynamic) {}
+		catch (e:Dynamic)
+		{
+		}
 		#end
 		return null;
 	}
@@ -765,7 +775,8 @@ class System
 			var uint16array = new UInt16Array(arrayBuffer);
 			uint8Array[0] = 0xAA;
 			uint8Array[1] = 0xBB;
-			if (uint16array[0] == 0xAABB) __endianness = BIG_ENDIAN;
+			if (uint16array[0] == 0xAABB)
+				__endianness = BIG_ENDIAN;
 			else
 				__endianness = LITTLE_ENDIAN;
 			#end
@@ -803,14 +814,17 @@ class System
 			#else
 			var label:String = NativeCFFI.lime_system_get_platform_label();
 			#end
-			if (label != null) __platformLabel = StringTools.trim(label);
+			if (label != null)
+				__platformLabel = StringTools.trim(label);
 			#elseif linux
 			__platformLabel = __runProcess("lsb_release", ["-ds"]);
 			#else
 			var name = System.platformName;
 			var version = System.platformVersion;
-			if (name != null && version != null) __platformLabel = name + " " + version;
-			else if (name != null) __platformLabel = name;
+			if (name != null && version != null)
+				__platformLabel = name + " " + version;
+			else if (name != null)
+				__platformLabel = name;
 			#end
 		}
 
@@ -868,7 +882,8 @@ class System
 			#elseif android
 			var release = JNI.createStaticField("android/os/Build$VERSION", "RELEASE", "Ljava/lang/String;").get();
 			var api = JNI.createStaticField("android/os/Build$VERSION", "SDK_INT", "I").get();
-			if (release != null && api != null) __platformVersion = release + " (API " + api + ")";
+			if (release != null && api != null)
+				__platformVersion = release + " (API " + api + ")";
 			#elseif (lime_cffi && !macro && (ios || tvos))
 			__platformVersion = NativeCFFI.lime_system_get_platform_version();
 			#elseif mac

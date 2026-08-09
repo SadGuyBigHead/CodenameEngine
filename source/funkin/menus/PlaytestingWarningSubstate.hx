@@ -20,13 +20,15 @@ class PlaytestingWarningSubstate extends MusicBeatSubstate
 
 	var indicator:FunkinText;
 
-	public function new(closingWindow:Bool, buttons:Array<WarningButton>) {
+	public function new(closingWindow:Bool, buttons:Array<WarningButton>)
+	{
 		super();
 		windowClosing = closingWindow;
 		buttonsData = buttons;
 	}
 
-	override function create() {
+	override function create()
+	{
 		super.create();
 
 		camera = new FlxCamera();
@@ -46,17 +48,16 @@ class PlaytestingWarningSubstate extends MusicBeatSubstate
 
 		disclaimer = new FunkinText(16, titleAlphabet.y + titleAlphabet.height + 70, FlxG.width - 32, "", 32);
 		disclaimer.alignment = CENTER;
-		disclaimer.applyMarkup(TU.translate("playtesting.warningDesc"),
-			[
-				new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFFF4444), "*")
-			]
-		);
+		disclaimer.applyMarkup(TU.translate("playtesting.warningDesc"), [new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFFF4444), "*")]);
 		disclaimer.borderSize = 4;
 		add(disclaimer);
 
-		for (buttonData in buttonsData) {
+		for (buttonData in buttonsData)
+		{
 			var textOption:FunkinText = new FunkinText(0, disclaimer.y + disclaimer.height + 140, 0, buttonData.label, 24);
-			textOption.borderSize = 4; if (buttonData.color != null) textOption.color = buttonData.color;
+			textOption.borderSize = 4;
+			if (buttonData.color != null)
+				textOption.color = buttonData.color;
 			options.push(cast add(textOption));
 		}
 
@@ -66,33 +67,43 @@ class PlaytestingWarningSubstate extends MusicBeatSubstate
 
 		FlxTween.tween(indicator.offset, {y: -7.5}, {ease: FlxEase.quadInOut, type: PINGPONG});
 
-		curSelected = options.length-1;
+		curSelected = options.length - 1;
 		changeSelection(0);
 	}
 
 	var sinner:Float = 0;
 	var __firstFrame:Bool = true;
-	override function update(elapsed:Float) {
-		super.update(elapsed); sinner += elapsed;
+
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+		sinner += elapsed;
 
 		titleAlphabet.offset.y = FlxMath.fastSin(sinner) * 12;
-		disclaimer.offset.y = FlxMath.fastSin(sinner+.8) * 8;
+		disclaimer.offset.y = FlxMath.fastSin(sinner + .8) * 8;
 
-		if (controls.RIGHT_P) changeSelection(1);
-		if (controls.LEFT_P) changeSelection(-1);
+		if (controls.RIGHT_P)
+			changeSelection(1);
+		if (controls.LEFT_P)
+			changeSelection(-1);
 
-		for (i => option in options) {
-			option.x = FlxG.width * ((1+i)/4) - (option.fieldWidth/2);
-			switch(i) {
-				case 1: option.x -= 20;
+		for (i => option in options)
+		{
+			option.x = FlxG.width * ((1 + i) / 4) - (option.fieldWidth / 2);
+			switch (i)
+			{
+				case 1:
+					option.x -= 20;
 			}
-			if (i == curSelected) indicator.x = option.x + (option.fieldWidth/2) - (indicator.fieldWidth/2);
+			if (i == curSelected)
+				indicator.x = option.x + (option.fieldWidth / 2) - (indicator.fieldWidth / 2);
 			option.alpha = i == curSelected ? 1 : 0.4;
-			option.y = disclaimer.y + disclaimer.height + 140 + (FlxMath.fastSin((sinner*2)+1.2+(.3*i)) * 4);
-			option.offset.y = CoolUtil.fpsLerp(option.offset.y, i == curSelected ? 10 : -10, 1/6);
+			option.y = disclaimer.y + disclaimer.height + 140 + (FlxMath.fastSin((sinner * 2) + 1.2 + (.3 * i)) * 4);
+			option.offset.y = CoolUtil.fpsLerp(option.offset.y, i == curSelected ? 10 : -10, 1 / 6);
 		}
 
-		if (controls.ACCEPT && !__firstFrame) {
+		if (controls.ACCEPT && !__firstFrame)
+		{
 			buttonsData[curSelected].onClick(null);
 			close();
 		}
@@ -100,13 +111,15 @@ class PlaytestingWarningSubstate extends MusicBeatSubstate
 		__firstFrame = false;
 	}
 
-	function changeSelection(change:Int) {
+	function changeSelection(change:Int)
+	{
 		CoolUtil.playMenuSFX(SCROLL, 0.7);
-		curSelected = FlxMath.wrap(curSelected+change, 0, options.length-1);
+		curSelected = FlxMath.wrap(curSelected + change, 0, options.length - 1);
 	}
 
-	override function destroy() {
-		if(FlxG.cameras.list.contains(camera))
+	override function destroy()
+	{
+		if (FlxG.cameras.list.contains(camera))
 			FlxG.cameras.remove(camera, true);
 		super.destroy();
 	}

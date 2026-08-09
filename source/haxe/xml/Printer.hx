@@ -1,40 +1,42 @@
 /*
-* Copyright (C)2005-2019 Haxe Foundation
-*
-* Permission is hereby granted, free of charge, to any person obtaining a
-* copy of this software and associated documentation files (the "Software"),
-* to deal in the Software without restriction, including without limitation
-* the rights to use, copy, modify, merge, publish, distribute, sublicense,
-* and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in
-* all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-* DEALINGS IN THE SOFTWARE.
-*/
+ * Copyright (C)2005-2019 Haxe Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
 
 package haxe.xml;
 
 using StringTools;
 
 /**
- This class provides utility methods to convert Xml instances to
-	String representation.
+	This class provides utility methods to convert Xml instances to
+		String representation.
 **/
-class Printer {
+class Printer
+{
 	/**
-	 Convert `Xml` to string representation.
+		Convert `Xml` to string representation.
 
-		Set `pretty` to `true` to prettify the result.
+				Set `pretty` to `true` to prettify the result.
 	**/
-	static public function print(xml:Xml, ?pretty = false) {
+	static public function print(xml:Xml, ?pretty = false)
+	{
 		var printer = new Printer(pretty);
 		printer.writeNode(xml, "");
 		return printer.output.toString();
@@ -43,13 +45,16 @@ class Printer {
 	var output:StringBuf;
 	var pretty:Bool;
 
-	function new(pretty) {
+	function new(pretty)
+	{
 		output = new StringBuf();
 		this.pretty = pretty;
 	}
 
-	function writeNode(value:Xml, tabs:String) {
-		switch (value.nodeType) {
+	function writeNode(value:Xml, tabs:String)
+	{
+		switch (value.nodeType)
+		{
 			case CData:
 				write(tabs + "<![CDATA[");
 				write(value.nodeValue);
@@ -63,7 +68,8 @@ class Printer {
 				write(StringTools.trim(commentContent));
 				newline();
 			case Document:
-				for (child in value) {
+				for (child in value)
+				{
 					writeNode(child, tabs);
 				}
 			case Element:
@@ -74,30 +80,37 @@ class Printer {
 				if (attributes == null)
 					attributes = [for (att in value.attributes()) att];
 
-				for (attribute in attributes) {
-					if (!value.exists(attribute) || value.get(attribute).trim() == "") continue;
+				for (attribute in attributes)
+				{
+					if (!value.exists(attribute) || value.get(attribute).trim() == "")
+						continue;
 
 					write(" " + attribute + "=\"");
 					write(StringTools.htmlEscape(value.get(attribute), true));
 					write("\"");
 				}
-				if (hasChildren(value)) {
+				if (hasChildren(value))
+				{
 					write(">");
 					newline();
-					for (child in value) {
+					for (child in value)
+					{
 						writeNode(child, pretty ? tabs + "\t" : tabs);
 					}
 					write(tabs + "</");
 					write(value.nodeName);
 					write(">");
 					newline();
-				} else {
+				}
+				else
+				{
 					write("/>");
 					newline();
 				}
 			case PCData:
 				var nodeValue:String = value.nodeValue;
-				if (nodeValue.length != 0) {
+				if (nodeValue.length != 0)
+				{
 					write(tabs + StringTools.htmlEscape(nodeValue));
 					newline();
 				}
@@ -110,23 +123,30 @@ class Printer {
 		}
 	}
 
-	inline function write(input:String) {
+	inline function write(input:String)
+	{
 		output.add(input);
 	}
 
-	inline function newline() {
-		if (pretty) {
+	inline function newline()
+	{
+		if (pretty)
+		{
 			output.add("\n");
 		}
 	}
 
-	function hasChildren(value:Xml):Bool {
-		for (child in value) {
-			switch (child.nodeType) {
+	function hasChildren(value:Xml):Bool
+	{
+		for (child in value)
+		{
+			switch (child.nodeType)
+			{
 				case Element, PCData:
 					return true;
 				case CData, Comment:
-					if (StringTools.ltrim(child.nodeValue).length != 0) {
+					if (StringTools.ltrim(child.nodeValue).length != 0)
+					{
 						return true;
 					}
 				case _:

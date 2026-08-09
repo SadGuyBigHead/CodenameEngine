@@ -10,8 +10,9 @@ import funkin.game.Stage;
 
 using StringTools;
 
-class CharterEventScreen extends UISubstateWindow {
-	//public var cam:FlxCamera;
+class CharterEventScreen extends UISubstateWindow
+{
+	// public var cam:FlxCamera;
 	public var chartEvent:CharterEvent;
 
 	public var step:Float = 0;
@@ -28,15 +29,20 @@ class CharterEventScreen extends UISubstateWindow {
 
 	public var global:Bool = false;
 
-	public function new(step:Float, global:Bool, ?chartEvent:Null<CharterEvent>) {
-		if (chartEvent != null) this.chartEvent = chartEvent;
-		this.step = step; this.global = global;
+	public function new(step:Float, global:Bool, ?chartEvent:Null<CharterEvent>)
+	{
+		if (chartEvent != null)
+			this.chartEvent = chartEvent;
+		this.step = step;
+		this.global = global;
 		super();
 	}
 
-	public override function create() {
+	public override function create()
+	{
 		var creatingEvent:Bool = chartEvent == null;
-		if (creatingEvent) chartEvent = new CharterEvent(step, [], global);
+		if (creatingEvent)
+			chartEvent = new CharterEvent(step, [], global);
 
 		winTitle = TU.translate("charterEventScreen.title" + (creatingEvent ? "-creating" : "-editing"));
 		winWidth = 960;
@@ -45,29 +51,33 @@ class CharterEventScreen extends UISubstateWindow {
 
 		FlxG.sound.music.pause(); // prevent the song from continuing
 		Charter.instance.vocals.pause();
-		for (strumLine in Charter.instance.strumLines.members) strumLine.vocals.pause();
+		for (strumLine in Charter.instance.strumLines.members)
+			strumLine.vocals.pause();
 
 		events = chartEvent.events.copy();
 
-		eventsList = new UIButtonList<EventButton>(0,0,75, 570, null, FlxPoint.get(73, 40), null, 0);
+		eventsList = new UIButtonList<EventButton>(0, 0, 75, 570, null, FlxPoint.get(73, 40), null, 0);
 		eventsList.drawTop = false;
-		eventsList.addButton.callback = () -> openSubState(new CharterEventTypeSelection(function(eventName) {
+		eventsList.addButton.callback = () -> openSubState(new CharterEventTypeSelection(function(eventName)
+		{
 			events.push({
 				time: Conductor.getTimeForStep(chartEvent.step),
 				params: [],
 				name: eventName
 			});
-			eventsList.add(new EventButton(events[events.length-1], CharterEvent.generateEventIcon(events[events.length-1]), events.length-1, this, eventsList));
-			changeTab(events.length-1);
+			eventsList.add(new EventButton(events[events.length - 1], CharterEvent.generateEventIcon(events[events.length - 1]), events.length - 1, this,
+				eventsList));
+			changeTab(events.length - 1);
 		}, chartEvent.step));
-		for (k=>i in events)
+		for (k => i in events)
 			eventsList.add(new EventButton(i, CharterEvent.generateEventIcon(i), k, this, eventsList));
 		add(eventsList);
 
 		paramsPanel = new FlxGroup();
 		add(paramsPanel);
 
-		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20, windowSpr.y + windowSpr.bHeight - 16 - 32, TU.translate("editor.saveClose"), function() {
+		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20, windowSpr.y + windowSpr.bHeight - 16 - 32, TU.translate("editor.saveClose"), function()
+		{
 			saveCurTab();
 			chartEvent.refreshEventIcons();
 
@@ -75,7 +85,8 @@ class CharterEventScreen extends UISubstateWindow {
 
 			if (events.length <= 0 && !creatingEvent)
 				Charter.instance.deleteSelection([chartEvent]);
-			else if (events.length > 0) {
+			else if (events.length > 0)
+			{
 				var oldEvents:Array<ChartEvent> = chartEvent.events.copy();
 				chartEvent.events = [for (i in eventsList.buttons.members) i.event];
 				chartEvent.global = global;
@@ -84,7 +95,8 @@ class CharterEventScreen extends UISubstateWindow {
 
 				if (creatingEvent && events.length > 0)
 					Charter.instance.createSelection([chartEvent]);
-				else {
+				else
+				{
 					Charter.undos.addToUndo(CEditEvent(chartEvent, oldEvents, [for (event in events) Reflect.copy(event)]));
 				}
 			}
@@ -94,7 +106,7 @@ class CharterEventScreen extends UISubstateWindow {
 		saveButton.x -= saveButton.bWidth;
 		add(saveButton);
 
-		closeButton = new UIButton(saveButton.x - 10, saveButton.y, TU.translate("editor.close"), ()->close());
+		closeButton = new UIButton(saveButton.x - 10, saveButton.y, TU.translate("editor.close"), () -> close());
 		closeButton.color = 0xFFFF0000;
 		closeButton.x -= closeButton.bWidth;
 		add(closeButton);
@@ -107,31 +119,36 @@ class CharterEventScreen extends UISubstateWindow {
 
 	public var curEvent:Int = -1;
 
-	public function changeTab(id:Int, save:Bool = true) {
+	public function changeTab(id:Int, save:Bool = true)
+	{
 		if (save)
 			saveCurTab();
 
 		// destroy old elements
 		paramsFields = [];
-		for(e in paramsPanel) {
+		for (e in paramsPanel)
+		{
 			e.destroy();
 			paramsPanel.remove(e);
 		}
 
-		if (id >= 0 && id < events.length) {
+		if (id >= 0 && id < events.length)
+		{
 			curEvent = id;
 			var curEvent = events[curEvent];
 
 			var visualName = curEvent.name;
 			var tuId = "charter.events." + TU.raw2Id(curEvent.name);
-			if(TU.exists(tuId))
+			if (TU.exists(tuId))
 				visualName = TU.translate(tuId);
 
 			eventName.text = visualName;
 			// add new elements
 			var y:Float = eventName.y + eventName.height + 10;
-			for(k=>param in EventsData.getEventParams(curEvent.name)) {
-				function addLabel() {
+			for (k => param in EventsData.getEventParams(curEvent.name))
+			{
+				function addLabel()
+				{
 					var visualName = param.name;
 					// TODO: add translations
 					var label:UIText = new UIText(eventName.x, y, 0, visualName);
@@ -140,62 +157,73 @@ class CharterEventScreen extends UISubstateWindow {
 				};
 
 				var value:Dynamic = CoolUtil.getDefault(curEvent.params[k], param.defValue);
-				var lastAdded = switch(param.type) {
+				var lastAdded = switch (param.type)
+				{
 					case TString:
 						addLabel();
 						var textBox:UITextBox = new UITextBox(eventName.x, y, cast value);
-						paramsPanel.add(textBox); paramsFields.push(textBox);
+						paramsPanel.add(textBox);
+						paramsFields.push(textBox);
 						textBox;
 					case TBool:
 						var checkbox = new UICheckbox(eventName.x, y, param.name, cast value);
-						paramsPanel.add(checkbox); paramsFields.push(checkbox);
+						paramsPanel.add(checkbox);
+						paramsFields.push(checkbox);
 						checkbox;
 					case TInt(min, max, step):
 						addLabel();
 						var numericStepper = new UINumericStepper(eventName.x, y, cast value, step.getDefault(1), 0, min, max);
-						paramsPanel.add(numericStepper); paramsFields.push(numericStepper);
+						paramsPanel.add(numericStepper);
+						paramsFields.push(numericStepper);
 						numericStepper;
 					case TFloat(min, max, step, precision):
 						addLabel();
 						var numericStepper = new UINumericStepper(eventName.x, y, cast value, step.getDefault(1), precision, min, max);
-						paramsPanel.add(numericStepper); paramsFields.push(numericStepper);
+						paramsPanel.add(numericStepper);
+						paramsFields.push(numericStepper);
 						numericStepper;
 					case TStrumLine:
 						addLabel();
 						var strumlineFormat = TU.getRaw("charterEventScreen.strumLine.format");
 						var dropdown = new UIDropDown(eventName.x, y, 320, 32, [
-							for(k=>s in cast(FlxG.state, Charter).strumLines.members)
-								strumlineFormat.format([k+1, s.strumLine.characters[0]])
+							for (k => s in cast(FlxG.state, Charter).strumLines.members)
+								strumlineFormat.format([k + 1, s.strumLine.characters[0]])
 						], cast value);
-						paramsPanel.add(dropdown); paramsFields.push(dropdown);
+						paramsPanel.add(dropdown);
+						paramsFields.push(dropdown);
 						dropdown;
 					case TColorWheel:
 						addLabel();
 						var colorWheel = new UIColorwheel(eventName.x, y, value is String ? FlxColor.fromString(value) : Std.int(value));
-						paramsPanel.add(colorWheel); paramsFields.push(colorWheel);
+						paramsPanel.add(colorWheel);
+						paramsFields.push(colorWheel);
 						colorWheel;
 					case TDropDown(options):
 						addLabel();
 						var optionIndex = options.indexOf(cast value);
-						if(optionIndex < 0) {
+						if (optionIndex < 0)
+						{
 							optionIndex = 0;
 						}
 						var dropdown = new UIDropDown(eventName.x, y, 320, 32, options, optionIndex);
-						paramsPanel.add(dropdown); paramsFields.push(dropdown);
+						paramsPanel.add(dropdown);
+						paramsFields.push(dropdown);
 						dropdown;
 					case TCharacter:
 						addLabel();
 						var charFileList = Character.getList(false);
 						var textBox:UIAutoCompleteTextBox = new UIAutoCompleteTextBox(eventName.x, y, cast value);
 						textBox.suggestItems = charFileList;
-						paramsPanel.add(textBox); paramsFields.push(textBox);
+						paramsPanel.add(textBox);
+						paramsFields.push(textBox);
 						textBox;
 					case TStage:
 						addLabel();
 						var stageFileList = Stage.getList(false);
 						var textBox:UIAutoCompleteTextBox = new UIAutoCompleteTextBox(eventName.x, y, cast value);
 						textBox.suggestItems = stageFileList;
-						paramsPanel.add(textBox); paramsFields.push(textBox);
+						paramsPanel.add(textBox);
+						paramsFields.push(textBox);
 						textBox;
 					default:
 						paramsFields.push(null);
@@ -206,23 +234,32 @@ class CharterEventScreen extends UISubstateWindow {
 				else if (lastAdded is FlxSprite)
 					y += cast(lastAdded, FlxSprite).height + 6;
 			}
-		} else {
+		}
+		else
+		{
 			eventName.text = TU.translate("charterEventScreen.noEvent"); // Maybe should be No Events?
 			curEvent = -1;
 		}
 	}
 
-	public function saveCurTab() {
-		if (curEvent < 0) return;
+	public function saveCurTab()
+	{
+		if (curEvent < 0)
+			return;
 
 		var dataParams = EventsData.getEventParams(events[curEvent].name);
 		var params:Array<Dynamic> = [
-			for (i => p in paramsFields) {
-				if (p is UIDropDown) {
-					if (dataParams[i].type == TStrumLine) cast(p, UIDropDown).index;
-					else cast(p, UIDropDown).label.text;
+			for (i => p in paramsFields)
+			{
+				if (p is UIDropDown)
+				{
+					if (dataParams[i].type == TStrumLine)
+						cast(p, UIDropDown).index;
+					else
+						cast(p, UIDropDown).label.text;
 				}
-				else if (p is UINumericStepper) {
+				else if (p is UINumericStepper)
+				{
 					var stepper = cast(p, UINumericStepper);
 					@:privateAccess stepper.__onChange(stepper.label.text);
 					if (stepper.precision == 0) // int
@@ -230,39 +267,37 @@ class CharterEventScreen extends UISubstateWindow {
 					else
 						stepper.value;
 				}
-				else if (p is UITextBox)
-					cast(p, UITextBox).label.text;
-				else if (p is UICheckbox)
-					cast(p, UICheckbox).checked;
-				else if (p is UIColorwheel)
-					cast(p, UIColorwheel).curColor;
-				else
-					null;
+				else if (p is UITextBox) cast(p, UITextBox).label.text; else if (p is UICheckbox) cast(p, UICheckbox).checked; else if (p is UIColorwheel)
+					cast(p, UIColorwheel).curColor; else null;
 			}
 		];
 
-		while(dataParams.length > 0 && {
+		while (dataParams.length > 0 && {
 			var index = params.length - 1;
 			var dataParam = dataParams[index];
 			dataParam.saveIfDefault == false && params[index] == dataParam.defValue;
-		}) params.pop();
+		})
+			params.pop();
 
 		events[curEvent].params = params;
 	}
 }
 
-class EventButton extends UIButton {
+class EventButton extends UIButton
+{
 	public var icon:FlxSprite = null;
 	public var event:ChartEvent = null;
 	public var deleteButton:UIButton;
 	public var deleteIcon:FlxSprite;
 
-	public function new(event:ChartEvent, icon:FlxSprite, id:Int, substate:CharterEventScreen, parent:UIButtonList<EventButton>) {
+	public function new(event:ChartEvent, icon:FlxSprite, id:Int, substate:CharterEventScreen, parent:UIButtonList<EventButton>)
+	{
 		this.icon = icon;
 		this.event = event;
-		super(0, 0, null, function() {
+		super(0, 0, null, function()
+		{
 			substate.changeTab(id);
-			for(i in parent.buttons.members)
+			for (i in parent.buttons.members)
 				i.alpha = i == this ? 1 : 0.25;
 		}, 73, 40);
 		autoAlpha = false;
@@ -270,7 +305,8 @@ class EventButton extends UIButton {
 		members.push(icon);
 		icon.setPosition(18 - icon.width / 2, 20 - icon.height / 2);
 
-		deleteButton = new UIButton(bWidth - 30, y + (bHeight - 26) / 2, null, function () {
+		deleteButton = new UIButton(bWidth - 30, y + (bHeight - 26) / 2, null, function()
+		{
 			substate.events.splice(id, 1);
 			substate.changeTab(id, false);
 			parent.remove(this);
@@ -279,19 +315,20 @@ class EventButton extends UIButton {
 		deleteButton.autoAlpha = false;
 		members.push(deleteButton);
 
-		deleteIcon = new FlxSprite(deleteButton.x + (15/2), deleteButton.y + 4).loadGraphic(Paths.image('editors/delete-button'));
+		deleteIcon = new FlxSprite(deleteButton.x + (15 / 2), deleteButton.y + 4).loadGraphic(Paths.image('editors/delete-button'));
 		deleteIcon.antialiasing = false;
 		members.push(deleteIcon);
 	}
 
-	override function update(elapsed) {
+	override function update(elapsed)
+	{
 		super.update(elapsed);
 
 		deleteButton.selectable = selectable;
 		deleteButton.shouldPress = shouldPress;
 
-		icon.setPosition(x + (18 - icon.width / 2),y + (20 - icon.height / 2));
+		icon.setPosition(x + (18 - icon.width / 2), y + (20 - icon.height / 2));
 		deleteButton.setPosition(x + (bWidth - 30), y + (bHeight - 26) / 2);
-		deleteIcon.setPosition(deleteButton.x + (10/2), deleteButton.y + 4);
+		deleteIcon.setPosition(deleteButton.x + (10 / 2), deleteButton.y + 4);
 	}
 }

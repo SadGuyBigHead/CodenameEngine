@@ -3,8 +3,10 @@ package funkin.backend.utils;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 
-final class MarkdownUtil {
-	public static function applyMarkdownText(text:FlxText, str:String) {
+final class MarkdownUtil
+{
+	public static function applyMarkdownText(text:FlxText, str:String)
+	{
 		text.textField.htmlText = Markdown.markdownToHtml(prepareMarkdown(str));
 		var changes:Array<FlxTextFormatMarkerPair> = [
 			createAdvancedMarkerPair("{title}", 0xFFFFFFFF, text.size * 2, false, true, true),
@@ -23,10 +25,7 @@ final class MarkdownUtil {
 			new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFFFFFFF, false, true, 0xFF888888), "{bold-italic}"),
 		];
 
-		text.applyMarkup(
-			parseWarnings(text.textField.text),
-			changes
-		);
+		text.applyMarkup(parseWarnings(text.textField.text), changes);
 		@:privateAccess {
 			// hacky fix for the text cutting when bigger text formats are used
 			text._regen = true;
@@ -36,7 +35,9 @@ final class MarkdownUtil {
 		}
 	}
 
-	public static function createAdvancedMarkerPair(marker:String, color:FlxColor, size:Null<Float>, bold:Bool = false, italic:Bool = false, ?underline:Bool = false, ?blockIndent:Int, ?bullet:Bool) {
+	public static function createAdvancedMarkerPair(marker:String, color:FlxColor, size:Null<Float>, bold:Bool = false, italic:Bool = false,
+			?underline:Bool = false, ?blockIndent:Int, ?bullet:Bool)
+	{
 		@:privateAccess {
 			var format = new FlxTextFormat(color, bold, italic);
 			format.format.size = size == null ? null : Std.int(size);
@@ -47,7 +48,8 @@ final class MarkdownUtil {
 		}
 	}
 
-	public static function parseWarnings(text:String) {
+	public static function parseWarnings(text:String)
+	{
 		text = text.replace("&nbsp;", " ");
 		text = parseEmote(text, "⚠", "{o}(!)", "{o}");
 		text = parseEmote(text, "❌", "{r}(X)", "{r}");
@@ -55,32 +57,37 @@ final class MarkdownUtil {
 		return text;
 	}
 
-	public static function prepareMarkdown(text:String) {
+	public static function prepareMarkdown(text:String)
+	{
 		text = "\n" + text;
-		text = parseEmote(text, "\n- ",             "\n{ident1}&nbsp;&nbsp;• ",             "{ident1}");
-		text = parseEmote(text, "\n    - ",         "\n{ident2}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• ",         "{ident2}");
-		text = parseEmote(text, "\n        - ",     "\n{ident3}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• ",     "{ident3}");
-		text = parseEmote(text, "\n            - ", "\n{ident4}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• ", "{ident4}");
-		text = parseEmote(text, "\n> ",             "\n{gray}",                 "{gray}");
-		text = parseEmote(text, "\n### ",           "\n{subsubtitle}",          "{subsubtitle}");
-		text = parseEmote(text, "\n## ",            "\n{subtitle}",             "{subtitle}");
-		text = parseEmote(text, "\n# ",             "\n{title}",                "{title}");
-		text = parseEmote(text, "***",              "{bold-italic}",            "{bold-italic}",    "***");
-		text = parseEmote(text, "**",               "{bold}",                   "{bold}",           "**");
-		text = parseEmote(text, "*",                "{italic}",                 "{italic}",         "*");
-		text = parseEmote(text, "_",                "{italic}",                 "{italic}",         "*");
-		text = parseEmote(text, "__",               "{bold}",                   "{bold}",           "*");
+		text = parseEmote(text, "\n- ", "\n{ident1}&nbsp;&nbsp;• ", "{ident1}");
+		text = parseEmote(text, "\n    - ", "\n{ident2}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• ", "{ident2}");
+		text = parseEmote(text, "\n        - ", "\n{ident3}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• ", "{ident3}");
+		text = parseEmote(text, "\n            - ", "\n{ident4}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• ",
+			"{ident4}");
+		text = parseEmote(text, "\n> ", "\n{gray}", "{gray}");
+		text = parseEmote(text, "\n### ", "\n{subsubtitle}", "{subsubtitle}");
+		text = parseEmote(text, "\n## ", "\n{subtitle}", "{subtitle}");
+		text = parseEmote(text, "\n# ", "\n{title}", "{title}");
+		text = parseEmote(text, "***", "{bold-italic}", "{bold-italic}", "***");
+		text = parseEmote(text, "**", "{bold}", "{bold}", "**");
+		text = parseEmote(text, "*", "{italic}", "{italic}", "*");
+		text = parseEmote(text, "_", "{italic}", "{italic}", "*");
+		text = parseEmote(text, "__", "{bold}", "{bold}", "*");
 		text.substr("\n".length);
 		return text;
 	}
 
-	public static function parseEmote(text:String, emote:String, beginning:String, end:String, emoteEnd:String = "\n") {
+	public static function parseEmote(text:String, emote:String, beginning:String, end:String, emoteEnd:String = "\n")
+	{
 		var index:Int;
-		while((index = text.indexOf(emote)) >= 0) {
+		while ((index = text.indexOf(emote)) >= 0)
+		{
 			var nextIndex = text.indexOf(emoteEnd, index + emote.length);
 			if (nextIndex < 0)
 				nextIndex = text.length;
-			text = text.substr(0, index) + beginning + text.substring(index + emote.length, nextIndex) + end + (emote == emoteEnd ? "" : emoteEnd) + text.substring(nextIndex + emoteEnd.length);
+			text = text.substr(0, index) + beginning + text.substring(index + emote.length, nextIndex) + end + (emote == emoteEnd ? "" : emoteEnd)
+				+ text.substring(nextIndex + emoteEnd.length);
 		}
 		return text;
 	}

@@ -54,7 +54,8 @@ class TitleState extends MusicBeatState
 		add(titleScreenSprites);
 		loadXML();
 
-		if (titleText == null) {
+		if (titleText == null)
+		{
 			titleText = new FlxSprite(0, FlxG.height * 0.8);
 			titleText.frames = Paths.getFrames('menus/titlescreen/titleEnter');
 			titleText.animation.addByPrefix('idle', "Press Enter to Begin", 24);
@@ -125,8 +126,9 @@ class TitleState extends MusicBeatState
 			#end
 		}
 
-		if (pressedEnter && transitioning && skippedIntro) {
-			FlxG.camera.stopFX();// FlxG.camera.visible = false;
+		if (pressedEnter && transitioning && skippedIntro)
+		{
+			FlxG.camera.stopFX(); // FlxG.camera.visible = false;
 			goToMainMenu(false);
 		}
 
@@ -141,7 +143,8 @@ class TitleState extends MusicBeatState
 		super.update(elapsed);
 	}
 
-	public function pressEnter() {
+	public function pressEnter()
+	{
 		titleText.animation.play('press');
 
 		FlxG.camera.flash(FlxColor.WHITE, 1);
@@ -153,28 +156,36 @@ class TitleState extends MusicBeatState
 		new FlxTimer().start(2, (_) -> goToMainMenu(false));
 	}
 
-	function goToMainMenu(force = true) {
+	function goToMainMenu(force = true)
+	{
 		#if UPDATE_CHECKING
-		if (!force && !Flags.DISABLE_AUTOUPDATER) {
-			funkin.backend.system.updating.UpdateUtil.waitForUpdates(false, (report) -> {
+		if (!force && !Flags.DISABLE_AUTOUPDATER)
+		{
+			funkin.backend.system.updating.UpdateUtil.waitForUpdates(false, (report) ->
+			{
 				hasCheckedUpdates = true;
-				if (FlxG.state != this) return;
+				if (FlxG.state != this)
+					return;
 
-				if (!report.newUpdate) goToMainMenu(true);
-				else FlxG.switchState(new funkin.backend.system.updating.UpdateAvailableScreen(report));
+				if (!report.newUpdate)
+					goToMainMenu(true);
+				else
+					FlxG.switchState(new funkin.backend.system.updating.UpdateAvailableScreen(report));
 			}, true);
 		}
 		else
-		#end {
+		#end
+		{
 			FlxG.switchState(new MainMenuState());
 		}
 	}
 
 	public function createCoolText(textArray:Array<String>)
 	{
-		for (i=>text in textArray)
+		for (i => text in textArray)
 		{
-			if (text == "" || text == null) continue;
+			if (text == "" || text == null)
+				continue;
 			var money:Alphabet = new Alphabet(0, (i * 60) + 200, text, "bold");
 			money.screenCenter(X);
 			textGroup.add(money);
@@ -190,7 +201,8 @@ class TitleState extends MusicBeatState
 
 	public function deleteCoolText()
 	{
-		while (textGroup.members.length > 0) {
+		while (textGroup.members.length > 0)
+		{
 			textGroup.members[0].destroy();
 			textGroup.remove(textGroup.members[0], true);
 		}
@@ -200,8 +212,10 @@ class TitleState extends MusicBeatState
 	{
 		super.beatHit(curBeat);
 
-		if (curBeat >= titleLength || skippedIntro) {
-			if (!skippedIntro) skipIntro();
+		if (curBeat >= titleLength || skippedIntro)
+		{
+			if (!skippedIntro)
+				skipIntro();
 			return;
 		}
 		var introText = titleLines[curBeat];
@@ -216,11 +230,16 @@ class TitleState extends MusicBeatState
 		3 => new IntroText(['ninjamuffin99', 'phantomArcade', 'kawaisprite', 'evilsk8er', 'present']),
 		4 => new IntroText(),
 		5 => new IntroText(['In association', 'with']),
-		7 => new IntroText(['In association', 'with', 'newgrounds', {
-			name: "newgroundsLogo",
-			path: "menus/titlescreen/newgrounds_logo",
-			scale: 0.8
-		}]),
+		7 => new IntroText([
+			'In association',
+			'with',
+			'newgrounds',
+			{
+				name: "newgroundsLogo",
+				path: "menus/titlescreen/newgrounds_logo",
+				scale: 0.8
+			}
+		]),
 		8 => new IntroText(),
 		9 => new IntroText(["{introText1}"]),
 		11 => new IntroText(["{introText1}", "{introText2}"]),
@@ -232,39 +251,54 @@ class TitleState extends MusicBeatState
 
 	public var titleSprites:Map<String, FlxSprite> = [];
 
-	public function loadXML() {
-		try {
+	public function loadXML()
+	{
+		try
+		{
 			xml = new Access(Xml.parse(Assets.getText(Paths.xml('titlescreen/titlescreen'))).firstElement());
-			if (xml.hasNode.intro) {
+			if (xml.hasNode.intro)
+			{
 				titleLines = [];
-				if (xml.node.intro.has.length) titleLength = Std.parseInt(xml.node.intro.att.length).getDefault(16);
-				for(node in xml.nodes.sprites) {
+				if (xml.node.intro.has.length)
+					titleLength = Std.parseInt(xml.node.intro.att.length).getDefault(16);
+				for (node in xml.nodes.sprites)
+				{
 					var parentFolder:String = node.getAtt("folder").getDefault("");
-					if (parentFolder != "" && !parentFolder.endsWith("/")) parentFolder += "/";
-					for(sprNode in node.elements) {
+					if (parentFolder != "" && !parentFolder.endsWith("/"))
+						parentFolder += "/";
+					for (sprNode in node.elements)
+					{
 						var spr = XMLUtil.createSpriteFromXML(sprNode, parentFolder);
-						switch(sprNode.name) {
+						switch (sprNode.name)
+						{
 							case "press-enter":
 								titleText = spr;
 							default:
 								titleScreenSprites.add(spr);
 						}
-						if(node.has.name) titleSprites[node.att.name] = spr;
+						if (node.has.name)
+							titleSprites[node.att.name] = spr;
 					}
 				}
-				for(text in xml.node.intro.nodes.text) {
+				for (text in xml.node.intro.nodes.text)
+				{
 					var beat:Int = text.has.beat ? Std.parseInt(text.att.beat).getDefault(0) : 0;
 					var texts:Array<OneOfTwo<String, TitleStateImage>> = [];
-					for(node in text.elements) {
-						switch(node.name) {
+					for (node in text.elements)
+					{
+						switch (node.name)
+						{
 							case "line":
-								if (!node.has.text) continue;
+								if (!node.has.text)
+									continue;
 								texts.push(node.att.text);
 							case "introtext":
-								if (!node.has.line) continue;
+								if (!node.has.line)
+									continue;
 								texts.push('{introText${node.att.line}}');
 							case "sprite":
-								if (!node.has.path) continue;
+								if (!node.has.path)
+									continue;
 								var name:String = node.has.name ? node.att.name : null;
 								var path:String = node.att.path;
 								var flipX:Bool = node.has.flipX ? node.att.flipX == "true" : false;
@@ -283,7 +317,9 @@ class TitleState extends MusicBeatState
 					titleLines[beat] = new IntroText(texts);
 				}
 			}
-		} catch(e) {
+		}
+		catch (e)
+		{
 			Logs.error('Failed to load titlescreen XML: $e');
 		}
 	}
@@ -303,31 +339,42 @@ class TitleState extends MusicBeatState
 	}
 }
 
-class IntroText {
+class IntroText
+{
 	public var lines:Array<OneOfTwo<String, TitleStateImage>> = [];
 
-	public function new(?lines:Array<OneOfTwo<String, TitleStateImage>>) {
+	public function new(?lines:Array<OneOfTwo<String, TitleStateImage>>)
+	{
 		this.lines = lines;
 	}
 
-	public function show() {
+	public function show()
+	{
 		var state = cast(FlxG.state, TitleState);
 		state.deleteCoolText();
-		if (lines == null) return;
-		for(e in lines) {
-			if (e is String) {
+		if (lines == null)
+			return;
+		for (e in lines)
+		{
+			if (e is String)
+			{
 				var text = cast(e, String);
-				for(k=>e in state.curWacky) text = text.replace('{introText${k+1}}', e);
+				for (k => e in state.curWacky)
+					text = text.replace('{introText${k + 1}}', e);
 				state.addMoreText(text);
-			} else if (e is Dynamic) {
+			}
+			else if (e is Dynamic)
+			{
 				var image:TitleStateImage = e;
-				if (image.path == null) continue;
+				if (image.path == null)
+					continue;
 
 				var scale:Float = image.scale.getDefault(1);
 
 				var yPos:Float = 200;
-				if(state.textGroup.members.length > 0) {
-					var lastLine:FlxSprite = cast state.textGroup.members[state.textGroup.members.length-1];
+				if (state.textGroup.members.length > 0)
+				{
+					var lastLine:FlxSprite = cast state.textGroup.members[state.textGroup.members.length - 1];
 					yPos = lastLine.y + lastLine.height + 10;
 				}
 
@@ -344,7 +391,8 @@ class IntroText {
 	}
 }
 
-typedef TitleStateImage = {
+typedef TitleStateImage =
+{
 	var name:String;
 	var path:String;
 	@:optional var scale:Null<Float>;

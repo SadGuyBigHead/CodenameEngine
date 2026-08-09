@@ -9,6 +9,7 @@ import funkin.backend.utils.NativeAPI.FileAttribute;
 class FileAttributeWrapper
 {
 	private var flags:Int;
+
 	inline public function getValue():Int
 	{
 		return flags;
@@ -34,6 +35,7 @@ class FileAttributeWrapper
 
 	// Settables
 	public var isArchived(get, set):Bool;
+
 	private function get_isArchived():Bool
 	{
 		#if windows
@@ -42,6 +44,7 @@ class FileAttributeWrapper
 		return false;
 		#end
 	}
+
 	private function set_isArchived(value:Bool):Bool
 	{
 		#if windows
@@ -56,6 +59,7 @@ class FileAttributeWrapper
 	}
 
 	public var isHidden(get, set):Bool;
+
 	private function get_isHidden():Bool
 	{
 		#if windows
@@ -64,6 +68,7 @@ class FileAttributeWrapper
 		return false;
 		#end
 	}
+
 	private function set_isHidden(value:Bool):Bool
 	{
 		#if windows
@@ -78,6 +83,7 @@ class FileAttributeWrapper
 	}
 
 	public var isNormal(get, set):Bool;
+
 	private function get_isNormal():Bool
 	{
 		#if windows
@@ -86,6 +92,7 @@ class FileAttributeWrapper
 		return false;
 		#end
 	}
+
 	private function set_isNormal(value:Bool):Bool
 	{
 		#if windows
@@ -100,6 +107,7 @@ class FileAttributeWrapper
 	}
 
 	public var isNotContentIndexed(get, set):Bool;
+
 	private function get_isNotContentIndexed():Bool
 	{
 		#if windows
@@ -108,6 +116,7 @@ class FileAttributeWrapper
 		return false;
 		#end
 	}
+
 	private function set_isNotContentIndexed(value:Bool):Bool
 	{
 		#if windows
@@ -122,6 +131,7 @@ class FileAttributeWrapper
 	}
 
 	public var isOffline(get, set):Bool;
+
 	private function get_isOffline():Bool
 	{
 		#if windows
@@ -130,6 +140,7 @@ class FileAttributeWrapper
 		return false;
 		#end
 	}
+
 	private function set_isOffline(value:Bool):Bool
 	{
 		#if windows
@@ -144,6 +155,7 @@ class FileAttributeWrapper
 	}
 
 	public var isReadOnly(get, set):Bool;
+
 	private function get_isReadOnly():Bool
 	{
 		#if windows
@@ -152,6 +164,7 @@ class FileAttributeWrapper
 		return false;
 		#end
 	}
+
 	private function set_isReadOnly(value:Bool):Bool
 	{
 		#if windows
@@ -166,6 +179,7 @@ class FileAttributeWrapper
 	}
 
 	public var isSystem(get, set):Bool;
+
 	private function get_isSystem():Bool
 	{
 		#if windows
@@ -174,6 +188,7 @@ class FileAttributeWrapper
 		return false;
 		#end
 	}
+
 	private function set_isSystem(value:Bool):Bool
 	{
 		#if windows
@@ -188,6 +203,7 @@ class FileAttributeWrapper
 	}
 
 	public var isTemporary(get, set):Bool;
+
 	private function get_isTemporary():Bool
 	{
 		#if windows
@@ -196,6 +212,7 @@ class FileAttributeWrapper
 		return false;
 		#end
 	}
+
 	private function set_isTemporary(value:Bool):Bool
 	{
 		#if windows
@@ -211,6 +228,7 @@ class FileAttributeWrapper
 
 	// Non Settables
 	public var isCompressed(get, never):Bool;
+
 	private function get_isCompressed():Bool
 	{
 		#if windows
@@ -221,6 +239,7 @@ class FileAttributeWrapper
 	}
 
 	public var isDevice(get, never):Bool;
+
 	private function get_isDevice():Bool
 	{
 		#if windows
@@ -231,6 +250,7 @@ class FileAttributeWrapper
 	}
 
 	public var isDirectory(get, never):Bool;
+
 	private function get_isDirectory():Bool
 	{
 		#if windows
@@ -241,6 +261,7 @@ class FileAttributeWrapper
 	}
 
 	public var isEncrypted(get, never):Bool;
+
 	private function get_isEncrypted():Bool
 	{
 		#if windows
@@ -251,6 +272,7 @@ class FileAttributeWrapper
 	}
 
 	public var isReparsePoint(get, never):Bool;
+
 	private function get_isReparsePoint():Bool
 	{
 		#if windows
@@ -261,6 +283,7 @@ class FileAttributeWrapper
 	}
 
 	public var isSparseFile(get, never):Bool;
+
 	private function get_isSparseFile():Bool
 	{
 		#if windows
@@ -272,6 +295,7 @@ class FileAttributeWrapper
 
 	// For checking
 	public var isNothing(get, never):Bool;
+
 	private function get_isNothing():Bool
 	{
 		#if windows

@@ -1,6 +1,7 @@
 package funkin.backend.scripting.events.sprite;
 
-final class PlayAnimEvent extends CancellableEvent {
+final class PlayAnimEvent extends CancellableEvent
+{
 	/**
 		Name of the animation that's going to be played.
 	**/

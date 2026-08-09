@@ -1,10 +1,12 @@
 package funkin.backend.scripting.events;
 
-final class ResizeEvent extends CancellableEvent {
+final class ResizeEvent extends CancellableEvent
+{
 	/**
 	 * New width
 	 */
 	public var width:Int;
+
 	/**
 	 * New height
 	 */

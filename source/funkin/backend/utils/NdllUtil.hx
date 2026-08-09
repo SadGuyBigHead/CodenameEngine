@@ -14,13 +14,14 @@ package funkin.backend.utils;
  * - The Function cannot be found in the NDLL
  * then an empty function will be returned instead, and a message will be shown in logs.
  */
-final class NdllUtil {
+final class NdllUtil
+{
 	#if NDLLS_SUPPORTED
-		#if windows   public static final os:String = "windows";   #end
-		#if linux     public static final os:String = "linux";     #end
-		#if macos     public static final os:String = "mac";       #end
-		#if android   public static final os:String = "android";   #end
-		#if ios       public static final os:String = "ios";       #end
+	#if windows public static final os:String = "windows"; #end
+	#if linux public static final os:String = "linux"; #end
+	#if macos public static final os:String = "mac"; #end
+	#if android public static final os:String = "android"; #end
+	#if ios public static final os:String = "ios"; #end
 	#end
 
 	/**
@@ -31,14 +32,16 @@ final class NdllUtil {
 	 * @param name Name of the function.
 	 * @param args Number of arguments of that function.
 	 */
-	public static function getFunction(ndll:String, name:String, args:Int):Dynamic {
+	public static function getFunction(ndll:String, name:String, args:Int):Dynamic
+	{
 		#if NDLLS_SUPPORTED
 		var func:Dynamic = getFunctionFromPath(Paths.ndll('$ndll-$os'), name, args);
 
-		return Reflect.makeVarArgs(function(a:Array<Dynamic>) {
+		return Reflect.makeVarArgs(function(a:Array<Dynamic>)
+		{
 			// This generates horrific code
 			return funkin.backend.system.macros.Utils.generateReflectionLike(25, "func", "a");
-			//return Reflect.callMethod(null, func, a); // wouldn't work for some reason, maybe cause like c++ functions doesn't have reflection enabled
+			// return Reflect.callMethod(null, func, a); // wouldn't work for some reason, maybe cause like c++ functions doesn't have reflection enabled
 		});
 		#else
 		Logs.warn('NDLLs are not supported on this platform.');
@@ -53,15 +56,18 @@ final class NdllUtil {
 	 * @param name Name of the function.
 	 * @param args Number of arguments of that function.
 	 */
-	public static function getFunctionFromPath(ndll:String, name:String, args:Int):Dynamic {
+	public static function getFunctionFromPath(ndll:String, name:String, args:Int):Dynamic
+	{
 		#if NDLLS_SUPPORTED
-		if (!Assets.exists(ndll)) {
+		if (!Assets.exists(ndll))
+		{
 			Logs.warn('Couldn\'t find ndll at ${ndll}.');
 			return noop;
 		}
 		var func = lime.system.CFFI.load(Assets.getPath(ndll), name, args);
 
-		if (func == null) {
+		if (func == null)
+		{
 			Logs.error('Method ${name} in ndll ${ndll} with ${args} args was not found.');
 			return noop;
 		}
@@ -72,5 +78,7 @@ final class NdllUtil {
 		#end
 	}
 
-	@:dox(hide) @:noCompletion static function noop() {}
+	@:dox(hide) @:noCompletion static function noop()
+	{
+	}
 }

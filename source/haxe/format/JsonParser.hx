@@ -30,7 +30,8 @@ package haxe.format;
 
 	@see https://haxe.org/manual/std-Json-parsing.html
 **/
-class JsonParser {
+class JsonParser
+{
 	/**
 		Parses given JSON-encoded `str` and returns the resulting object.
 
@@ -41,28 +42,34 @@ class JsonParser {
 
 		If `str` is null, the result is unspecified.
 	**/
-	static public inline function parse(str:String):Dynamic {
+	static public inline function parse(str:String):Dynamic
+	{
 		return new JsonParser(str).doParse();
 	}
 
 	var str:String;
 	var pos:Int;
 
-	function new(str:String) {
+	function new(str:String)
+	{
 		this.str = str;
 		this.pos = 0;
 	}
 
-	function doParse():Dynamic {
+	function doParse():Dynamic
+	{
 		var result = parseRec();
 		var c;
-		while (!StringTools.isEof(c = nextChar())) {
-			if (checkComments(c)) {
+		while (!StringTools.isEof(c = nextChar()))
+		{
+			if (checkComments(c))
+			{
 				continue;
 			}
-			switch (c) {
+			switch (c)
+			{
 				case ' '.code, '\r'.code, '\n'.code, '\t'.code:
-				// allow trailing whitespace
+					// allow trailing whitespace
 				default:
 					invalidChar();
 			}
@@ -73,30 +80,46 @@ class JsonParser {
 	var inComment = false;
 	var blockComment = false;
 
-	inline function checkComments(c:Int) {
+	inline function checkComments(c:Int)
+	{
 		var ret = false;
-		if (!inComment) { // Starting Comment
-			if (c == '/'.code) {
+		if (!inComment)
+		{ // Starting Comment
+			if (c == '/'.code)
+			{
 				var d = nextChar();
-				if (d == '/'.code || (blockComment = (d == '*'.code))) {
+				if (d == '/'.code || (blockComment = (d == '*'.code)))
+				{
 					inComment = true;
-				} else {
+				}
+				else
+				{
 					pos--;
 				}
 			}
-		} else { // In Comment
-			if (blockComment) { // Block Comment
-				if (c == '*'.code) {
+		}
+		else
+		{ // In Comment
+			if (blockComment)
+			{ // Block Comment
+				if (c == '*'.code)
+				{
 					var d = nextChar();
-					if (d == '/'.code) {
+					if (d == '/'.code)
+					{
 						inComment = blockComment = false;
 						ret = true;
-					} else {
+					}
+					else
+					{
 						pos--;
 					}
 				}
-			} else { // Line Comment
-				if (c == '\n'.code) {
+			}
+			else
+			{ // Line Comment
+				if (c == '\n'.code)
+				{
 					inComment = false;
 				}
 			}
@@ -104,25 +127,32 @@ class JsonParser {
 		return ret || inComment;
 	}
 
-	function parseRec():Dynamic {
-		while (true) {
+	function parseRec():Dynamic
+	{
+		while (true)
+		{
 			var c = nextChar();
-			if (checkComments(c)) {
+			if (checkComments(c))
+			{
 				continue;
 			}
-			switch (c) {
+			switch (c)
+			{
 				case ' '.code, '\r'.code, '\n'.code, '\t'.code:
-				// loop
+					// loop
 				case '{'.code:
 					var obj = {}, field = null, comma:Null<Bool> = null;
-					while (true) {
+					while (true)
+					{
 						var c = nextChar();
-						if (checkComments(c)) {
+						if (checkComments(c))
+						{
 							continue;
 						}
-						switch (c) {
+						switch (c)
+						{
 							case ' '.code, '\r'.code, '\n'.code, '\t'.code:
-							// loop
+								// loop
 							case '}'.code:
 								if (field != null || comma == false)
 									invalidChar();
@@ -136,7 +166,8 @@ class JsonParser {
 							case ','.code:
 								if (comma) comma = false else invalidChar();
 							case '"'.code:
-								if (field != null || comma) invalidChar();
+								if (field != null || comma)
+									invalidChar();
 								field = parseString();
 							default:
 								invalidChar();
@@ -144,21 +175,26 @@ class JsonParser {
 					}
 				case '['.code:
 					var arr = [], comma:Null<Bool> = null;
-					while (true) {
+					while (true)
+					{
 						var c = nextChar();
-						if (checkComments(c)) {
+						if (checkComments(c))
+						{
 							continue;
 						}
-						switch (c) {
+						switch (c)
+						{
 							case ' '.code, '\r'.code, '\n'.code, '\t'.code:
-							// loop
+								// loop
 							case ']'.code:
-								if (comma == false) invalidChar();
+								if (comma == false)
+									invalidChar();
 								return arr;
 							case ','.code:
 								if (comma) comma = false else invalidChar();
 							default:
-								if (comma) invalidChar();
+								if (comma)
+									invalidChar();
 								pos--;
 								arr.push(parseRec());
 								comma = true;
@@ -166,21 +202,24 @@ class JsonParser {
 					}
 				case 't'.code:
 					var save = pos;
-					if (nextChar() != 'r'.code || nextChar() != 'u'.code || nextChar() != 'e'.code) {
+					if (nextChar() != 'r'.code || nextChar() != 'u'.code || nextChar() != 'e'.code)
+					{
 						pos = save;
 						invalidChar();
 					}
 					return true;
 				case 'f'.code:
 					var save = pos;
-					if (nextChar() != 'a'.code || nextChar() != 'l'.code || nextChar() != 's'.code || nextChar() != 'e'.code) {
+					if (nextChar() != 'a'.code || nextChar() != 'l'.code || nextChar() != 's'.code || nextChar() != 'e'.code)
+					{
 						pos = save;
 						invalidChar();
 					}
 					return false;
 				case 'n'.code:
 					var save = pos;
-					if (nextChar() != 'u'.code || nextChar() != 'l'.code || nextChar() != 'l'.code) {
+					if (nextChar() != 'u'.code || nextChar() != 'l'.code || nextChar() != 'l'.code)
+					{
 						pos = save;
 						invalidChar();
 					}
@@ -195,23 +234,28 @@ class JsonParser {
 		}
 	}
 
-	function parseString() {
+	function parseString()
+	{
 		var start = pos;
 		var buf:StringBuf = null;
 		#if target.unicode
 		var prev = -1;
-		inline function cancelSurrogate() {
+		inline function cancelSurrogate()
+		{
 			// invalid high surrogate (not followed by low surrogate)
 			buf.addChar(0xFFFD);
 			prev = -1;
 		}
 		#end
-		while (true) {
+		while (true)
+		{
 			var c = nextChar();
 			if (c == '"'.code)
 				break;
-			if (c == '\\'.code) {
-				if (buf == null) {
+			if (c == '\\'.code)
+			{
+				if (buf == null)
+				{
 					buf = new StringBuf();
 				}
 				buf.addSub(str, start, pos - start - 1);
@@ -220,7 +264,8 @@ class JsonParser {
 				if (c != "u".code && prev != -1)
 					cancelSurrogate();
 				#end
-				switch (c) {
+				switch (c)
+				{
 					case "r".code:
 						buf.addChar("\r".code);
 					case "n".code:
@@ -239,28 +284,36 @@ class JsonParser {
 						#if !target.unicode
 						if (uc <= 0x7F)
 							buf.addChar(uc);
-						else if (uc <= 0x7FF) {
+						else if (uc <= 0x7FF)
+						{
 							buf.addChar(0xC0 | (uc >> 6));
 							buf.addChar(0x80 | (uc & 63));
-						} else if (uc <= 0xFFFF) {
+						}
+						else if (uc <= 0xFFFF)
+						{
 							buf.addChar(0xE0 | (uc >> 12));
 							buf.addChar(0x80 | ((uc >> 6) & 63));
 							buf.addChar(0x80 | (uc & 63));
-						} else {
+						}
+						else
+						{
 							buf.addChar(0xF0 | (uc >> 18));
 							buf.addChar(0x80 | ((uc >> 12) & 63));
 							buf.addChar(0x80 | ((uc >> 6) & 63));
 							buf.addChar(0x80 | (uc & 63));
 						}
 						#else
-						if (prev != -1) {
+						if (prev != -1)
+						{
 							if (uc < 0xDC00 || uc > 0xDFFF)
 								cancelSurrogate();
-							else {
+							else
+							{
 								buf.addChar(((prev - 0xD800) << 10) + (uc - 0xDC00) + 0x10000);
 								prev = -1;
 							}
-						} else if (uc >= 0xD800 && uc <= 0xDBFF)
+						}
+						else if (uc >= 0xD800 && uc <= 0xDBFF)
 							prev = uc;
 						else
 							buf.addChar(uc);
@@ -270,9 +323,9 @@ class JsonParser {
 				}
 				start = pos;
 			}
-			#if !(target.unicode)
-			// ensure utf8 chars are not cut
-			else if (c >= 0x80) {
+			#if !(target.unicode) // ensure utf8 chars are not cut
+			else if (c >= 0x80)
+			{
 				pos++;
 				if (c >= 0xFC)
 					pos += 4;
@@ -291,25 +344,32 @@ class JsonParser {
 		if (prev != -1)
 			cancelSurrogate();
 		#end
-		if (buf == null) {
+		if (buf == null)
+		{
 			return str.substr(start, pos - start - 1);
-		} else {
+		}
+		else
+		{
 			buf.addSub(str, start, pos - start - 1);
 			return buf.toString();
 		}
 	}
 
-	inline function parseNumber(c:Int):Dynamic {
+	inline function parseNumber(c:Int):Dynamic
+	{
 		var start = pos - 1;
 		var minus = c == '-'.code, digit = !minus, zero = c == '0'.code;
 		var point = false, e = false, pm = false, end = false;
-		while (true) {
+		while (true)
+		{
 			c = nextChar();
-			switch (c) {
+			switch (c)
+			{
 				case '0'.code:
 					if (zero && !point)
 						invalidNumber(start);
-					if (minus) {
+					if (minus)
+					{
 						minus = false;
 						zero = true;
 					}
@@ -347,45 +407,57 @@ class JsonParser {
 		}
 
 		var f = Std.parseFloat(str.substr(start, pos - start));
-		if (point) {
+		if (point)
+		{
 			return f;
-		} else {
+		}
+		else
+		{
 			var i = Std.int(f);
 			return if (i == f) i else f;
 		}
 	}
 
-	inline function nextChar() {
+	inline function nextChar()
+	{
 		return StringTools.fastCodeAt(str, pos++);
 	}
 
-	function invalidChar() {
+	function invalidChar()
+	{
 		pos--; // rewind
 		var col = 1;
 		var line = 1;
-		for (i in 0...pos) {
+		for (i in 0...pos)
+		{
 			var c = StringTools.fastCodeAt(str, i);
-			if (c == '\n'.code) {
+			if (c == '\n'.code)
+			{
 				col = 1;
 				line++;
 			}
-			else {
+			else
+			{
 				col++;
 			}
 		}
 		throw "Invalid char " + StringTools.fastCodeAt(str, pos) + " ('" + str.charAt(pos) + "')" + " at line " + line + " col " + col;
 	}
 
-	function invalidNumber(start:Int) {
+	function invalidNumber(start:Int)
+	{
 		var col = 1;
 		var line = 1;
-		for (i in 0...start) {
+		for (i in 0...start)
+		{
 			var c = StringTools.fastCodeAt(str, i);
-			if (c == '\n'.code) {
+			if (c == '\n'.code)
+			{
 				col = 1;
 				line++;
 			}
-			else {
+			else
+			{
 				col++;
 			}
 		}

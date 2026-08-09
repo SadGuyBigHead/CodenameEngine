@@ -67,7 +67,9 @@ class DisplayObjectRenderer extends EventDispatcher
 		__worldAlpha = 1;
 	}
 
-	@:noCompletion private function __clear():Void {}
+	@:noCompletion private function __clear():Void
+	{
+	}
 
 	@:noCompletion private function __getAlpha(value:Float):Float
 	{
@@ -88,19 +90,33 @@ class DisplayObjectRenderer extends EventDispatcher
 		}
 	}
 
-	@:noCompletion private function __popMask():Void {}
+	@:noCompletion private function __popMask():Void
+	{
+	}
 
-	@:noCompletion private function __popMaskObject(object:DisplayObject, handleScrollRect:Bool = true):Void {}
+	@:noCompletion private function __popMaskObject(object:DisplayObject, handleScrollRect:Bool = true):Void
+	{
+	}
 
-	@:noCompletion private function __popMaskRect():Void {}
+	@:noCompletion private function __popMaskRect():Void
+	{
+	}
 
-	@:noCompletion private function __pushMask(mask:DisplayObject):Void {}
+	@:noCompletion private function __pushMask(mask:DisplayObject):Void
+	{
+	}
 
-	@:noCompletion private function __pushMaskObject(object:DisplayObject, handleScrollRect:Bool = true):Void {}
+	@:noCompletion private function __pushMaskObject(object:DisplayObject, handleScrollRect:Bool = true):Void
+	{
+	}
 
-	@:noCompletion private function __pushMaskRect(rect:Rectangle, transform:Matrix):Void {}
+	@:noCompletion private function __pushMaskRect(rect:Rectangle, transform:Matrix):Void
+	{
+	}
 
-	@:noCompletion private function __render(object:IBitmapDrawable):Void {}
+	@:noCompletion private function __render(object:IBitmapDrawable):Void
+	{
+	}
 
 	@:noCompletion private function __renderEvent(displayObject:DisplayObject):Void
 	{
@@ -116,7 +132,8 @@ class DisplayObjectRenderer extends EventDispatcher
 			switch (renderer.__type)
 			{
 				case OPENGL:
-					if (!renderer.__cleared) renderer.__clear();
+					if (!renderer.__cleared)
+						renderer.__clear();
 
 					var renderer:OpenGLRenderer = cast renderer;
 					renderer.setShader(displayObject.__worldShader);
@@ -160,27 +177,35 @@ class DisplayObjectRenderer extends EventDispatcher
 		#end
 	}
 
-	@:noCompletion private function __resize(width:Int, height:Int):Void {}
+	@:noCompletion private function __resize(width:Int, height:Int):Void
+	{
+	}
 
-	@:noCompletion private function __setBlendMode(value:BlendMode):Void {}
+	@:noCompletion private function __setBlendMode(value:BlendMode):Void
+	{
+	}
 
 	@:noCompletion private function __shouldCacheHardware(displayObject:DisplayObject, value:Null<Bool>):Null<Bool>
 	{
-		if (displayObject == null) return null;
+		if (displayObject == null)
+			return null;
 
 		switch (displayObject.__drawableType)
 		{
 			case SPRITE, STAGE:
-				if (value == true) return true;
+				if (value == true)
+					return true;
 				value = __shouldCacheHardware_DisplayObject(displayObject, value);
-				if (value == true) return true;
+				if (value == true)
+					return true;
 
 				if (displayObject.__children != null)
 				{
 					for (child in displayObject.__children)
 					{
 						value = __shouldCacheHardware_DisplayObject(child, value);
-						if (value == true) return true;
+						if (value == true)
+							return true;
 					}
 				}
 
@@ -199,7 +224,8 @@ class DisplayObjectRenderer extends EventDispatcher
 
 	@:noCompletion private function __shouldCacheHardware_DisplayObject(displayObject:DisplayObject, value:Null<Bool>):Null<Bool>
 	{
-		if (value == true || displayObject.__filters != null) return true;
+		if (value == true || displayObject.__filters != null)
+			return true;
 
 		if (value == false || (displayObject.__graphics != null && !Context3DGraphics.isCompatible(displayObject.__graphics)))
 		{
@@ -211,7 +237,8 @@ class DisplayObjectRenderer extends EventDispatcher
 
 	@:noCompletion private function __updateCacheBitmap(displayObject:DisplayObject, force:Bool):Bool
 	{
-		if (displayObject == null) return false;
+		if (displayObject == null)
+			return false;
 		var renderer = this;
 
 		switch (displayObject.__drawableType)
@@ -220,32 +247,38 @@ class DisplayObjectRenderer extends EventDispatcher
 				var bitmap:Bitmap = cast displayObject;
 				// TODO: Handle filters without an intermediate draw
 				if (bitmap.__bitmapData == null
-					|| (bitmap.__filters == null #if lime && renderer.__type == OPENGL #end && bitmap.__cacheBitmap == null)) return false;
+					|| (bitmap.__filters == null #if lime && renderer.__type == OPENGL #end && bitmap.__cacheBitmap == null))
+					return false;
 				force = (bitmap.__bitmapData.image != null && bitmap.__bitmapData.image.version != bitmap.__imageVersion);
 
 			case TEXT_FIELD:
 				var textField:TextField = cast displayObject;
 				if (textField.__filters == null #if lime && renderer.__type == OPENGL #end && textField.__cacheBitmap == null
-					&& !textField.__domRender) return false;
-				if (force) textField.__renderDirty = true;
+					&& !textField.__domRender)
+					return false;
+				if (force)
+					textField.__renderDirty = true;
 				force = force || textField.__dirty;
 
 			case TILEMAP:
 				var tilemap:Tilemap = cast displayObject;
-				if (tilemap.__filters == null #if lime && renderer.__type == OPENGL #end && tilemap.__cacheBitmap == null) return false;
+				if (tilemap.__filters == null #if lime && renderer.__type == OPENGL #end && tilemap.__cacheBitmap == null)
+					return false;
 
 			default:
 		}
 
 		#if lime
-		if (displayObject.__isCacheBitmapRender) return false;
+		if (displayObject.__isCacheBitmapRender)
+			return false;
 		#if openfl_disable_cacheasbitmap
 		return false;
 		#end
 
 		var colorTransform = ColorTransform.__pool.get();
 		colorTransform.__copyFrom(displayObject.__worldColorTransform);
-		if (renderer.__worldColorTransform != null) colorTransform.__combine(renderer.__worldColorTransform);
+		if (renderer.__worldColorTransform != null)
+			colorTransform.__combine(renderer.__worldColorTransform);
 		var updated = false;
 
 		// TODO: Do not force cacheAsBitmap on OpenGL once Scale-9 is properly supported in Context3DShape
@@ -281,8 +314,10 @@ class DisplayObjectRenderer extends EventDispatcher
 				}
 				#end
 
-				if (softwareDirty && (renderType == CANVAS || renderType == CAIRO)) needRender = true;
-				if (hardwareDirty && renderType == OPENGL) needRender = true;
+				if (softwareDirty && (renderType == CANVAS || renderType == CAIRO))
+					needRender = true;
+				if (hardwareDirty && renderType == OPENGL)
+					needRender = true;
 			}
 
 			var updateTransform = (needRender || !displayObject.__cacheBitmap.__worldTransform.equals(displayObject.__worldTransform));
@@ -416,7 +451,8 @@ class DisplayObjectRenderer extends EventDispatcher
 					{
 						displayObject.__cacheBitmapData = new BitmapData(bitmapWidth, bitmapHeight, true, bitmapColor);
 
-						if (displayObject.__cacheBitmap == null) displayObject.__cacheBitmap = new Bitmap();
+						if (displayObject.__cacheBitmap == null)
+							displayObject.__cacheBitmap = new Bitmap();
 						displayObject.__cacheBitmap.__bitmapData = displayObject.__cacheBitmapData;
 						displayObject.__cacheBitmapRenderer = null;
 					}
@@ -528,7 +564,8 @@ class DisplayObjectRenderer extends EventDispatcher
 				return false;
 				#end
 
-				if (displayObject.__cacheBitmapColorTransform == null) displayObject.__cacheBitmapColorTransform = new ColorTransform();
+				if (displayObject.__cacheBitmapColorTransform == null)
+					displayObject.__cacheBitmapColorTransform = new ColorTransform();
 
 				displayObject.__cacheBitmapRenderer.__stage = displayObject.stage;
 
@@ -572,8 +609,7 @@ class DisplayObjectRenderer extends EventDispatcher
 					displayObject.__cacheBitmapData.__setUVRect(context, 0, 0, filterWidth, filterHeight);
 					childRenderer.__setRenderTarget(displayObject.__cacheBitmapData);
 					if (displayObject.__cacheBitmapData.image != null)
-						displayObject.__cacheBitmapData.__textureVersion = displayObject.__cacheBitmapData.image.version
-						+ 1;
+						displayObject.__cacheBitmapData.__textureVersion = displayObject.__cacheBitmapData.image.version + 1;
 
 					displayObject.__cacheBitmapData.__drawGL(displayObject, childRenderer);
 
@@ -760,7 +796,8 @@ class DisplayObjectRenderer extends EventDispatcher
 							bitmap3 = displayObject.__cacheBitmapData3;
 						}
 
-						if (displayObject.__tempPoint == null) displayObject.__tempPoint = new Point();
+						if (displayObject.__tempPoint == null)
+							displayObject.__tempPoint = new Point();
 						var destPoint = displayObject.__tempPoint;
 						var cacheBitmap, lastBitmap;
 

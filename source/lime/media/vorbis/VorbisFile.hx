@@ -53,8 +53,10 @@ class VorbisFile
 
 	public function clone():VorbisFile
 	{
-		if (_filePath != null) return fromFile(_filePath);
-		if (_bytes != null) return fromBytes(_bytes);
+		if (_filePath != null)
+			return fromFile(_filePath);
+		if (_bytes != null)
+			return fromBytes(_bytes);
 		return null;
 	}
 
@@ -251,7 +253,8 @@ class VorbisFile
 	{
 		#if (lime_cffi && lime_vorbis && !macro)
 		var data = NativeCFFI.lime_vorbis_file_read(handle, buffer, position, length, bigEndianPacking, wordSize, signed);
-		if (data == null) return 0;
+		if (data == null)
+			return 0;
 		bitstream = data.bitstream;
 		return data.returnValue;
 		#else
@@ -264,7 +267,8 @@ class VorbisFile
 	{
 		#if (lime_cffi && lime_vorbis && !macro)
 		var data = NativeCFFI.lime_vorbis_file_read_float(handle, pcmChannels, samples);
-		if (data == null) return 0;
+		if (data == null)
+			return 0;
 		bitstream = data.bitstream;
 		return data.returnValue;
 		#else

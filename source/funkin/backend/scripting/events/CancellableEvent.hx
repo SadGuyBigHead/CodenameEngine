@@ -4,8 +4,10 @@ import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 
 @:allow(funkin.backend.scripting.ScriptPack)
 @:autoBuild(funkin.backend.system.macros.EventMacro.build())
-class CancellableEvent implements IFlxDestroyable {
+class CancellableEvent implements IFlxDestroyable
+{
 	@:dox(hide) public var cancelled:Bool = false;
+
 	@:dox(hide) private var __continueCalls:Bool = true;
 
 	/**
@@ -17,21 +19,28 @@ class CancellableEvent implements IFlxDestroyable {
 	 * Prevents default action from occurring.
 	 * @param c Whenever the scripts following this one should be called or not. (Defaults to `true`)
 	 */
-	public function preventDefault(c:Bool = false) {
+	public function preventDefault(c:Bool = false)
+	{
 		cancelled = true;
 		__continueCalls = c;
 	}
 
 	@:dox(hide)
-	public function cancel(c:Bool = true) {preventDefault(c);}
+	public function cancel(c:Bool = true)
+	{
+		preventDefault(c);
+	}
 
 	/**
 	 * Creates a new cancellable event.
 	 * This allows scripts to call `cancel()` to cancel the event.
 	 */
-	public function new() {}
+	public function new()
+	{
+	}
 
-	public function recycleBase() {
+	public function recycleBase()
+	{
 		data = {};
 		cancelled = false;
 		__continueCalls = true;
@@ -43,14 +52,16 @@ class CancellableEvent implements IFlxDestroyable {
 	 * `[CancellableEvent (Cancelled)]`
 	 * @return String
 	 */
-	public function toString():String {
+	public function toString():String
+	{
 		var fields = Reflect.fields(this);
 		var claName = Type.getClassName(Type.getClass(this)).split(".");
-		var rep = '[${claName[claName.length-1]}${cancelled ? " (Cancelled)" : ""}]';
+		var rep = '[${claName[claName.length - 1]}${cancelled ? " (Cancelled)" : ""}]';
 		return rep;
 	}
 
-	public function destroy() {
+	public function destroy()
+	{
 		data = null;
 	}
 }

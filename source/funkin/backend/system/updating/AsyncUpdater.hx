@@ -13,18 +13,20 @@ import sys.FileSystem;
 import sys.io.File;
 import sys.io.FileOutput;
 
-class AsyncUpdater {
+class AsyncUpdater
+{
 	// NON ASYNC STUFF
 	#if REGION
-	public function new(releases:Array<GitHubRelease>) {
+	public function new(releases:Array<GitHubRelease>)
+	{
 		this.releases = releases;
 	}
 
-	public function execute() {
+	public function execute()
+	{
 		Main.execAsync(installUpdates);
 	}
 	#end
-
 
 	#if windows
 	public static var executableGitHubName:String = "update-windows.exe";
@@ -48,17 +50,20 @@ class AsyncUpdater {
 	public var lastTime:Float = 0;
 	public var oldBytesLoaded:Float = 0;
 
-	public function installUpdates() {
+	public function installUpdates()
+	{
 		prepareInstallationEnvironment();
 		downloadFiles();
 	}
 
-	public function installFiles(files:Array<String>) {
+	public function installFiles(files:Array<String>)
+	{
 		progress.step = INSTALLING;
-		progress.files = files.length+1;
-		for(k=>e in files) {
+		progress.files = files.length + 1;
+		for (k => e in files)
+		{
 			var path = '$path$e';
-			progress.curFile = k+1;
+			progress.curFile = k + 1;
 			progress.curFileName = e;
 			trace('extracting file ${path}');
 			var reader = ZipUtil.openZip(path);
@@ -67,7 +72,8 @@ class AsyncUpdater {
 			ZipUtil.uncompressZip(reader, './', null, progress.curZipProgress);
 			// FileSystem.deleteFile(path);
 		}
-		if (executableReplaced = FileSystem.exists('$path$executableName')) {
+		if (executableReplaced = FileSystem.exists('$path$executableName'))
+		{
 			progress.curFile = files.length;
 			progress.curFileName = executableName;
 
@@ -80,16 +86,22 @@ class AsyncUpdater {
 		}
 	}
 
-	public function downloadFiles() {
+	public function downloadFiles()
+	{
 		var files:Array<String> = [];
 		var fileNames:Array<String> = [];
 		var exePath:String = "";
-		for(r in releases) {
-			for(e in r.assets) {
-				if (e.name.toLowerCase() == "update-assets.zip") {
+		for (r in releases)
+		{
+			for (e in r.assets)
+			{
+				if (e.name.toLowerCase() == "update-assets.zip")
+				{
 					files.push(e.browser_download_url);
 					fileNames.push('${Path.withoutExtension(e.name)}-${r.tag_name}.${Path.extension(e.name)}');
-				} else if (e.name.toLowerCase() == executableGitHubName) {
+				}
+				else if (e.name.toLowerCase() == executableGitHubName)
+				{
 					exePath = e.browser_download_url;
 				}
 			}
@@ -99,13 +111,15 @@ class AsyncUpdater {
 		progress.files = files.length;
 		progress.step = DOWNLOADING_ASSETS;
 		trace('starting assets download');
-		doFile(files.copy(), fileNames.copy(), function() {
+		doFile(files.copy(), fileNames.copy(), function()
+		{
 			progress.curFile = -1;
 			progress.curFileName = null;
 			progress.files = 1;
 			progress.step = DOWNLOADING_EXECUTABLE;
 			trace('starting exe download');
-			doFile([exePath], [executableName], function() {
+			doFile([exePath], [executableName], function()
+			{
 				trace('done, starting installation');
 				installFiles(fileNames);
 				progress.done = true;
@@ -113,9 +127,11 @@ class AsyncUpdater {
 		});
 	}
 
-	public function doFile(files:Array<String>, fileNames:Array<String>, onFinish:Void->Void) {
+	public function doFile(files:Array<String>, fileNames:Array<String>, onFinish:Void->Void)
+	{
 		var f = files.shift();
-		if (f == null) {
+		if (f == null)
+		{
 			onFinish();
 			return;
 		}
@@ -128,7 +144,8 @@ class AsyncUpdater {
 		downloadStream = new URLLoader();
 		downloadStream.dataFormat = BINARY;
 
-		downloadStream.addEventListener(ProgressEvent.PROGRESS, function(e) {
+		downloadStream.addEventListener(ProgressEvent.PROGRESS, function(e)
+		{
 			progress.bytesLoaded = e.bytesLoaded;
 			progress.bytesTotal = e.bytesTotal;
 
@@ -139,7 +156,8 @@ class AsyncUpdater {
 			lastTime = curTime;
 			oldBytesLoaded = e.bytesLoaded;
 		});
-		downloadStream.addEventListener(Event.COMPLETE, function(e) {
+		downloadStream.addEventListener(Event.COMPLETE, function(e)
+		{
 			var fileOutput:FileOutput = File.write('$path$fn', true);
 
 			var data:ByteArray = new ByteArray();
@@ -156,7 +174,8 @@ class AsyncUpdater {
 		downloadStream.load(new URLRequest(f));
 	}
 
-	public function prepareInstallationEnvironment() {
+	public function prepareInstallationEnvironment()
+	{
 		progress.step = PREPARING;
 
 		#if windows
@@ -169,7 +188,8 @@ class AsyncUpdater {
 	}
 }
 
-class UpdaterProgress {
+class UpdaterProgress
+{
 	public var step:UpdaterStep = PREPARING;
 	public var curFile:Int = 0;
 	public var files:Int = 0;
@@ -180,10 +200,13 @@ class UpdaterProgress {
 	public var done:Bool = false;
 	public var curZipProgress:ZipProgress = new ZipProgress();
 
-	public function new() {}
+	public function new()
+	{
+	}
 }
 
-enum abstract UpdaterStep(Int) {
+enum abstract UpdaterStep(Int)
+{
 	var PREPARING = 0;
 	var DOWNLOADING_ASSETS = 1;
 	var DOWNLOADING_EXECUTABLE = 2;

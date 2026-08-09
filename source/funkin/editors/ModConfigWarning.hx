@@ -3,14 +3,14 @@ package funkin.editors;
 import funkin.backend.assets.ModsFolderLibrary;
 import flixel.FlxState;
 
-class ModConfigWarning extends UIState {
+class ModConfigWarning extends UIState
+{
 	public static var hadPopup:Bool = false;
 
 	var library:ModsFolderLibrary = null;
 	var goToState:Class<FlxState>;
 
-	public static var defaultModConfigText = 
-'[Common] # This section applies the \'MOD_\' prefix to the flags so you don\'t have to.
+	public static var defaultModConfigText = '[Common] # This section applies the \'MOD_\' prefix to the flags so you don\'t have to.
 NAME="YOUR MOD NAME HERE"
 DESCRIPTION="YOUR MOD DESCRIPTION HERE"
 AUTHOR="YOU/YOUR TEAM HERE"
@@ -47,13 +47,15 @@ LOGO_TEXT=""
 [StateRedirects.force] # Use this if you want to override redirects set by subsequent addons/mods
 ';
 
-	public function new(library:ModsFolderLibrary, ?goToState:Class<FlxState>) {
+	public function new(library:ModsFolderLibrary, ?goToState:Class<FlxState>)
+	{
 		super();
 		this.library = library;
 		this.goToState = goToState != null ? goToState : funkin.menus.TitleState;
 	}
 
-	override function createPost() {
+	override function createPost()
+	{
 		super.createPost();
 		hadPopup = true;
 
@@ -61,20 +63,23 @@ LOGO_TEXT=""
 			{
 				label: TU.translate("editor.notNow"),
 				color: 0x969533,
-				onClick: function (_) {
+				onClick: function(_)
+				{
 					MusicBeatState.skipTransOut = MusicBeatState.skipTransIn = false;
 					FlxG.switchState(cast Type.createInstance(goToState, []));
 				}
 			},
 			{
 				label: TU.translate("editor.yes"),
-				onClick: function(_) {
+				onClick: function(_)
+				{
 					var path = '${library.folderPath}/data/config/modpack.ini';
 					CoolUtil.safeSaveFile(path, defaultModConfigText);
 					openSubState(new UIWarningSubstate(TU.translate("modConfigWarning.createdTitle"), TU.translate("modConfigWarning.createdDesc", [path]), [
 						{
 							label: TU.translate("editor.ok"),
-							onClick: function (_) {
+							onClick: function(_)
+							{
 								MusicBeatState.skipTransOut = MusicBeatState.skipTransIn = false;
 								FlxG.switchState(cast Type.createInstance(goToState, []));
 							}

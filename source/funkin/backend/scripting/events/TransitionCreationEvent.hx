@@ -5,7 +5,8 @@ import flixel.FlxState;
 /**
  * CANCEL this event to prevent default behaviour!
  */
-final class TransitionCreationEvent extends CancellableEvent {
+final class TransitionCreationEvent extends CancellableEvent
+{
 	/**
 	 * If the transition is going out into another state
 	 */

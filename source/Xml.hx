@@ -25,7 +25,8 @@
 
 	@see https://haxe.org/manual/std-Xml.html
 **/
-enum abstract XmlType(Int) {
+enum abstract XmlType(Int)
+{
 	/**
 		Represents an XML element type.
 	**/
@@ -61,8 +62,10 @@ enum abstract XmlType(Int) {
 	**/
 	var Document = 6;
 
-	public function toString():String {
-		return switch (cast this : XmlType) {
+	public function toString():String
+	{
+		return switch (cast this : XmlType)
+		{
 			case Element: "Element";
 			case PCData: "PCData";
 			case CData: "CData";
@@ -79,7 +82,8 @@ enum abstract XmlType(Int) {
 
 	@see https://haxe.org/manual/std-Xml.html
 **/
-class Xml {
+class Xml
+{
 	/**
 		XML element type.
 	**/
@@ -118,7 +122,8 @@ class Xml {
 	/**
 		Parses the String into an Xml document.
 	**/
-	static public function parse(str:String):Xml {
+	static public function parse(str:String):Xml
+	{
 		return haxe.xml.Parser.parse(str);
 	}
 
@@ -150,29 +155,37 @@ class Xml {
 
 	public var attributeOrder:Array<String>;
 
-	#if !cppia inline #end function get_nodeName() {
-		if (nodeType != Element) {
+	#if !cppia inline #end function get_nodeName()
+	{
+		if (nodeType != Element)
+		{
 			throw 'Bad node type, expected Element but found $nodeType';
 		}
 		return nodeName;
 	}
 
-	#if !cppia inline #end function set_nodeName(v) {
-		if (nodeType != Element) {
+	#if !cppia inline #end function set_nodeName(v)
+	{
+		if (nodeType != Element)
+		{
 			throw 'Bad node type, expected Element but found $nodeType';
 		}
 		return this.nodeName = v;
 	}
 
-	#if !cppia inline #end function get_nodeValue() {
-		if (nodeType == Document || nodeType == Element) {
+	#if !cppia inline #end function get_nodeValue()
+	{
+		if (nodeType == Document || nodeType == Element)
+		{
 			throw 'Bad node type, unexpected $nodeType';
 		}
 		return nodeValue;
 	}
 
-	#if !cppia inline #end function set_nodeValue(v) {
-		if (nodeType == Document || nodeType == Element) {
+	#if !cppia inline #end function set_nodeValue(v)
+	{
+		if (nodeType == Document || nodeType == Element)
+		{
 			throw 'Bad node type, unexpected $nodeType';
 		}
 		return this.nodeValue = v;
@@ -181,7 +194,8 @@ class Xml {
 	/**
 		Creates a node of the given type.
 	**/
-	static public function createElement(name:String):Xml {
+	static public function createElement(name:String):Xml
+	{
 		var xml = new Xml(Element);
 		xml.nodeName = name;
 		return xml;
@@ -190,7 +204,8 @@ class Xml {
 	/**
 		Creates a node of the given type.
 	**/
-	static public function createPCData(data:String):Xml {
+	static public function createPCData(data:String):Xml
+	{
 		var xml = new Xml(PCData);
 		xml.nodeValue = data;
 		return xml;
@@ -199,7 +214,8 @@ class Xml {
 	/**
 		Creates a node of the given type.
 	**/
-	static public function createCData(data:String):Xml {
+	static public function createCData(data:String):Xml
+	{
 		var xml = new Xml(CData);
 		xml.nodeValue = data;
 		return xml;
@@ -208,7 +224,8 @@ class Xml {
 	/**
 		Creates a node of the given type.
 	**/
-	static public function createComment(data:String):Xml {
+	static public function createComment(data:String):Xml
+	{
 		var xml = new Xml(Comment);
 		xml.nodeValue = data;
 		return xml;
@@ -217,7 +234,8 @@ class Xml {
 	/**
 		Creates a node of the given type.
 	**/
-	static public function createDocType(data:String):Xml {
+	static public function createDocType(data:String):Xml
+	{
 		var xml = new Xml(DocType);
 		xml.nodeValue = data;
 		return xml;
@@ -226,7 +244,8 @@ class Xml {
 	/**
 		Creates a node of the given type.
 	**/
-	static public function createProcessingInstruction(data:String):Xml {
+	static public function createProcessingInstruction(data:String):Xml
+	{
 		var xml = new Xml(ProcessingInstruction);
 		xml.nodeValue = data;
 		return xml;
@@ -235,7 +254,8 @@ class Xml {
 	/**
 		Creates a node of the given type.
 	**/
-	static public function createDocument():Xml {
+	static public function createDocument():Xml
+	{
 		return new Xml(Document);
 	}
 
@@ -243,8 +263,10 @@ class Xml {
 		Get the given attribute of an Element node. Returns `null` if not found.
 		Attributes are case-sensitive.
 	**/
-	public function get(att:String):String {
-		if (nodeType != Element) {
+	public function get(att:String):String
+	{
+		if (nodeType != Element)
+		{
 			throw 'Bad node type, expected Element but found $nodeType';
 		}
 		return attributeMap[att];
@@ -254,8 +276,10 @@ class Xml {
 		Set the given attribute value for an Element node.
 		Attributes are case-sensitive.
 	**/
-	public function set(att:String, value:String):Void {
-		if (nodeType != Element) {
+	public function set(att:String, value:String):Void
+	{
+		if (nodeType != Element)
+		{
 			throw 'Bad node type, expected Element but found $nodeType';
 		}
 		attributeMap.set(att, value);
@@ -265,8 +289,10 @@ class Xml {
 		Removes an attribute for an Element node.
 		Attributes are case-sensitive.
 	**/
-	public function remove(att:String):Void {
-		if (nodeType != Element) {
+	public function remove(att:String):Void
+	{
+		if (nodeType != Element)
+		{
 			throw 'Bad node type, expected Element but found $nodeType';
 		}
 		attributeMap.remove(att);
@@ -276,8 +302,10 @@ class Xml {
 		Tells if the Element node has a given attribute.
 		Attributes are case-sensitive.
 	**/
-	public function exists(att:String):Bool {
-		if (nodeType != Element) {
+	public function exists(att:String):Bool
+	{
+		if (nodeType != Element)
+		{
 			throw 'Bad node type, expected Element but found $nodeType';
 		}
 		return attributeMap.exists(att);
@@ -286,8 +314,10 @@ class Xml {
 	/**
 		Returns an `Iterator` on all the attribute names.
 	**/
-	public function attributes():Iterator<String> {
-		if (nodeType != Element) {
+	public function attributes():Iterator<String>
+	{
+		if (nodeType != Element)
+		{
 			throw 'Bad node type, expected Element but found $nodeType';
 		}
 		return attributeMap.keys();
@@ -297,7 +327,8 @@ class Xml {
 		Returns an iterator of all child nodes.
 		Only works if the current node is an Element or a Document.
 	**/
-	public #if !cppia inline #end function iterator():Iterator<Xml> {
+	public #if !cppia inline #end function iterator():Iterator<Xml>
+	{
 		ensureElementType();
 		return children.iterator();
 	}
@@ -306,7 +337,8 @@ class Xml {
 		Returns an iterator of all child nodes which are Elements.
 		Only works if the current node is an Element or a Document.
 	**/
-	public function elements():Iterator<Xml> {
+	public function elements():Iterator<Xml>
+	{
 		ensureElementType();
 		var ret = [for (child in children) if (child.nodeType == Element) child];
 		return ret.iterator();
@@ -316,7 +348,8 @@ class Xml {
 		Returns an iterator of all child nodes which are Elements with the given nodeName.
 		Only works if the current node is an Element or a Document.
 	**/
-	public function elementsNamed(name:String):Iterator<Xml> {
+	public function elementsNamed(name:String):Iterator<Xml>
+	{
 		ensureElementType();
 		var ret = [
 			for (child in children)
@@ -328,7 +361,8 @@ class Xml {
 	/**
 		Returns the first child node.
 	**/
-	public #if !cppia inline #end function firstChild():Xml {
+	public #if !cppia inline #end function firstChild():Xml
+	{
 		ensureElementType();
 		return children[0];
 	}
@@ -336,10 +370,13 @@ class Xml {
 	/**
 		Returns the first child node which is an Element.
 	**/
-	public function firstElement():Xml {
+	public function firstElement():Xml
+	{
 		ensureElementType();
-		for (child in children) {
-			if (child.nodeType == Element) {
+		for (child in children)
+		{
+			if (child.nodeType == Element)
+			{
 				return child;
 			}
 		}
@@ -352,9 +389,11 @@ class Xml {
 		If the child is already inside this Document or Element, it will be moved to the last position among the Document or Element's children.
 		If the child node was previously inside a different node, it will be moved to this Document or Element.
 	**/
-	public function addChild(x:Xml):Void {
+	public function addChild(x:Xml):Void
+	{
 		ensureElementType();
-		if (x.parent != null) {
+		if (x.parent != null)
+		{
 			x.parent.removeChild(x);
 		}
 		children.push(x);
@@ -365,9 +404,11 @@ class Xml {
 		Removes a child from the Document or Element.
 		Returns true if the child was successfully removed.
 	**/
-	public function removeChild(x:Xml):Bool {
+	public function removeChild(x:Xml):Bool
+	{
 		ensureElementType();
-		if (children.remove(x)) {
+		if (children.remove(x))
+		{
 			x.parent = null;
 			return true;
 		}
@@ -380,9 +421,11 @@ class Xml {
 		If the child is already inside this Document or Element, it will be moved to the new position among the Document or Element's children.
 		If the child node was previously inside a different node, it will be moved to this Document or Element.
 	**/
-	public function insertChild(x:Xml, pos:Int):Void {
+	public function insertChild(x:Xml, pos:Int):Void
+	{
 		ensureElementType();
-		if (x.parent != null) {
+		if (x.parent != null)
+		{
 			x.parent.children.remove(x);
 		}
 		children.insert(pos, x);
@@ -392,18 +435,22 @@ class Xml {
 	/**
 		Returns a String representation of the Xml node.
 	**/
-	public #if !cppia inline #end function toString():String {
+	public #if !cppia inline #end function toString():String
+	{
 		return haxe.xml.Printer.print(this);
 	}
 
-	function new(nodeType:XmlType) {
+	function new(nodeType:XmlType)
+	{
 		this.nodeType = nodeType;
 		children = [];
 		attributeMap = new Map();
 	}
 
-	inline function ensureElementType() {
-		if (nodeType != Document && nodeType != Element) {
+	inline function ensureElementType()
+	{
+		if (nodeType != Document && nodeType != Element)
+		{
 			throw 'Bad node type, expected Element or Document but found $nodeType';
 		}
 	}

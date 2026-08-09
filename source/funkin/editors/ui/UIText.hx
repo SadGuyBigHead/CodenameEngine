@@ -3,14 +3,18 @@ package funkin.editors.ui;
 import flixel.util.FlxColor;
 import funkin.backend.FunkinText;
 
-class UIText extends FunkinText {
+class UIText extends FunkinText
+{
 	public var optimized:Bool = false;
+
 	// PUTTING THIS HERE IN CASE IMMA MAKE FUTURE CHANGES
-	public function new(x, y, w, text, size:Int = 15, color:FlxColor = 0xFFFFFFFF, ?outline:Bool = true) {
+	public function new(x, y, w, text, size:Int = 15, color:FlxColor = 0xFFFFFFFF, ?outline:Bool = true)
+	{
 		super(x, y, w, text, size, false);
 		this.color = color;
 
-		if (outline) {
+		if (outline)
+		{
 			this.borderStyle = OUTLINE_FAST;
 			this.borderColor = 0x88000000;
 			this.borderSize = 1;
@@ -22,8 +26,10 @@ class UIText extends FunkinText {
 		// this.textField.sharpness = 400;
 	}
 
-	public override function applyBorderStyle() {
-		if (borderStyle == OUTLINE_FAST && optimized) {
+	public override function applyBorderStyle()
+	{
+		if (borderStyle == OUTLINE_FAST && optimized)
+		{
 			var iterations:Int = Std.int(borderSize * borderQuality);
 			if (iterations <= 0)
 			{

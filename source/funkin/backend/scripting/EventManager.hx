@@ -3,13 +3,16 @@ package funkin.backend.scripting;
 import flixel.FlxState;
 import funkin.backend.scripting.events.*;
 
-final class EventManager {
+final class EventManager
+{
 	#if cpp
 	public static var eventCache:haxe.ds.ObjectMap<Dynamic, CancellableEvent> = new haxe.ds.ObjectMap();
 
-	public static inline function get<T:CancellableEvent>(cl:Class<T>):T {
+	public static inline function get<T:CancellableEvent>(cl:Class<T>):T
+	{
 		var event:CancellableEvent = eventCache.get(cl);
-		if (event == null) {
+		if (event == null)
+		{
 			event = Type.createInstance(cl, []);
 			eventCache.set(cl, event);
 		}
@@ -18,10 +21,12 @@ final class EventManager {
 	#else
 	public static var eventCache:Map<String, CancellableEvent> = [];
 
-	public static inline function get<T:CancellableEvent>(cl:Class<T>):T {
+	public static inline function get<T:CancellableEvent>(cl:Class<T>):T
+	{
 		var className = Type.getClassName(cl);
 		var event = eventCache.get(className);
-		if (event == null) {
+		if (event == null)
+		{
 			event = Type.createInstance(cl, []);
 			eventCache.set(className, event);
 		}
@@ -29,18 +34,21 @@ final class EventManager {
 	}
 	#end
 
-	public static function reset() {
+	public static function reset()
+	{
 		#if cpp
 		eventCache = new haxe.ds.ObjectMap();
 		#else
-		for (event in eventCache) {
+		for (event in eventCache)
+		{
 			event.destroy();
 		}
 		eventCache = [];
 		#end
 	}
 
-	public static function init() {
+	public static function init()
+	{
 		FlxG.signals.preStateCreate.add(onStateSwitch);
 	}
 

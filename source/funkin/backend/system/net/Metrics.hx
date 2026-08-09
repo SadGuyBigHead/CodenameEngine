@@ -2,7 +2,8 @@ package funkin.backend.system.net;
 
 import flixel.util.FlxSignal.FlxTypedSignal;
 
-class Metrics {
+class Metrics
+{
 	public var bytesSent:Int = 0;
 	public var bytesReceived:Int = 0;
 
@@ -14,10 +15,14 @@ class Metrics {
 	public var onBytesSent:FlxTypedSignal<Int->Void> = new FlxTypedSignal<Int->Void>();
 	public var onBytesReceived:FlxTypedSignal<Int->Void> = new FlxTypedSignal<Int->Void>();
 
-	public function new() { }
+	public function new()
+	{
+	}
 
-	public function updateBytesSent(amount:Int) {
-		if (!IS_LOGGING) return;
+	public function updateBytesSent(amount:Int)
+	{
+		if (!IS_LOGGING)
+			return;
 
 		bytesSent += amount;
 		packetsSent++;
@@ -25,8 +30,10 @@ class Metrics {
 		onBytesSent.dispatch(amount);
 	}
 
-	public function updateBytesReceived(amount:Int) {
-		if (!IS_LOGGING) return;
+	public function updateBytesReceived(amount:Int)
+	{
+		if (!IS_LOGGING)
+			return;
 
 		bytesReceived += amount;
 		packetsReceived++;
@@ -34,7 +41,8 @@ class Metrics {
 		onBytesReceived.dispatch(amount);
 	}
 
-	public function toString():String {
+	public function toString():String
+	{
 		return '(Metrics) $bytesSent bytes sent | $bytesReceived bytes received | $packetsSent packets sent | $packetsReceived packets received';
 	}
 }

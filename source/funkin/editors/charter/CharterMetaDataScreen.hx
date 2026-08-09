@@ -7,7 +7,8 @@ import funkin.game.HealthIcon;
 
 using StringTools;
 
-class CharterMetaDataScreen extends UISubstateWindow {
+class CharterMetaDataScreen extends UISubstateWindow
+{
 	public var metadata:ChartMetaData;
 	public var saveButton:UIButton;
 	public var closeButton:UIButton;
@@ -27,7 +28,8 @@ class CharterMetaDataScreen extends UISubstateWindow {
 	public var colorWheel:UIColorwheel;
 	public var difficultiesTextBox:UITextBox;
 
-	public function new(metadata:ChartMetaData) {
+	public function new(metadata:ChartMetaData)
+	{
 		super();
 		this.metadata = metadata;
 	}
@@ -35,7 +37,8 @@ class CharterMetaDataScreen extends UISubstateWindow {
 	inline function translate(id:String):String
 		return TU.translate("charterMetaDataScreen." + id);
 
-	public override function create() {
+	public override function create()
+	{
 		winTitle = translate("title");
 		winWidth = 1056;
 		winHeight = 520;
@@ -44,7 +47,8 @@ class CharterMetaDataScreen extends UISubstateWindow {
 
 		FlxG.sound.music.pause();
 		Charter.instance.vocals.pause();
-		for (strumLine in Charter.instance.strumLines.members) strumLine.vocals.pause();
+		for (strumLine in Charter.instance.strumLines.members)
+			strumLine.vocals.pause();
 
 		function addLabelOn(ui:UISprite, text:String)
 			add(new UIText(ui.x, ui.y - 24, 0, text));
@@ -66,7 +70,8 @@ class CharterMetaDataScreen extends UISubstateWindow {
 
 		add(new UIText(beatsPerMeasureStepper.x + 30, beatsPerMeasureStepper.y + 3, 0, "/", 22));
 
-		denominatorStepper = new UINumericStepper(beatsPerMeasureStepper.x + 30 + 24, beatsPerMeasureStepper.y, Math.floor(16 / metadata.stepsPerBeat), 1, 0, 1, null, 54);
+		denominatorStepper = new UINumericStepper(beatsPerMeasureStepper.x + 30 + 24, beatsPerMeasureStepper.y, Math.floor(16 / metadata.stepsPerBeat), 1, 0,
+			1, null, 54);
 		add(denominatorStepper);
 
 		needsVoicesCheckbox = new UICheckbox(beatsPerMeasureStepper.x + 100, beatsPerMeasureStepper.y + 6, translate("needsVoices"), metadata.needsVoices);
@@ -79,7 +84,10 @@ class CharterMetaDataScreen extends UISubstateWindow {
 		addLabelOn(displayNameTextBox, translate("displayName"));
 
 		iconTextBox = new UITextBox(displayNameTextBox.x + 320 + 26, displayNameTextBox.y, metadata.icon, 150);
-		iconTextBox.onChange = (newIcon:String) -> {updateIcon(newIcon);}
+		iconTextBox.onChange = (newIcon:String) ->
+		{
+			updateIcon(newIcon);
+		}
 		add(iconTextBox);
 		addLabelOn(iconTextBox, translate("icon"));
 
@@ -100,10 +108,12 @@ class CharterMetaDataScreen extends UISubstateWindow {
 		add(difficultiesTextBox);
 		addLabelOn(difficultiesTextBox, translate("difficulties"));
 
-		customPropertiesButtonList = new UIButtonList<PropertyButton>(denominatorStepper.x + 80 + 26 + 105, songNameTextBox.y, 290, 316, '', FlxPoint.get(280, 35), null, 5);
+		customPropertiesButtonList = new UIButtonList<PropertyButton>(denominatorStepper.x + 80 + 26 + 105, songNameTextBox.y, 290, 316, '',
+			FlxPoint.get(280, 35), null, 5);
 		customPropertiesButtonList.frames = Paths.getFrames('editors/ui/inputbox');
 		customPropertiesButtonList.cameraSpacing = 0;
-		customPropertiesButtonList.addButton.callback = function() {
+		customPropertiesButtonList.addButton.callback = function()
+		{
 			customPropertiesButtonList.add(new PropertyButton("newProperty", "valueHere", customPropertiesButtonList));
 		}
 		for (val in Reflect.fields(metadata.customValues))
@@ -112,27 +122,34 @@ class CharterMetaDataScreen extends UISubstateWindow {
 		addLabelOn(customPropertiesButtonList, translate("customValues"));
 
 		for (checkbox in [opponentModeCheckbox, coopAllowedCheckbox])
-			{checkbox.y += 6; checkbox.x += 4;}
+		{
+			checkbox.y += 6;
+			checkbox.x += 4;
+		}
 
-		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20, windowSpr.y + windowSpr.bHeight - 20, TU.translate("editor.saveClose"), function() {
+		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20, windowSpr.y + windowSpr.bHeight - 20, TU.translate("editor.saveClose"), function()
+		{
 			saveMeta();
 			close();
 		}, 125);
 		saveButton.x -= saveButton.bWidth;
 		saveButton.y -= saveButton.bHeight;
 
-		closeButton = new UIButton(saveButton.x - 20, saveButton.y, TU.translate("editor.close"), function() {
+		closeButton = new UIButton(saveButton.x - 20, saveButton.y, TU.translate("editor.close"), function()
+		{
 			close();
 		}, 125);
 		closeButton.color = 0xFFFF0000;
 		closeButton.x -= closeButton.bWidth;
-		//closeButton.y -= closeButton.bHeight;
+		// closeButton.y -= closeButton.bHeight;
 		add(closeButton);
 		add(saveButton);
 	}
 
-	function updateIcon(icon:String) {
-		if (iconSprite == null) add(iconSprite = new HealthIcon());
+	function updateIcon(icon:String)
+	{
+		if (iconSprite == null)
+			add(iconSprite = new HealthIcon());
 
 		iconSprite.setIcon(icon);
 		var size = Std.int(150 * 0.5);
@@ -142,17 +159,21 @@ class CharterMetaDataScreen extends UISubstateWindow {
 		iconSprite.scrollFactor.set(1, 1);
 	}
 
-	public function saveMeta() {
+	public function saveMeta()
+	{
 		UIUtil.confirmUISelections(this);
 
 		var customVals = {};
-		for (vals in customPropertiesButtonList.buttons.members) {
+		for (vals in customPropertiesButtonList.buttons.members)
+		{
 			Reflect.setProperty(customVals, vals.propertyText.label.text, vals.valueText.label.text);
 		}
 
 		var meta = PlayState.SONG.meta;
-		if (meta == null) meta = {name: songNameTextBox.label.text};
-		else meta.name = songNameTextBox.label.text;
+		if (meta == null)
+			meta = {name: songNameTextBox.label.text};
+		else
+			meta.name = songNameTextBox.label.text;
 
 		meta.bpm = bpmStepper.value;
 		meta.needsVoices = needsVoicesCheckbox.checked;

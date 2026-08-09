@@ -3,37 +3,44 @@ package funkin.editors;
 import flixel.addons.display.FlxBackdrop;
 import funkin.options.type.OptionType;
 
-class EditorTreeMenu extends funkin.options.TreeMenu {
+class EditorTreeMenu extends funkin.options.TreeMenu
+{
 	public var bg:FlxBackdrop;
 	public var bgType:String = "default";
 	public var bgMovement:FlxPoint = new FlxPoint();
 
-	override function create() {
+	override function create()
+	{
 		super.create();
 		UIState.setResolutionAware();
 		FlxG.camera.fade(0xFF000000, 0.5, true);
 	}
 
-	override function createPost() {
+	override function createPost()
+	{
 		insert(0, bg = new FlxBackdrop());
 		bg.loadGraphic(Paths.image('editors/bgs/${bgType}'));
 		bg.antialiasing = true;
 		setBackgroundRotation(-5);
 		super.createPost();
 
-		if (Paths.assetsTree.hasCompressedLibrary) warnCompressLibrary();
+		if (Paths.assetsTree.hasCompressedLibrary)
+			warnCompressLibrary();
 	}
 
-	public inline function setBackgroundRotation(rotation:Float) {
+	public inline function setBackgroundRotation(rotation:Float)
+	{
 		bg.rotation = rotation;
 		bg.velocity.set(85, 0).degrees = bg.rotation;
 	}
 
-	override function exit() {
+	override function exit()
+	{
 		FlxG.switchState(new funkin.menus.MainMenuState());
 	}
 
-	override function update(elapsed:Float) {
+	override function update(elapsed:Float)
+	{
 		super.update(elapsed);
 
 		bg.colorTransform.redOffset = lerp(bg.colorTransform.redOffset, 0, 0.0625);
@@ -46,10 +53,12 @@ class EditorTreeMenu extends funkin.options.TreeMenu {
 
 	override function menuChanged() @:privateAccess {
 		super.menuChanged();
-		if (previousMenus.length > 0) return; // selected a sub-menu
+		if (previousMenus.length > 0)
+			return; // selected a sub-menu
 
 		var prev = tree[tree.length - 2];
-		if (prev == null || prev.curOption == null || !(prev.curOption is OptionType)) return;
+		if (prev == null || prev.curOption == null || !(prev.curOption is OptionType))
+			return;
 
 		// small flashbang
 		var color = cast(prev.curOption, OptionType).editorFlashColor;
@@ -61,28 +70,33 @@ class EditorTreeMenu extends funkin.options.TreeMenu {
 		bg.colorTransform.blueMultiplier = FlxMath.lerp(1, color.blueFloat, 0.25);
 	}
 
-	private function warnCompressLibrary() {
+	private function warnCompressLibrary()
+	{
 		var warningMessage = "It seems you have libraries loaded that are compressed, and can not have files written to them.\n
 		This is just a friendly reminder that if you're loading a Mod and wish to edit files, you need to uncompress it to be able to use any editors!\n\nCompressed Libraries: ";
 		var compressedList = Paths.assetsTree.libraries.filter(l -> funkin.backend.assets.AssetsLibraryList.getCleanLibrary(l).isCompressed);
-		var modNameList = [for (l in compressedList) {
-			l = funkin.backend.assets.AssetsLibraryList.getCleanLibrary(l);
-			if (l is funkin.backend.assets.IModsAssetLibrary) cast(l, funkin.backend.assets.IModsAssetLibrary).modName;
-		}];
+		var modNameList = [
+			for (l in compressedList)
+			{
+				l = funkin.backend.assets.AssetsLibraryList.getCleanLibrary(l);
+				if (l is funkin.backend.assets.IModsAssetLibrary) cast(l, funkin.backend.assets.IModsAssetLibrary).modName;
+			}
+		];
 		warningMessage += modNameList.join(", ");
-		var zipLibraryWarning = new funkin.editors.ui.UIWarningSubstate("Compressed Library Detected!", warningMessage, [{label: "Ok", color: 0x969533, onClick: (state) -> {} }], false);
+		var zipLibraryWarning = new funkin.editors.ui.UIWarningSubstate("Compressed Library Detected!", warningMessage,
+			[{label: "Ok", color: 0x969533, onClick: (state) -> {}}], false);
 
 		openSubState(zipLibraryWarning);
 	}
-
 }
 
-class EditorTreeMenuScreen extends funkin.options.TreeMenuScreen {
-	public function new(name:String, desc:String, ?prefix:String, ?objects:Array<FlxSprite>,
-		?newButton:String, ?newButtonDesc:String, ?newCallback:Void->Void)
+class EditorTreeMenuScreen extends funkin.options.TreeMenuScreen
+{
+	public function new(name:String, desc:String, ?prefix:String, ?objects:Array<FlxSprite>, ?newButton:String, ?newButtonDesc:String, ?newCallback:Void->Void)
 	{
 		super(name, desc, prefix, objects);
-		if (newCallback != null) {
+		if (newCallback != null)
+		{
 			insert(0, new funkin.options.type.NewOption(getID(newButton), getID(newButtonDesc), newCallback));
 			curSelected = 1;
 		}

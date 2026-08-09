@@ -3,7 +3,8 @@ package funkin.backend.scripting.events.character;
 import funkin.game.Character;
 import haxe.xml.Access;
 
-final class CharacterNodeEvent extends CancellableEvent {
+final class CharacterNodeEvent extends CancellableEvent
+{
 	/**
 	 * The character instance
 	 */

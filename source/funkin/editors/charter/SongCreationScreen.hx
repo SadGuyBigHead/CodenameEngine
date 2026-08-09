@@ -15,7 +15,8 @@ import haxe.Json;
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
 
-typedef SongCreationData = {
+typedef SongCreationData =
+{
 	var meta:ChartMetaData;
 	var instBytes:Bytes;
 	var voicesBytes:Bytes;
@@ -23,8 +24,9 @@ typedef SongCreationData = {
 	@:optional var oppVocals:Bytes;
 }
 
-class SongCreationScreen extends UISubstateWindow {
-	private var onSave:Null<SongCreationData> -> Null<String -> Void> -> Void = null;
+class SongCreationScreen extends UISubstateWindow
+{
+	private var onSave:Null<SongCreationData>->Null<String->Void>->Void = null;
 
 	public var songNameTextBox:UITextBox;
 	public var bpmStepper:UINumericStepper;
@@ -73,9 +75,11 @@ class SongCreationScreen extends UISubstateWindow {
 
 	public var curPage:Int = 0;
 
-	public function new(?onSave:SongCreationData -> Null<String -> Void> -> Void) {
+	public function new(?onSave:SongCreationData->Null<String->Void>->Void)
+	{
 		super();
-		if (onSave != null) this.onSave = onSave;
+		if (onSave != null)
+			this.onSave = onSave;
 	}
 
 	inline function translate(id:String):String
@@ -84,7 +88,8 @@ class SongCreationScreen extends UISubstateWindow {
 	inline function translateMeta(id:String):String
 		return TU.translate("charterMetaDataScreen." + id);
 
-	public override function create() {
+	public override function create()
+	{
 		winTitle = translate("win-title");
 
 		winWidth = 748 - 32 + 40;
@@ -92,7 +97,8 @@ class SongCreationScreen extends UISubstateWindow {
 
 		super.create();
 
-		function addLabelOn(ui:UISprite, text:String):UIText {
+		function addLabelOn(ui:UISprite, text:String):UIText
+		{
 			var label:UIText = new UIText(ui.x, ui.y - 24, 0, text);
 			ui.members.push(label);
 			return label;
@@ -118,19 +124,21 @@ class SongCreationScreen extends UISubstateWindow {
 		denominatorStepper = new UINumericStepper(beatsPerMeasureStepper.x + 30 + 24, beatsPerMeasureStepper.y, 4, 1, 0, 1, null, 54);
 		songDataGroup.add(denominatorStepper);
 
-		instExplorer = new UIFileExplorer(songNameTextBox.x, songNameTextBox.y + 32 + 36, null, null, Flags.SOUND_EXT, function (path, res) {
-			if (path == null || res == null) return;
+		instExplorer = new UIFileExplorer(songNameTextBox.x, songNameTextBox.y + 32 + 36, null, null, Flags.SOUND_EXT, function(path, res)
+		{
+			if (path == null || res == null)
+				return;
 			var audioPlayer:UIAudioPlayer = new UIAudioPlayer(instExplorer.x + 8, instExplorer.y + 8, res);
 			instExplorer.members.push(audioPlayer);
 			instExplorer.uiElement = audioPlayer;
 		});
 		songDataGroup.add(instExplorer);
-		addLabelOn(instExplorer, "").applyMarkup(
-			translate("instAudio"),
-			[new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFAD1212), "$")]);
+		addLabelOn(instExplorer, "").applyMarkup(translate("instAudio"), [new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFAD1212), "$")]);
 
-		voicesExplorer = new UIFileExplorer(instExplorer.x + 320 + 26, instExplorer.y, null, null, Flags.SOUND_EXT, function (path, res) {
-			if (path == null || res == null) return;
+		voicesExplorer = new UIFileExplorer(instExplorer.x + 320 + 26, instExplorer.y, null, null, Flags.SOUND_EXT, function(path, res)
+		{
+			if (path == null || res == null)
+				return;
 			var audioPlayer:UIAudioPlayer = new UIAudioPlayer(voicesExplorer.x + 8, voicesExplorer.y + 8, res);
 			voicesExplorer.members.push(audioPlayer);
 			voicesExplorer.uiElement = audioPlayer;
@@ -138,13 +146,14 @@ class SongCreationScreen extends UISubstateWindow {
 		songDataGroup.add(voicesExplorer);
 
 		/*voicesUIText = addLabelOn(voicesExplorer, "");
-		voicesUIText.applyMarkup(
-			translate("voicesAudio"),
-			[new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFAD1212), "$")]);*/
+			voicesUIText.applyMarkup(
+				translate("voicesAudio"),
+				[new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFAD1212), "$")]); */
 
 		addLabelOn(voicesExplorer, translate("voicesAudio"));
 
-		importFrom = new UIButton(windowSpr.x + 20, windowSpr.y + windowSpr.bHeight - 16 - 32, translate("importFrom"), function() {
+		importFrom = new UIButton(windowSpr.x + 20, windowSpr.y + windowSpr.bHeight - 16 - 32, translate("importFrom"), function()
+		{
 			winTitle = translate("win-title-importing");
 			isImporting = true;
 			updatePagesTexts();
@@ -160,7 +169,10 @@ class SongCreationScreen extends UISubstateWindow {
 		addLabelOn(displayNameTextBox, translateMeta("displayName"));
 
 		iconTextBox = new UITextBox(displayNameTextBox.x + 320 + 26, displayNameTextBox.y, "face", 150);
-		iconTextBox.onChange = (newIcon:String) -> {updateIcon(newIcon);}
+		iconTextBox.onChange = (newIcon:String) ->
+		{
+			updateIcon(newIcon);
+		}
 		menuDataGroup.add(iconTextBox);
 		addLabelOn(iconTextBox, translateMeta("icon"));
 
@@ -182,16 +194,21 @@ class SongCreationScreen extends UISubstateWindow {
 		addLabelOn(difficultiesTextBox, translateMeta("difficulties"));
 
 		for (checkbox in [opponentModeCheckbox, coopAllowedCheckbox])
-			{checkbox.y += 6; checkbox.x += 4;}
+		{
+			checkbox.y += 6;
+			checkbox.x += 4;
+		}
 
 		var menuTitle:UIText;
 		selectFormatGroup.add(menuTitle = new UIText(windowSpr.x + 20, windowSpr.y + 30 + 16, 0, translate("importSource"), 28));
 
-		engineDropdown = new UIDropDown(menuTitle.x, menuTitle.y + menuTitle.height + 36, 480, 32, [translate("legacyOrPsych"), translate("vslice"), translate("vsliceProject")]);
+		engineDropdown = new UIDropDown(menuTitle.x, menuTitle.y + menuTitle.height + 36, 480, 32,
+			[translate("legacyOrPsych"), translate("vslice"), translate("vsliceProject")]);
 		selectFormatGroup.add(engineDropdown);
 		addLabelOn(engineDropdown, translate("importChartFormat"));
 
-		createSong = new UIButton(windowSpr.x + 20, windowSpr.y + windowSpr.bHeight - 16 - 32, "< " + translate("back"), function() {
+		createSong = new UIButton(windowSpr.x + 20, windowSpr.y + windowSpr.bHeight - 16 - 32, "< " + translate("back"), function()
+		{
 			winTitle = translate("win-title");
 			isImporting = false;
 			updatePagesTexts();
@@ -202,19 +219,21 @@ class SongCreationScreen extends UISubstateWindow {
 		var menuTitle:UIText;
 		importAudioGroup.add(menuTitle = new UIText(windowSpr.x + 20, windowSpr.y + 30 + 16, 0, translate("importAudios"), 28));
 
-		importInstExplorer = new UIFileExplorer(menuTitle.x, menuTitle.y + menuTitle.height + 36, null, null, Flags.SOUND_EXT, function (path, res) {
-			if (path == null || res == null) return;
+		importInstExplorer = new UIFileExplorer(menuTitle.x, menuTitle.y + menuTitle.height + 36, null, null, Flags.SOUND_EXT, function(path, res)
+		{
+			if (path == null || res == null)
+				return;
 			var audioPlayer:UIAudioPlayer = new UIAudioPlayer(importInstExplorer.x + 8, importInstExplorer.y + 8, res);
 			importInstExplorer.members.push(audioPlayer);
 			importInstExplorer.uiElement = audioPlayer;
 		});
 		importAudioGroup.add(importInstExplorer);
-		addLabelOn(importInstExplorer, "").applyMarkup(
-			translate("instAudio"),
-			[new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFAD1212), "$")]);
+		addLabelOn(importInstExplorer, "").applyMarkup(translate("instAudio"), [new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFAD1212), "$")]);
 
-		importVoicesExplorer = new UIFileExplorer(importInstExplorer.x + 320 + 26, importInstExplorer.y, null, null, Flags.SOUND_EXT, function (path, res) {
-			if (path == null || res == null) return;
+		importVoicesExplorer = new UIFileExplorer(importInstExplorer.x + 320 + 26, importInstExplorer.y, null, null, Flags.SOUND_EXT, function(path, res)
+		{
+			if (path == null || res == null)
+				return;
 			var audioPlayer:UIAudioPlayer = new UIAudioPlayer(importVoicesExplorer.x + 8, importVoicesExplorer.y + 8, res);
 			importVoicesExplorer.members.push(audioPlayer);
 			importVoicesExplorer.uiElement = audioPlayer;
@@ -226,37 +245,39 @@ class SongCreationScreen extends UISubstateWindow {
 		importDataGroup.add(menuTitle = new UIText(windowSpr.x + 20, windowSpr.y + 30 + 16, 0, "Add Data", 28));
 
 		importDataGroup.add(importIdTextBox = new UITextBox(menuTitle.x, menuTitle.y + menuTitle.height + 36));
-		addLabelOn(importIdTextBox, "").applyMarkup(
-			translate("songFileName"),
-			[new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFAD1212), "$")]);
+		addLabelOn(importIdTextBox, "").applyMarkup(translate("songFileName"), [new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFAD1212), "$")]);
 
-		importChartFile = new UIFileExplorer(importIdTextBox.x, importIdTextBox.y + importIdTextBox.height + 56, null, null, "fnfc", function (_, _) importIdTextBox.label.text = new haxe.io.Path(importChartFile.filePath).file);
+		importChartFile = new UIFileExplorer(importIdTextBox.x, importIdTextBox.y + importIdTextBox.height + 56, null, null, "fnfc",
+			function(_, _) importIdTextBox.label.text = new haxe.io.Path(importChartFile.filePath).file);
 		importDataGroup.add(importChartFile);
-		addLabelOn(importChartFile, "").applyMarkup(
-			translate("songDataFile"),
-			[new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFAD1212), "$")]);
+		addLabelOn(importChartFile, "").applyMarkup(translate("songDataFile"), [new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFAD1212), "$")]);
 
 		importMetaFile = new UIFileExplorer(importChartFile.x + 320 + 26, importChartFile.y, null, null, "json");
 		importDataGroup.add(importMetaFile);
-		addLabelOn(importMetaFile, "").applyMarkup(
-			translate("songMetaFile"),
-			[new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFAD1212), "$")]);
+		addLabelOn(importMetaFile, "").applyMarkup(translate("songMetaFile"), [new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFAD1212), "$")]);
 
-		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20 - 125, windowSpr.y + windowSpr.bHeight - 16 - 32, TU.translate("editor.saveClose"), function() {
-			var pages = isImporting ? importPages : pages;
-			if (curPage == pages.length-1) {
-				saveSongInfo();
-				if (subState == null) close();
-			} else {
-				curPage++;
-				refreshPages();
-			}
+		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20 - 125, windowSpr.y + windowSpr.bHeight - 16 - 32, TU.translate("editor.saveClose"),
+			function()
+			{
+				var pages = isImporting ? importPages : pages;
+				if (curPage == pages.length - 1)
+				{
+					saveSongInfo();
+					if (subState == null)
+						close();
+				}
+				else
+				{
+					curPage++;
+					refreshPages();
+				}
 
-			updatePagesTexts();
-		}, 125);
+				updatePagesTexts();
+			}, 125);
 		add(saveButton);
 
-		backButton = new UIButton(saveButton.x - 20 - saveButton.bWidth, saveButton.y, "< " + translate("back"), function() {
+		backButton = new UIButton(saveButton.x - 20 - saveButton.bWidth, saveButton.y, "< " + translate("back"), function()
+		{
 			curPage--;
 			refreshPages();
 
@@ -264,7 +285,8 @@ class SongCreationScreen extends UISubstateWindow {
 		}, 125);
 		add(backButton);
 
-		closeButton = new UIButton(backButton.x - 20 - saveButton.bWidth, saveButton.y, TU.translate("editor.close"), function() {
+		closeButton = new UIButton(backButton.x - 20 - saveButton.bWidth, saveButton.y, TU.translate("editor.close"), function()
+		{
 			close();
 		}, 125);
 		add(closeButton);
@@ -289,23 +311,32 @@ class SongCreationScreen extends UISubstateWindow {
 		updatePagesTexts();
 	}
 
-	public override function update(elapsed:Float) {
+	public override function update(elapsed:Float)
+	{
 		if (isImporting)
 		{
 			var name = engineDropdown.options[engineDropdown.index];
 			var project = name == translate("vsliceProject");
 
-			if (curPage == 1) {
+			if (curPage == 1)
+			{
 				importInstExplorer.selectable = importVoicesExplorer.selectable = !project;
 				saveButton.selectable = #if TEST_BUILD true #else project ? true : (importInstExplorer.file != null) #end;
-			} else if (curPage == 2) {
+			}
+			else if (curPage == 2)
+			{
 				importIdTextBox.selectable = !project;
 				importChartFile.fileType = project ? "fnfc" : "json";
 				importMetaFile.selectable = name == translate("vslice");
-				saveButton.selectable = importChartFile.file != null && (!importMetaFile.selectable || importMetaFile.file != null) && (!importIdTextBox.selectable || importIdTextBox.label.text.trim().length > 0);
-			} else
+				saveButton.selectable = importChartFile.file != null
+					&& (!importMetaFile.selectable || importMetaFile.file != null)
+					&& (!importIdTextBox.selectable || importIdTextBox.label.text.trim().length > 0);
+			}
+			else
 				saveButton.selectable = true;
-		} else {
+		}
+		else
+		{
 			if (curPage == 0)
 				saveButton.selectable = (instExplorer.file != null);
 			else
@@ -316,15 +347,17 @@ class SongCreationScreen extends UISubstateWindow {
 		super.update(elapsed);
 	}
 
-	function refreshPages() {
-		for (i=>page in pages)
+	function refreshPages()
+	{
+		for (i => page in pages)
 			page.visible = page.exists = i == curPage && !isImporting;
 
-		for (i=>page in importPages)
+		for (i => page in importPages)
 			page.visible = page.exists = i == curPage && isImporting;
 	}
 
-	function updatePagesTexts() {
+	function updatePagesTexts()
+	{
 		var pageSizes = isImporting ? importPageSizes : pageSizes;
 		var pages = isImporting ? importPages : pages;
 		windowSpr.bWidth = Std.int(pageSizes[curPage].x);
@@ -333,8 +366,8 @@ class SongCreationScreen extends UISubstateWindow {
 		titleSpr.x = windowSpr.x + 25;
 		titleSpr.y = windowSpr.y + ((30 - titleSpr.height) / 2);
 
-		saveButton.field.text = curPage == pages.length-1 ? TU.translate("editor.saveClose") : translate("next") + ' >';
-		titleSpr.text = '$winTitle (${curPage+1}/${pages.length})';
+		saveButton.field.text = curPage == pages.length - 1 ? TU.translate("editor.saveClose") : translate("next") + ' >';
+		titleSpr.text = '$winTitle (${curPage + 1}/${pages.length})';
 
 		backButton.field.text = '< ' + translate("back");
 		backButton.visible = backButton.exists = curPage > 0;
@@ -346,8 +379,10 @@ class SongCreationScreen extends UISubstateWindow {
 			button.y = windowSpr.y + windowSpr.bHeight - 16 - 32;
 	}
 
-	function updateIcon(icon:String) {
-		if (iconSprite == null) menuDataGroup.add(iconSprite = new HealthIcon());
+	function updateIcon(icon:String)
+	{
+		if (iconSprite == null)
+			menuDataGroup.add(iconSprite = new HealthIcon());
 
 		iconSprite.setIcon(icon);
 		var size = Std.int(150 * 0.5);
@@ -364,64 +399,75 @@ class SongCreationScreen extends UISubstateWindow {
 	function getChartSavePath(meta:ChartMetaData, diff:String):String
 		return 'charts/${meta.variant != null && meta.variant != "" ? meta.variant + "/" : ""}$diff.json';
 
-	function saveSongInfo() {
+	function saveSongInfo()
+	{
 		if (isImporting)
 		{
-			try switch(engineDropdown.index)
+			try
+				switch (engineDropdown.index)
+				{
+					case 2 /*"V-Slice Project (.fnfc)"*/:
+						var files:Map<String, Any> = [];
+						for (field in new ZipReader(new BytesInput(importChartFile.file)).read())
+						{
+							var fileName = field.fileName;
+							var fileContent = ZipUtil.unzip(field);
+							files.set(fileName, fileContent);
+						}
+						saveFromVSlice(files);
+					case 1 /*"V-Slice"*/:
+						var songId = importIdTextBox.label.text;
+						var files:Map<String, Any> = [];
+						files.set('${songId}-metadata.json', importMetaFile.file);
+						files.set('${songId}-chart.json', importChartFile.file);
+						files.set('Inst.${Flags.SOUND_EXT}', importInstExplorer.file);
+						files.set('Voices.${Flags.SOUND_EXT}', importVoicesExplorer.file);
+						saveFromVSlice(files, songId);
+					default /*"Psych/Legacy FNF"*/:
+						var songId = importIdTextBox.label.text;
+						var oldChart:
+						SwagSong = Chart.cleanSongData(Json.parse(cast importChartFile.file));
+						var base:ChartData = {
+							strumLines: [],
+							noteTypes: [],
+							events: [],
+							meta: {name: songId},
+							scrollSpeed: Flags.DEFAULT_SCROLL_SPEED,
+							stage: Flags.DEFAULT_STAGE,
+							codenameChart: true
+						};
+						PsychParser.parse(oldChart, base);
+						var meta = formatMeta({
+							name: songId,
+							difficulties: ['normal'],
+							bpm: oldChart.bpm,
+							beatsPerMeasure: oldChart.beatsPerMeasure,
+							stepsPerBeat: oldChart.stepsPerBeat,
+							displayName: oldChart.song
+						});
+						if (onSave != null)
+							onSave({
+								meta: meta,
+								instBytes: importInstExplorer.file,
+								voicesBytes: importVoicesExplorer.file,
+							}, (songFolder:String) -> {
+								#if sys
+								CoolUtil.safeSaveFile('$songFolder/${getChartSavePath(meta, "normal")}', Json.stringify(base, Flags.JSON_PRETTY_PRINT));
+								#end
+							});
+				}
+			catch (e:haxe.Exception)
 			{
-				case 2 /*"V-Slice Project (.fnfc)"*/:
-					var files:Map<String, Any> = [];
-					for (field in new ZipReader(new BytesInput(importChartFile.file)).read()) {
-						var fileName = field.fileName;
-						var fileContent = ZipUtil.unzip(field);
-						files.set(fileName, fileContent);
-					}
-					saveFromVSlice(files);
-				case 1 /*"V-Slice"*/:
-					var songId = importIdTextBox.label.text;
-					var files:Map<String, Any> = [];
-					files.set('${songId}-metadata.json', importMetaFile.file);
-					files.set('${songId}-chart.json', importChartFile.file);
-					files.set('Inst.${Flags.SOUND_EXT}', importInstExplorer.file);
-					files.set('Voices.${Flags.SOUND_EXT}', importVoicesExplorer.file);
-					saveFromVSlice(files, songId);
-				default /*"Psych/Legacy FNF"*/:
-					var songId = importIdTextBox.label.text;
-					var oldChart:SwagSong = Chart.cleanSongData(Json.parse(cast importChartFile.file));
-					var base:ChartData = {
-						strumLines: [],
-						noteTypes: [],
-						events: [],
-						meta: {name: songId},
-						scrollSpeed: Flags.DEFAULT_SCROLL_SPEED,
-						stage: Flags.DEFAULT_STAGE,
-						codenameChart: true
-					};
-					PsychParser.parse(oldChart, base);
-					var meta = formatMeta({
-						name: songId,
-						difficulties: ['normal'],
-						bpm: oldChart.bpm,
-						beatsPerMeasure: oldChart.beatsPerMeasure,
-						stepsPerBeat: oldChart.stepsPerBeat,
-						displayName: oldChart.song
-					});
-					if (onSave != null) onSave({
-						meta: meta,
-						instBytes: importInstExplorer.file,
-						voicesBytes: importVoicesExplorer.file,
-					}, (songFolder:String) -> {
-						#if sys
-						CoolUtil.safeSaveFile('$songFolder/${getChartSavePath(meta, "normal")}', Json.stringify(base, Flags.JSON_PRETTY_PRINT));
-						#end
-					});
-			} catch (e:haxe.Exception) {
 				trace(e.stack, e.message);
 				openSubState(new UIWarningSubstate("Importing Song/Charts: Error!", e.details(), [
-					{label: "Ok", color: 0xFFFF0000, onClick: function(t) {}}
+					{label: "Ok", color: 0xFFFF0000, onClick: function(t)
+					{
+					}}
 				]));
 			}
-		} else {
+		}
+		else
+		{
 			for (stepper in [bpmStepper, beatsPerMeasureStepper, denominatorStepper])
 				@:privateAccess stepper.__onChange(stepper.label.text);
 
@@ -435,41 +481,52 @@ class SongCreationScreen extends UISubstateWindow {
 				color: colorWheel.curColor,
 				opponentModeAllowed: opponentModeCheckbox.checked,
 				coopAllowed: coopAllowedCheckbox.checked,
-				difficulties: [for (diff in difficultiesTextBox.label.text.split(",")) if (diff.length > 0) diff.trim()]
+				difficulties: [
+					for (diff in difficultiesTextBox.label.text.split(",")) if (diff.length > 0) diff.trim()
+				]
 			});
 
-			if (onSave != null) onSave({
-				meta: meta,
-				instBytes: instExplorer.file,
-				voicesBytes: voicesExplorer.file
-			}, null);
+			if (onSave != null)
+				onSave({
+					meta: meta,
+					instBytes: instExplorer.file,
+					voicesBytes: voicesExplorer.file
+				}, null);
 		}
 	}
 
-	function saveFromVSlice(files:Map<String, Any>, ?name:String) {
+	function saveFromVSlice(files:Map<String, Any>, ?name:String)
+	{
 		var songId = name == null && files.exists("manifest.json") ? Json.parse(files.get("manifest.json")).songId : name;
 		var vslicemeta:SwagMetadata = Json.parse(files.get('${songId}-metadata.json'));
 		var vslicechart:NewSwagSong = Json.parse(files.get('${songId}-chart.json'));
 		var playData = vslicemeta.playData;
 
 		var meta:ChartMetaData = formatMeta({name: songId, needsVoices: files.get('Voices.${Flags.SOUND_EXT}') != null});
-		var diffCharts:Array<ChartDataWithInfo> = [], events:Array<ChartEvent> = null;
+		var diffCharts:Array<ChartDataWithInfo> = [],
+			events:Array<ChartEvent> = null;
 		VSliceParser.parse(vslicemeta, vslicechart, meta, diffCharts, songId);
 
-		if (diffCharts.length != 0) events = diffCharts[0].chart.events;
-		for (diff in diffCharts) diff.chart.events = [];
+		if (diffCharts.length != 0)
+			events = diffCharts[0].chart.events;
+		for (diff in diffCharts)
+			diff.chart.events = [];
 
-		if (onSave != null) onSave({
-			meta: meta,
-			instBytes: files.get('Inst.${Flags.SOUND_EXT}'),
-			voicesBytes: files.get('Voices.${Flags.SOUND_EXT}'), //it may exist
-			playerVocals: files.get('Voices-${playData.characters.playerVocals != null ? playData.characters.playerVocals[0] : playData.characters.player}.${Flags.SOUND_EXT}'),
-			oppVocals: files.get('Voices-${playData.characters.opponentVocals != null ? playData.characters.opponentVocals[0] : playData.characters.opponent}.${Flags.SOUND_EXT}'),
-		}, (songFolder:String) -> {
-			#if sys
-			for (diff in diffCharts) CoolUtil.safeSaveFile('$songFolder/${getChartSavePath(meta, diff.diffName)}', Json.stringify(diff.chart, Flags.JSON_PRETTY_PRINT));
-			if (events != null) CoolUtil.safeSaveFile('$songFolder/events${meta.variant != null && meta.variant != "" ? "-" + meta.variant : ""}.json', Json.stringify({events: events}, Flags.JSON_PRETTY_PRINT));
-			#end
-		});
+		if (onSave != null)
+			onSave({
+				meta: meta,
+				instBytes: files.get('Inst.${Flags.SOUND_EXT}'),
+				voicesBytes: files.get('Voices.${Flags.SOUND_EXT}'), // it may exist
+				playerVocals: files.get('Voices-${playData.characters.playerVocals != null ? playData.characters.playerVocals[0] : playData.characters.player}.${Flags.SOUND_EXT}'),
+				oppVocals: files.get('Voices-${playData.characters.opponentVocals != null ? playData.characters.opponentVocals[0] : playData.characters.opponent}.${Flags.SOUND_EXT}'),
+			}, (songFolder:String) -> {
+				#if sys
+				for (diff in diffCharts)
+					CoolUtil.safeSaveFile('$songFolder/${getChartSavePath(meta, diff.diffName)}', Json.stringify(diff.chart, Flags.JSON_PRETTY_PRINT));
+				if (events != null)
+					CoolUtil.safeSaveFile('$songFolder/events${meta.variant != null && meta.variant != "" ? "-" + meta.variant : ""}.json',
+						Json.stringify({events: events}, Flags.JSON_PRETTY_PRINT));
+				#end
+			});
 	}
 }

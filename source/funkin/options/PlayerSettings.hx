@@ -5,7 +5,7 @@ import funkin.backend.system.Controls;
 
 // import props.Player;
 // import ui.DeviceManager;
-class  PlayerSettings
+class PlayerSettings
 {
 	static public var numPlayers(default, null) = 0;
 	static public var numAvatars(default, null) = 0;

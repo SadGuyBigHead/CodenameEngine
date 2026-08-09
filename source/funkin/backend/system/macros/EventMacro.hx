@@ -8,34 +8,42 @@ import haxe.macro.Expr;
  * Macro that generates all additional fields, making events much easier to code in.
  * It adds the `recycle` function, which allows you to "reset" an event's values.
  */
-class EventMacro {
-	public static function build():Array<Field> {
+class EventMacro
+{
+	public static function build():Array<Field>
+	{
 		var fields = Context.getBuildFields();
 
 		var curClassRest = Context.getLocalClass();
-		if (curClassRest == null) return fields;
+		if (curClassRest == null)
+			return fields;
 
 		var curClass = curClassRest.get();
-		if (curClass == null || curClass.name == "CancellableEvent") return fields;
+		if (curClass == null || curClass.name == "CancellableEvent")
+			return fields;
 
-		for(f in fields)
+		for (f in fields)
 			if (f.name == "recycle")
 				return fields;
 
 		// gets all fields
 		var values:Array<EventVar> = [];
 		var hiddenValues:Array<EventVar> = [];
-		for(field in fields) {
-			if (field.access.contains(AStatic)) continue;
+		for (field in fields)
+		{
+			if (field.access.contains(AStatic))
+				continue;
 
 			var hidden = false;
 			if (field.meta != null)
-				for(m in field.meta)
+				for (m in field.meta)
 					if (m.name == ":dox")
 						hidden = true;
-			if (!field.access.contains(APublic)) hidden = true;
+			if (!field.access.contains(APublic))
+				hidden = true;
 
-			switch(field.kind) {
+			switch (field.kind)
+			{
 				case FVar(type, expr):
 					(hidden ? hiddenValues : values).push({
 						name: field.name,
@@ -49,12 +57,15 @@ class EventMacro {
 
 		// add recycle option
 		var func:Function = {
-			args: [for(a in values) {
-				value: a.expr,
-				type: a.type,
-				opt: false,
-				name: a.name
-			}],
+			args: [
+				for (a in values)
+					{
+						value: a.expr,
+						type: a.type,
+						opt: false,
+						name: a.name
+					}
+			],
 			expr: {
 				pos: Context.currentPos(),
 				expr: EBlock([])
@@ -70,16 +81,19 @@ class EventMacro {
 
 		fields.push(funcField);
 
-		switch(func.expr.expr) {
+		switch (func.expr.expr)
+		{
 			case EBlock(exprs):
 				// add a "set this" expr for each variable
-				for(v in values) {
+				for (v in values)
+				{
 					var name = v.name;
 					exprs.push(macro this.$name = $i{name});
 				}
 
 				// add a "set this" expr to reset each private/hidden variables
-				for(v in hiddenValues) {
+				for (v in hiddenValues)
+				{
 					var name = v.name;
 					exprs.push(macro this.$name = ${v.expr});
 				}
@@ -94,7 +108,8 @@ class EventMacro {
 	}
 }
 
-typedef EventVar = {
+typedef EventVar =
+{
 	var name:String;
 	var type:ComplexType;
 	var expr:Expr;

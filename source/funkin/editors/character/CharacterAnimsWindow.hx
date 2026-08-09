@@ -14,13 +14,15 @@ import funkin.backend.system.Logs;
 
 using funkin.backend.utils.BitmapUtil;
 
-typedef DisplayAnimFrameEntry = {
+typedef DisplayAnimFrameEntry =
+{
 	scale:Float,
 	frame:FlxFrame,
 	renderTexture:RenderTexture
 }
 
-class CharacterAnimsWindow extends UIButtonList<CharacterAnimButton> {
+class CharacterAnimsWindow extends UIButtonList<CharacterAnimButton>
+{
 	public var character:CharacterGhost;
 
 	public var displayWindowSprite:FlxSprite;
@@ -30,8 +32,9 @@ class CharacterAnimsWindow extends UIButtonList<CharacterAnimButton> {
 	public var animButtons:Map<String, CharacterAnimButton> = [];
 	public var animsList:Array<String> = [];
 
-	public function new(x:Float, y:Float, character:CharacterGhost) {
-		super(x, y, Std.int(500-16), 419, null, FlxPoint.get(Std.int(500-16-32), 208));
+	public function new(x:Float, y:Float, character:CharacterGhost)
+	{
+		super(x, y, Std.int(500 - 16), 419, null, FlxPoint.get(Std.int(500 - 16 - 32), 208));
 		this.character = character;
 
 		cameraSpacing = 0;
@@ -60,18 +63,20 @@ class CharacterAnimsWindow extends UIButtonList<CharacterAnimButton> {
 	}
 
 	public var ghosts:Array<String> = [];
+
 	var __movingAnimOldOrder:Int = -1;
-	public override function update(elapsed:Float) {
+
+	public override function update(elapsed:Float)
+	{
 		var __oldMoving:CharacterAnimButton = curMoving;
 		super.update(elapsed);
 
-		if (curMoving != null && __oldMoving == null) 
+		if (curMoving != null && __oldMoving == null)
 			__movingAnimOldOrder = curMoving.ID;
 
 		if (curMoving == null && __oldMoving != null)
-			if (__movingAnimOldOrder != __oldMoving.ID) 
+			if (__movingAnimOldOrder != __oldMoving.ID)
 				CharacterEditor.undos.addToUndo(CAnimEditOrder(__movingAnimOldOrder, __oldMoving.ID));
-		
 
 		animsList = [for (button in buttons) button.anim];
 		character.ghosts = ghosts;
@@ -79,70 +84,83 @@ class CharacterAnimsWindow extends UIButtonList<CharacterAnimButton> {
 
 	public function buildAnimDisplay(name:String, anim:AnimData) @:privateAccess {
 		var anim:FlxAnimation = character.animation._animations[anim.name];
-		if (anim == null) return;
+		if (anim == null)
+			return;
 
-		if (character.isAnimate) {
+		if (character.isAnimate)
+		{
 			var renderTex = character.generateRenderTextureForAnim(name);
 			var frame = renderTex.graphic.imageFrame.frame;
 
 			displayAnimsFramesList.set(name, {
 				frame: frame,
-				scale: 104/Math.max(frame.frame.width, frame.frame.height),
+				scale: 104 / Math.max(frame.frame.width, frame.frame.height),
 				renderTexture: renderTex
 			});
-		} else {
+		}
+		else
+		{
 			var frameIndex:Int = anim.frames.getDefault([0])[0];
 			var frame:FlxFrame = displayWindowSprite.frames.frames[frameIndex];
-	
+
 			var frameRect:Rectangle = new Rectangle(frame.offset.x, frame.offset.y, frame.sourceSize.x, frame.sourceSize.y);
 			var animBounds:Rectangle = displayWindowGraphic != null ? displayWindowGraphic.bitmap.bounds(frameRect) : frameRect;
-	
+
 			displayAnimsFramesList.set(name, {
 				frame: character.frames.frames[anim.frames.getDefault([0])[0]],
-				scale: 104/Math.max(animBounds.width, animBounds.height),
+				scale: 104 / Math.max(animBounds.width, animBounds.height),
 				renderTexture: null
 			});
 		}
-
 	}
 
-	public function removeAnimDisplay(name:String) {
+	public function removeAnimDisplay(name:String)
+	{
 		if (displayAnimsFramesList.exists(name))
 			displayAnimsFramesList[name].renderTexture?.destroy();
 		displayAnimsFramesList.remove(name);
 	}
 
-	public function clearDisplayAnims() {
-		for(k=>e in displayAnimsFramesList)
+	public function clearDisplayAnims()
+	{
+		for (k => e in displayAnimsFramesList)
 			e.renderTexture?.destroy();
 		displayAnimsFramesList.clear();
 	}
 
-	public function deleteAnimation(button:CharacterAnimButton, addToUndo:Bool = true) {
+	public function deleteAnimation(button:CharacterAnimButton, addToUndo:Bool = true)
+	{
 		UIState.playEditorSound(Flags.DEFAULT_EDITOR_DELETE_SOUND);
-		if (buttons.members.length <= 1) return;
+		if (buttons.members.length <= 1)
+			return;
 		if (character.getAnimName() == button.anim)
 			@:privateAccess CharacterEditor.instance._animation_down(null);
 
 		character.ghosts.remove(button.anim);
 		character.removeAnimation(button.anim);
-		if (character.animOffsets.exists(button.anim)) character.animOffsets.remove(button.anim);
-		if (character.animDatas.exists(button.anim)) character.animDatas.remove(button.anim);
+		if (character.animOffsets.exists(button.anim))
+			character.animOffsets.remove(button.anim);
+		if (character.animDatas.exists(button.anim))
+			character.animDatas.remove(button.anim);
 
-		if (addToUndo) CharacterEditor.undos.addToUndo(CAnimDelete(button.ID, button.data));
-		remove(button); button.destroy();
+		if (addToUndo)
+			CharacterEditor.undos.addToUndo(CAnimDelete(button.ID, button.data));
+		remove(button);
+		button.destroy();
 	}
 
-	public function generateAnimation() {
+	public function generateAnimation()
+	{
 		var newAnim = TU.translate("characterEditor.characterAnim.defaultAnimName");
 		var animName:String = newAnim;
 		var animNames:Array<String> = character.getNameList();
 
 		var newAnimCount:Int = 0;
-		while (animNames.indexOf(animName) != -1) {
-            newAnimCount++;
-            animName = '$newAnim - $newAnimCount';
-        }
+		while (animNames.indexOf(animName) != -1)
+		{
+			newAnimCount++;
+			animName = '$newAnim - $newAnimCount';
+		}
 
 		if (__autoCompleteAnims.length <= 0)
 			setAnimAutoComplete(CoolUtil.getAnimsListFromSprite(character));
@@ -150,8 +168,10 @@ class CharacterAnimsWindow extends UIButtonList<CharacterAnimButton> {
 		var animData:AnimData = {
 			name: animName,
 			anim: __autoCompleteAnims[0],
-			fps: character.defaultAimFPS, loop: false,
-			x: 0, y: 0,
+			fps: character.defaultAimFPS,
+			loop: false,
+			x: 0,
+			y: 0,
 			indices: [],
 			animType: NONE,
 			label: false
@@ -163,11 +183,14 @@ class CharacterAnimsWindow extends UIButtonList<CharacterAnimButton> {
 		XMLUtil.addAnimToSprite(character, animData);
 
 		var newButton:CharacterAnimButton = new CharacterAnimButton(0, 0, animData, this);
-		newButton.alpha = 0.25; animButtons.set(animData.name, newButton);
+		newButton.alpha = 0.25;
+		animButtons.set(animData.name, newButton);
 		newButton.animTextBox.suggestItems = __autoCompleteAnims;
 
-		if (animID == -1) add(newButton);
-		else insert(newButton, animID);
+		if (animID == -1)
+			add(newButton);
+		else
+			insert(newButton, animID);
 
 		if (newButton.valid)
 			buildAnimDisplay(animData.name, animData);
@@ -182,14 +205,19 @@ class CharacterAnimsWindow extends UIButtonList<CharacterAnimButton> {
 	}
 
 	@:noCompletion var __autoCompleteAnims:Array<String> = [];
-	public inline function setAnimAutoComplete(anims:Array<String>) {
+
+	public inline function setAnimAutoComplete(anims:Array<String>)
+	{
 		__autoCompleteAnims = anims.copy();
 		for (button in buttons)
 			button.animTextBox.suggestItems = __autoCompleteAnims;
 	}
 
-	public function findValid():Null<String> {
-		for (button in buttons) if (button.valid) return button.anim;
+	public function findValid():Null<String>
+	{
+		for (button in buttons)
+			if (button.valid)
+				return button.anim;
 		return null;
 	}
 }

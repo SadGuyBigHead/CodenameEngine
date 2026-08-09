@@ -106,10 +106,13 @@ final class HttpUtil
 	 */
 	public static function hasInternet():Bool
 	{
-		try {
+		try
+		{
 			var r = requestText("https://www.google.com/");
 			return true;
-		} catch (e:HttpError) {
+		}
+		catch (e:HttpError)
+		{
 			Logs.trace('[HttpUtil.hasInternet] Failed: ${e.toString()}', WARNING);
 			return false;
 		}
@@ -126,7 +129,11 @@ final class HttpUtil
 		switch (status)
 		{
 			case 301 | 302 | 307 | 308:
-				Logs.traceColored([Logs.logText('[Connection Status] ', BLUE), Logs.logText('Redirected with status code: ', YELLOW), Logs.logText('$status', GREEN)], VERBOSE);
+				Logs.traceColored([
+					Logs.logText('[Connection Status] ', BLUE),
+					Logs.logText('Redirected with status code: ', YELLOW),
+					Logs.logText('$status', GREEN)
+				], VERBOSE);
 				return true;
 		}
 		return false;
@@ -140,10 +147,13 @@ private class HttpError
 {
 	/** The error message. */
 	public var message:String;
+
 	/** The URL that triggered the error. */
 	public var url:String;
+
 	/** The HTTP status code, or `-1` if not applicable. */
 	public var status:Int;
+
 	/** Whether the error occurred during a redirect. */
 	public var redirected:Bool;
 

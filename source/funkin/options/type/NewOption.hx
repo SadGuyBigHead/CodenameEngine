@@ -5,10 +5,12 @@ import flixel.util.FlxColor;
 /**
  * Option type that has a new button, and is green.
 **/
-class NewOption extends TextOption {
+class NewOption extends TextOption
+{
 	public var iconSpr:FlxSprite;
 
-	public function new(name:String, desc:String, callback:Void->Void) {
+	public function new(name:String, desc:String, callback:Void->Void)
+	{
 		super(name, desc, callback);
 		itemHeight = 150;
 

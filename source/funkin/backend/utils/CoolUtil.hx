@@ -47,7 +47,8 @@ final class CoolUtil
 	/**
 	 * Gets the last exception stack. Useful for debugging.
 	 */
-	public static function getLastExceptionStack():String {
+	public static function getLastExceptionStack():String
+	{
 		return CallStack.toString(CallStack.exceptionStack());
 	}
 
@@ -56,7 +57,8 @@ final class CoolUtil
 	 * @param v The value
 	 * @return A bool value
 	 */
-	public static inline function isNotNull(v:Null<Dynamic>):Bool {
+	public static inline function isNotNull(v:Null<Dynamic>):Bool
+	{
 		return v != null && !isNaN(v);
 	}
 
@@ -66,7 +68,8 @@ final class CoolUtil
 	 * @param defaultValue The default value
 	 * @return The return value
 	 */
-	public static inline function getDefault<T>(v:Null<T>, defaultValue:T):T {
+	public static inline function getDefault<T>(v:Null<T>, defaultValue:T):T
+	{
 		return (v == null || isNaN(v)) ? defaultValue : v;
 	}
 
@@ -76,7 +79,8 @@ final class CoolUtil
 	 * @param defaultValue The default value
 	 * @return The return value
 	 */
-	public static inline function getDefaultFloat(v:Float, defaultValue:Float):Float {
+	public static inline function getDefaultFloat(v:Float, defaultValue:Float):Float
+	{
 		return (Math.isNaN(v)) ? defaultValue : v;
 	}
 
@@ -87,7 +91,8 @@ final class CoolUtil
 	 * @param divisor What to modulo by. The right side of the equation.
 	 * @return A positive reminder of `dividend / divisor`.
 	 */
-	public static inline function positiveModulo(dividend:Float, divisor:Float) {
+	public static inline function positiveModulo(dividend:Float, divisor:Float)
+	{
 		return ((dividend % divisor) + divisor) % divisor;
 	}
 
@@ -98,7 +103,8 @@ final class CoolUtil
 	 * @param divisor What to modulo by. The right side of the equation.
 	 * @return A positive reminder of `dividend / divisor`.
 	 */
-	public static inline function positiveModuloInt(dividend:Int, divisor:Int) {
+	public static inline function positiveModuloInt(dividend:Int, divisor:Int)
+	{
 		return ((dividend % divisor) + divisor) % divisor;
 	}
 
@@ -106,7 +112,8 @@ final class CoolUtil
 	 * Shortcut to parse JSON from an Asset path
 	 * @param assetPath Path to the JSON asset.
 	 */
-	public static function parseJson(assetPath:String) {
+	public static function parseJson(assetPath:String)
+	{
 		return Json.parse(Assets.getText(assetPath));
 	}
 
@@ -114,17 +121,25 @@ final class CoolUtil
 	 * Deletes a folder recursively
 	 * @param delete Path to the folder.
 	 */
-	@:noUsing public static function deleteFolder(delete:String) {
+	@:noUsing public static function deleteFolder(delete:String)
+	{
 		#if sys
-		if (!FileSystem.exists(delete)) return;
+		if (!FileSystem.exists(delete))
+			return;
 		var files:Array<String> = FileSystem.readDirectory(delete);
-		for(file in files) {
-			if (FileSystem.isDirectory(delete + "/" + file)) {
+		for (file in files)
+		{
+			if (FileSystem.isDirectory(delete + "/" + file))
+			{
 				deleteFolder(delete + "/" + file);
 				FileSystem.deleteDirectory(delete + "/" + file);
-			} else {
-				try FileSystem.deleteFile(delete + "/" + file)
-				catch(e) Logs.warn("Could not delete " + delete + "/" + file);
+			}
+			else
+			{
+				try
+					FileSystem.deleteFile(delete + "/" + file)
+				catch (e)
+					Logs.warn("Could not delete " + delete + "/" + file);
 			}
 		}
 		#end
@@ -135,16 +150,23 @@ final class CoolUtil
 	 * @param path Path to save the file at.
 	 * @param content Content of the file to save (as String or Bytes).
 	 */
-	@:noUsing public static function safeSaveFile(path:String, content:OneOfTwo<String, Bytes>, showErrorBox:Bool = true) {
+	@:noUsing public static function safeSaveFile(path:String, content:OneOfTwo<String, Bytes>, showErrorBox:Bool = true)
+	{
 		#if sys
-		try {
+		try
+		{
 			addMissingFolders(Path.directory(path));
-			if(content is Bytes) sys.io.File.saveBytes(path, content);
-			else sys.io.File.saveContent(path, content);
-		} catch(e) {
+			if (content is Bytes)
+				sys.io.File.saveBytes(path, content);
+			else
+				sys.io.File.saveContent(path, content);
+		}
+		catch (e)
+		{
 			var errMsg:String = 'Error while trying to save the file: ${Std.string(e).replace('\n', ' ')}';
 			Logs.error(errMsg);
-			if(showErrorBox) funkin.backend.utils.NativeAPI.showMessageBox("Codename Engine Warning", errMsg, MSG_WARNING);
+			if (showErrorBox)
+				funkin.backend.utils.NativeAPI.showMessageBox("Codename Engine Warning", errMsg, MSG_WARNING);
 		}
 		#end
 	}
@@ -156,12 +178,14 @@ final class CoolUtil
 	 * @param useAbsolute If it should use the absolute path (By default it's `true` but if it's `false` you can use files outside from this program's directory for example)
 	 * @return The attributes through the `FileAttributeWrapper`
 	 */
-	@:noUsing public static inline function safeGetAttributes(path:String, useAbsolute:Bool = true):FileAttributeWrapper {
+	@:noUsing public static inline function safeGetAttributes(path:String, useAbsolute:Bool = true):FileAttributeWrapper
+	{
 		#if sys
 		addMissingFolders(Path.directory(path));
 
 		var result = NativeAPI.getFileAttributes(path, useAbsolute);
-		if(result.isNothing) Logs.trace('The file where it has been tried to get the attributes from, might be corrupted or inexistent (code: ${result.getValue()})', WARNING);
+		if (result.isNothing)
+			Logs.trace('The file where it has been tried to get the attributes from, might be corrupted or inexistent (code: ${result.getValue()})', WARNING);
 		return result;
 		#else
 		return new FileAttributeWrapper(0);
@@ -176,13 +200,16 @@ final class CoolUtil
 	 * @param useAbsolute If it should use the absolute path (By default it's `true` but if it's `false` you can use files outside from this program's directory for example)
 	 * @return The result code: `0` means that it failed setting
 	 */
-	@:noUsing public static inline function safeSetAttributes(path:String, attrib:OneOfThree<NativeAPI.FileAttribute, FileAttributeWrapper, Int>, useAbsolute:Bool = true):Int {
+	@:noUsing public static inline function safeSetAttributes(path:String, attrib:OneOfThree<NativeAPI.FileAttribute, FileAttributeWrapper, Int>,
+			useAbsolute:Bool = true):Int
+	{
 		// yes, i'm aware that FileAttribute is also an Int so need to include it too, but at least like this we don't have to make cast sometimes while passing the arguments  - Nex
 		#if sys
 		addMissingFolders(Path.directory(path));
 
 		var result = NativeAPI.setFileAttributes(path, attrib, useAbsolute);
-		if(result == 0) Logs.trace('Failed to set attributes to $path with a code of: $result', WARNING);
+		if (result == 0)
+			Logs.trace('Failed to set attributes to $path with a code of: $result', WARNING);
 		return result;
 		#else
 		return 0;
@@ -197,12 +224,14 @@ final class CoolUtil
 	 * @param useAbsolute If it should use the absolute path (By default it's `true` but if it's `false` you can use files outside from this program's directory for example)
 	 * @return The result code: `0` means that it failed setting
 	 */
-	@:noUsing public static inline function safeAddAttributes(path:String, attrib:OneOfTwo<NativeAPI.FileAttribute, Int>, useAbsolute:Bool = true):Int {
+	@:noUsing public static inline function safeAddAttributes(path:String, attrib:OneOfTwo<NativeAPI.FileAttribute, Int>, useAbsolute:Bool = true):Int
+	{
 		#if sys
 		addMissingFolders(Path.directory(path));
 
 		var result = NativeAPI.addFileAttributes(path, attrib, useAbsolute);
-		if (result == 0) Logs.trace('Failed to add attributes to $path with a code of: $result', WARNING);
+		if (result == 0)
+			Logs.trace('Failed to add attributes to $path with a code of: $result', WARNING);
 		return result;
 		#else
 		return 0;
@@ -217,12 +246,14 @@ final class CoolUtil
 	 * @param useAbsolute If it should use the absolute path (By default it's `true` but if it's `false` you can use files outside from this program's directory for example)
 	 * @return The result code: `0` means that it failed setting
 	 */
-	@:noUsing public static inline function safeRemoveAttributes(path:String, attrib:OneOfTwo<NativeAPI.FileAttribute, Int>, useAbsolute:Bool = true):Int {
+	@:noUsing public static inline function safeRemoveAttributes(path:String, attrib:OneOfTwo<NativeAPI.FileAttribute, Int>, useAbsolute:Bool = true):Int
+	{
 		#if sys
 		addMissingFolders(Path.directory(path));
 
 		var result = NativeAPI.removeFileAttributes(path, attrib, useAbsolute);
-		if(result == 0) Logs.trace('Failed to remove attributes to $path with a code of: $result', WARNING);
+		if (result == 0)
+			Logs.trace('Failed to remove attributes to $path with a code of: $result', WARNING);
 		return result;
 		#else
 		return 0;
@@ -237,12 +268,14 @@ final class CoolUtil
 	 * @param path Path to check.
 	 * @return The initial Path.
 	 */
-	@:noUsing public static function addMissingFolders(path:String):String {
+	@:noUsing public static function addMissingFolders(path:String):String
+	{
 		#if sys
 		var folders:Array<String> = path.split("/");
 		var currentPath:String = "";
 
-		for (folder in folders) {
+		for (folder in folders)
+		{
 			currentPath += folder + "/";
 			if (!FileSystem.exists(currentPath))
 				FileSystem.createDirectory(currentPath);
@@ -263,7 +296,8 @@ final class CoolUtil
 	 * Whenever a value is NaN or not.
 	 * @param v Value
 	 */
-	public static inline function isNaN(v:Dynamic):Bool {
+	public static inline function isNaN(v:Dynamic):Bool
+	{
 		return (v is Float) ? Math.isNaN(cast(v, Float)) : false;
 	}
 
@@ -272,7 +306,8 @@ final class CoolUtil
 	 * @param array Array
 	 * @return T Last element
 	 */
-	public static inline function first<T>(array:Array<T>):T {
+	public static inline function first<T>(array:Array<T>):T
+	{
 		return array[0];
 	}
 
@@ -281,7 +316,8 @@ final class CoolUtil
 	 * @param array Array
 	 * @return T Last element
 	 */
-	public static inline function last<T>(array:Array<T>):T {
+	public static inline function last<T>(array:Array<T>):T
+	{
 		return array[array.length - 1];
 	}
 
@@ -292,8 +328,10 @@ final class CoolUtil
 	 * @param defaultValue Default value
 	 * @return T New/old value.
 	 */
-	public static function setFieldDefault<T>(v:Dynamic, name:String, defaultValue:T):T {
-		if (Reflect.hasField(v, name)) {
+	public static function setFieldDefault<T>(v:Dynamic, name:String, defaultValue:T):T
+	{
+		if (Reflect.hasField(v, name))
+		{
 			var f:Null<Dynamic> = Reflect.field(v, name);
 			if (f != null)
 				return cast f;
@@ -307,8 +345,10 @@ final class CoolUtil
 	 * @param str String to add zeros
 	 * @param num The length required
 	 */
-	public static inline function addZeros(str:String, num:Int) {
-		while(str.length < num) str = '0${str}';
+	public static inline function addZeros(str:String, num:Int)
+	{
+		while (str.length < num)
+			str = '0${str}';
 		return str;
 	}
 
@@ -317,8 +357,10 @@ final class CoolUtil
 	 * @param str String to add zeros
 	 * @param num The length required
 	 */
-	public static inline function addEndZeros(str:String, num:Int) {
-		while(str.length < num) str = '${str}0';
+	public static inline function addEndZeros(str:String, num:Int)
+	{
+		while (str.length < num)
+			str = '${str}0';
 		return str;
 	}
 
@@ -329,11 +371,13 @@ final class CoolUtil
 	 * @param size Size to convert to string
 	 * @return String Result string representation
 	 */
-	public static function getSizeString(size:Float):String {
+	public static function getSizeString(size:Float):String
+	{
 		var rSize:Float = size;
 		var label:Int = 0;
 		var len = sizeLabels.length;
-		while(rSize >= 1024 && label < len-1) {
+		while (rSize >= 1024 && label < len - 1)
+		{
 			label++;
 			rSize /= 1024;
 		}
@@ -345,24 +389,26 @@ final class CoolUtil
 	 * @param size Size to convert to string
 	 * @return String Result string representation
 	 */
-	 public static function getSizeString64(size: #if cpp Float64 #else Float #end):String {
-		var rSize: #if cpp Float64 #else Float #end = size;
+	public static function getSizeString64(size:#if cpp Float64 #else Float #end):String
+	{
+		var rSize:#if cpp Float64 #else Float #end = size;
 		var label:Int = 0;
 		var len = sizeLabels.length;
-		while(rSize >= 1024 && label < len-1) {
+		while (rSize >= 1024 && label < len - 1)
+		{
 			label++;
 			rSize /= 1024;
 		}
 		return Std.int(rSize) + ((label <= 1) ? "" : "." + addZeros(Std.string(Std.int((rSize % 1) * 100)), 2)) + sizeLabels[label];
 	}
 
-
 	/**
 	 * Replaces in a string any kind of IP with `[Your IP]` making the string safer to trace.
 	 * @param msg String to check and edit
 	 * @return String Result without any kind of IP
 	 */
-	public static inline function removeIP(msg:String):String {
+	public static inline function removeIP(msg:String):String
+	{
 		return ~/\d+.\d+.\d+.\d+/.replace(msg, "[Your IP]"); // For now its just IPs but who knows in the future..  - Nex
 	}
 
@@ -373,9 +419,11 @@ final class CoolUtil
 	 * @param ratio Ratio
 	 * @return Float Final value
 	 */
-	@:noUsing public static inline function fpsLerp(v1:Float, v2:Float, ratio:Float):Float {
+	@:noUsing public static inline function fpsLerp(v1:Float, v2:Float, ratio:Float):Float
+	{
 		return FlxMath.lerp(v1, v2, getFPSRatio(ratio));
 	}
+
 	/**
 	 * Lerps from color1 into color2 (Shortcut to `FlxColor.interpolate`)
 	 * @param color1 Color 1
@@ -383,7 +431,8 @@ final class CoolUtil
 	 * @param ratio Ratio
 	 * @param fpsSensitive Whenever the ratio should be fps sensitive (adapted when game is running at 120 instead of 60)
 	 */
-	@:noUsing public static inline function lerpColor(color1:FlxColor, color2:FlxColor, ratio:Float, fpsSensitive:Bool = false) {
+	@:noUsing public static inline function lerpColor(color1:FlxColor, color2:FlxColor, ratio:Float, fpsSensitive:Bool = false)
+	{
 		if (!fpsSensitive)
 			ratio = getFPSRatio(ratio);
 		return FlxColor.interpolate(color1, color2, ratio);
@@ -403,30 +452,42 @@ final class CoolUtil
 	 * @param c `Dynamic` color.
 	 * @return The result color, or `null` if invalid.
 	 */
-	public static function getColorFromDynamic(c:Dynamic):Null<FlxColor> {
+	public static function getColorFromDynamic(c:Dynamic):Null<FlxColor>
+	{
 		// -1
-		if (c is Int) return c;
+		if (c is Int)
+			return c;
 
 		// -1.0
-		if (c is Float) return Std.int(c);
+		if (c is Float)
+			return Std.int(c);
 
 		// "#FFFFFF"
-		if (c is String) return FlxColor.fromString(c);
+		if (c is String)
+			return FlxColor.fromString(c);
 
 		// [255, 255, 255]
-		if (c is Array) {
+		if (c is Array)
+		{
 			var r:Int = 0;
 			var g:Int = 0;
 			var b:Int = 0;
 			var a:Int = 255;
 			var array:Array<Dynamic> = cast c;
-			for(k=>e in array) {
-				if (e is Int || e is Float) {
-					switch(k) {
-						case 0:	r = Std.int(e);
-						case 1:	g = Std.int(e);
-						case 2:	b = Std.int(e);
-						case 3:	a = Std.int(e);
+			for (k => e in array)
+			{
+				if (e is Int || e is Float)
+				{
+					switch (k)
+					{
+						case 0:
+							r = Std.int(e);
+						case 1:
+							g = Std.int(e);
+						case 2:
+							b = Std.int(e);
+						case 3:
+							a = Std.int(e);
 					}
 				}
 			}
@@ -439,10 +500,13 @@ final class CoolUtil
 	 * Plays the main menu theme.
 	 * @param fadeIn
 	 */
-	@:noUsing public static function playMenuSong(fadeIn:Bool = false) {
-		if (FlxG.sound.music == null || !FlxG.sound.music.playing) {
+	@:noUsing public static function playMenuSong(fadeIn:Bool = false)
+	{
+		if (FlxG.sound.music == null || !FlxG.sound.music.playing)
+		{
 			playMusic(Paths.music(Flags.DEFAULT_MENU_MUSIC), true, fadeIn ? 0 : 1, true, 102);
-			if (fadeIn) FlxG.sound.music.fadeIn(4, 0, 1);
+			if (fadeIn)
+				FlxG.sound.music.fadeIn(4, 0, 1);
 		}
 	}
 
@@ -451,8 +515,10 @@ final class CoolUtil
 	 * @param name Character name
 	 * @param spriteName (Optional) sprite name.
 	 */
-	@:noUsing public static function preloadCharacter(name:String, ?spriteName:String) {
-		if (name == null) return;
+	@:noUsing public static function preloadCharacter(name:String, ?spriteName:String)
+	{
+		if (name == null)
+			return;
 		if (spriteName == null)
 			spriteName = name;
 		Assets.getText(Paths.xml('characters/$name'));
@@ -468,10 +534,14 @@ final class CoolUtil
 	 * @param Looped Whenever the music loops (true)
 	 * @param Group A group that this music belongs to (default)
 	 */
-	@:noUsing public static function playMusic(path:String, Persist:Bool = false, Volume:Float = 1, Looped:Bool = true, DefaultBPM:Float = 102, ?Group:FlxSoundGroup) {
+	@:noUsing public static function playMusic(path:String, Persist:Bool = false, Volume:Float = 1, Looped:Bool = true, DefaultBPM:Float = 102,
+			?Group:FlxSoundGroup)
+	{
 		Conductor.reset();
-		if (FlxG.sound.music == null || !FlxG.sound.music.exists) FlxG.sound.music = new FlxSound();
-		else if (FlxG.sound.music.active) FlxG.sound.music.stop();
+		if (FlxG.sound.music == null || !FlxG.sound.music.exists)
+			FlxG.sound.music = new FlxSound();
+		else if (FlxG.sound.music.active)
+			FlxG.sound.music.stop();
 		FlxG.sound.music.loadEmbedded(path, Looped);
 		FlxG.sound.music.volume = Volume;
 		FlxG.sound.music.persist = Persist;
@@ -479,14 +549,20 @@ final class CoolUtil
 
 		var iniPath = '${Path.withoutExtension(path)}.ini';
 		var musicData = Assets.exists(iniPath) ? IniUtil.parseAsset(iniPath)["Global"] : null;
-		if (musicData != null) {
-			if (musicData["LoopTime"] != null) FlxG.sound.music.loopTime = Std.parseFloat(musicData["LoopTime"]) * 1000;
-			if (musicData["EndTime"] != null) FlxG.sound.music.endTime = Std.parseFloat(musicData["EndTime"]) * 1000;
-			if (musicData["Offset"] != null) FlxG.sound.music.offset = Std.parseFloat(musicData["Offset"]) * 1000;
+		if (musicData != null)
+		{
+			if (musicData["LoopTime"] != null)
+				FlxG.sound.music.loopTime = Std.parseFloat(musicData["LoopTime"]) * 1000;
+			if (musicData["EndTime"] != null)
+				FlxG.sound.music.endTime = Std.parseFloat(musicData["EndTime"]) * 1000;
+			if (musicData["Offset"] != null)
+				FlxG.sound.music.offset = Std.parseFloat(musicData["Offset"]) * 1000;
 
-			var timeSignParsed:Array<Null<Float>> = musicData["TimeSignature"] == null ? [] : [for(s in musicData["TimeSignature"].split("/")) Std.parseFloat(s)];
-			var beatsPerMeasure:Float = Flags.DEFAULT_BEATS_PER_MEASURE, stepsPerBeat:Float = Flags.DEFAULT_STEPS_PER_BEAT;
-			if (timeSignParsed.length == 2) {
+			var timeSignParsed:Array<Null<Float>> = musicData["TimeSignature"] == null ? [] : [for (s in musicData["TimeSignature"].split("/")) Std.parseFloat(s)];
+			var beatsPerMeasure:Float = Flags.DEFAULT_BEATS_PER_MEASURE,
+				stepsPerBeat:Float = Flags.DEFAULT_STEPS_PER_BEAT;
+			if (timeSignParsed.length == 2)
+			{
 				beatsPerMeasure = Math.isNaN(timeSignParsed[0]) ? Flags.DEFAULT_BEATS_PER_MEASURE : timeSignParsed[0];
 				stepsPerBeat = Math.isNaN(timeSignParsed[1]) ? Flags.DEFAULT_STEPS_PER_BEAT : (16 / timeSignParsed[1]); // from denominator
 			}
@@ -505,15 +581,17 @@ final class CoolUtil
 	 * @param menuSFX Menu SFX to play
 	 * @param volume At which volume it should play
 	 */
-	@:noUsing public static inline function playMenuSFX(menuSFX:CoolSfx = SCROLL, volume:Float = 1):FlxSound {
-		return FlxG.sound.play(Paths.sound(switch(menuSFX) {
-			case CONFIRM:	Flags.DEFAULT_MENU_CONFIRM_SOUND;
-			case CANCEL:	Flags.DEFAULT_MENU_CANCEL_SOUND;
-			case SCROLL:	Flags.DEFAULT_MENU_SCROLL_SOUND;
-			case CHECKED:	Flags.DEFAULT_EDITOR_CHECKBOXCHECKED_SOUND;
-			case UNCHECKED:	Flags.DEFAULT_EDITOR_CHECKBOXUNCHECKED_SOUND;
-			case WARNING:	Flags.DEFAULT_EDITOR_WARNING_SOUND;
-			default: 		Flags.DEFAULT_MENU_SCROLL_SOUND;
+	@:noUsing public static inline function playMenuSFX(menuSFX:CoolSfx = SCROLL, volume:Float = 1):FlxSound
+	{
+		return FlxG.sound.play(Paths.sound(switch (menuSFX)
+		{
+			case CONFIRM: Flags.DEFAULT_MENU_CONFIRM_SOUND;
+			case CANCEL: Flags.DEFAULT_MENU_CANCEL_SOUND;
+			case SCROLL: Flags.DEFAULT_MENU_SCROLL_SOUND;
+			case CHECKED: Flags.DEFAULT_EDITOR_CHECKBOXCHECKED_SOUND;
+			case UNCHECKED: Flags.DEFAULT_EDITOR_CHECKBOXUNCHECKED_SOUND;
+			case WARNING: Flags.DEFAULT_EDITOR_WARNING_SOUND;
+			default: Flags.DEFAULT_MENU_SCROLL_SOUND;
 		}), volume * Options.volumeSFX);
 	}
 
@@ -530,7 +608,10 @@ final class CoolUtil
 	@:noUsing public static function coolTextFile(path:String):Array<String>
 	{
 		var trim:String;
-		return [for(line in Assets.getText(path).split("\n")) if ((trim = line.trim()) != "" && !trim.startsWith("#")) trim];
+		return [
+			for (line in Assets.getText(path).split("\n"))
+				if ((trim = line.trim()) != "" && !trim.startsWith("#")) trim
+		];
 	}
 
 	/**
@@ -551,7 +632,7 @@ final class CoolUtil
 		var arr:Array<Int> = [];
 		arr.resize(len);
 		#end
-		for(i in 0...len)
+		for (i in 0...len)
 			arr[i] = i + min;
 		return arr;
 	}
@@ -566,8 +647,10 @@ final class CoolUtil
 	 * @param anim1 First animation
 	 * @param anim2 Second animation
 	 */
-	@:noUsing public static function switchAnimFrames(anim1:FlxAnimation, anim2:FlxAnimation) {
-		if (anim1 == null || anim2 == null) return;
+	@:noUsing public static function switchAnimFrames(anim1:FlxAnimation, anim2:FlxAnimation)
+	{
+		if (anim1 == null || anim2 == null)
+			return;
 		var old = anim1.frames;
 		anim1.frames = anim2.frames;
 		anim2.frames = old;
@@ -586,11 +669,13 @@ final class CoolUtil
 		var flxAnim2 = animation.getByName(anim2);
 		animation._animations.remove(anim2);
 
-		if (flxAnim1 != null) {
+		if (flxAnim1 != null)
+		{
 			flxAnim1.name = anim2;
 			animation._animations.set(anim2, flxAnim1);
 		}
-		if (flxAnim2 != null) {
+		if (flxAnim2 != null)
+		{
 			flxAnim2.name = anim1;
 			animation._animations.set(anim1, flxAnim2);
 		}
@@ -604,11 +689,13 @@ final class CoolUtil
 	 * @param fill Whenever the sprite should fill instead of shrinking (true)
 	 * @param maxScale Maximum scale (0 / none)
 	 */
-	public static inline function setUnstretchedGraphicSize(sprite:FlxSprite, width:Int, height:Int, fill:Bool = true, maxScale:Float = 0) {
+	public static inline function setUnstretchedGraphicSize(sprite:FlxSprite, width:Int, height:Int, fill:Bool = true, maxScale:Float = 0)
+	{
 		sprite.setGraphicSize(width, height);
 		sprite.updateHitbox();
 		var nScale = (fill ? Math.max : Math.min)(sprite.scale.x, sprite.scale.y);
-		if (maxScale > 0 && nScale > maxScale) nScale = maxScale;
+		if (maxScale > 0 && nScale > maxScale)
+			nScale = maxScale;
 		sprite.scale.set(nScale, nScale);
 	}
 
@@ -632,40 +719,42 @@ final class CoolUtil
 	 * @param key Key
 	 * @return Simple representation
 	 */
-	public static inline function keyToString(key:Null<FlxKey>):String {
-		return switch(key) {
-			case null | 0 | NONE:	"---";
-			case LEFT: 				"←";
-			case DOWN: 				"↓";
-			case UP: 				"↑";
-			case RIGHT:				"→";
-			case ESCAPE:			"ESC";
-			case BACKSPACE:			"[←]";
-			case NUMPADZERO:		"#0";
-			case NUMPADONE:			"#1";
-			case NUMPADTWO:			"#2";
-			case NUMPADTHREE:		"#3";
-			case NUMPADFOUR:		"#4";
-			case NUMPADFIVE:		"#5";
-			case NUMPADSIX:			"#6";
-			case NUMPADSEVEN:		"#7";
-			case NUMPADEIGHT:		"#8";
-			case NUMPADNINE:		"#9";
-			case NUMPADPLUS:		"#+";
-			case NUMPADMINUS:		"#-";
-			case NUMPADPERIOD:		"#.";
-			case ZERO:				"0";
-			case ONE:				"1";
-			case TWO:				"2";
-			case THREE:				"3";
-			case FOUR:				"4";
-			case FIVE:				"5";
-			case SIX:				"6";
-			case SEVEN:				"7";
-			case EIGHT:				"8";
-			case NINE:				"9";
-			case PERIOD:			".";
-			default:				key.toString();
+	public static inline function keyToString(key:Null<FlxKey>):String
+	{
+		return switch (key)
+		{
+			case null | 0 | NONE: "---";
+			case LEFT: "←";
+			case DOWN: "↓";
+			case UP: "↑";
+			case RIGHT: "→";
+			case ESCAPE: "ESC";
+			case BACKSPACE: "[←]";
+			case NUMPADZERO: "#0";
+			case NUMPADONE: "#1";
+			case NUMPADTWO: "#2";
+			case NUMPADTHREE: "#3";
+			case NUMPADFOUR: "#4";
+			case NUMPADFIVE: "#5";
+			case NUMPADSIX: "#6";
+			case NUMPADSEVEN: "#7";
+			case NUMPADEIGHT: "#8";
+			case NUMPADNINE: "#9";
+			case NUMPADPLUS: "#+";
+			case NUMPADMINUS: "#-";
+			case NUMPADPERIOD: "#.";
+			case ZERO: "0";
+			case ONE: "1";
+			case TWO: "2";
+			case THREE: "3";
+			case FOUR: "4";
+			case FIVE: "5";
+			case SIX: "6";
+			case SEVEN: "7";
+			case EIGHT: "8";
+			case NINE: "9";
+			case PERIOD: ".";
+			default: key.toString();
 		}
 	}
 
@@ -675,8 +764,10 @@ final class CoolUtil
 	 * @param cam Camera
 	 * @param axes Axes (XY)
 	 */
-	public static inline function cameraCenter(obj:FlxObject, cam:FlxCamera, axes:FlxAxes = XY) {
-		switch(axes) {
+	public static inline function cameraCenter(obj:FlxObject, cam:FlxCamera, axes:FlxAxes = XY)
+	{
+		switch (axes)
+		{
 			case XY:
 				obj.setPosition((cam.width - obj.width) / 2, (cam.height - obj.height) / 2);
 			case X:
@@ -693,7 +784,8 @@ final class CoolUtil
 	 * @param width Width
 	 * @param height Height
 	 */
-	public static inline function setSpriteSize(sprite:FlxSprite, width:Float, height:Float) {
+	public static inline function setSpriteSize(sprite:FlxSprite, width:Float, height:Float)
+	{
 		sprite.scale.set(width / sprite.frameWidth, height / sprite.frameHeight);
 		sprite.updateHitbox();
 	}
@@ -704,13 +796,15 @@ final class CoolUtil
 	 * @param xml XML to get the attribute from
 	 * @param name Name of the attribute
 	 */
-	public static inline function getAtt(xml:Access, name:String) {
+	public static inline function getAtt(xml:Access, name:String)
+	{
 		/*if (!xml.has.resolve(name)) return null;
-		return xml.att.resolve(name);*/
+			return xml.att.resolve(name); */
 		// Reason for change:
 		// Old one has error checking 4 times, this one has it once.
 		var xml:Xml = xml.x;
-		if (xml.nodeType != Element) {
+		if (xml.nodeType != Element)
+		{
 			throw 'Bad node type, expected Element but found ${xml.nodeType}';
 		}
 		@:privateAccess
@@ -724,15 +818,18 @@ final class CoolUtil
 	 * @param text Text to set the format for
 	 * @param formats Array of the formats (to get the formats from a node, you can use `XMLUtil.getTextFormats(node)`)
 	 */
-	public static function autoSetFormat(text:FlxText, formats:Array<TextFormat>) {
+	public static function autoSetFormat(text:FlxText, formats:Array<TextFormat>)
+	{
 		var i = 0;
 		@:privateAccess
-		for(format in formats) {
+		for (format in formats)
+		{
 			var fmtt = format.format;
 			var start = i;
 			var end = i + format.text.length;
 			i = end;
-			if(Reflect.fields(fmtt).length == 0) continue;
+			if (Reflect.fields(fmtt).length == 0)
+				continue;
 			var fmt = new FlxTextFormat();
 
 			fmt.format.color = Reflect.hasField(fmtt, "color") ? FlxColor.fromString(fmtt.color) : text.color;
@@ -743,16 +840,26 @@ final class CoolUtil
 			fmt.borderColor = Reflect.hasField(fmtt, "borderColor") ? FlxColor.fromString(fmtt.borderColor) : text.borderColor;
 			fmt.format.align = Reflect.hasField(fmtt, "align") ? TextFormatAlign.fromString(fmtt.align) : FlxTextAlign.toOpenFL(text.alignment);
 
-			if(Reflect.hasField(fmtt, "leading")) fmt.format.leading = Std.parseInt(fmtt.leading);
-			if(Reflect.hasField(fmtt, "kerning")) fmt.format.kerning = fmtt.kerning == "true";
-			if(Reflect.hasField(fmtt, "blockIndent")) fmt.format.blockIndent = Std.parseInt(fmtt.blockIndent);
-			if(Reflect.hasField(fmtt, "bullet")) fmt.format.bullet = fmtt.bullet == "true";
-			if(Reflect.hasField(fmtt, "indent")) fmt.format.indent = Std.parseInt(fmtt.indent);
-			if(Reflect.hasField(fmtt, "leftMargin")) fmt.format.leftMargin = Std.parseInt(fmtt.leftMargin);
-			if(Reflect.hasField(fmtt, "letterSpacing")) fmt.format.letterSpacing = Std.parseFloat(fmtt.letterSpacing);
-			if(Reflect.hasField(fmtt, "rightMargin")) fmt.format.rightMargin = Std.parseInt(fmtt.rightMargin);
-			if(Reflect.hasField(fmtt, "tabStops")) fmt.format.tabStops = [for(x in cast(fmtt.tabStops, String).split(",")) Std.parseInt(x)];
-			if(Reflect.hasField(fmtt, "underline")) fmt.format.underline = fmtt.underline == "true";
+			if (Reflect.hasField(fmtt, "leading"))
+				fmt.format.leading = Std.parseInt(fmtt.leading);
+			if (Reflect.hasField(fmtt, "kerning"))
+				fmt.format.kerning = fmtt.kerning == "true";
+			if (Reflect.hasField(fmtt, "blockIndent"))
+				fmt.format.blockIndent = Std.parseInt(fmtt.blockIndent);
+			if (Reflect.hasField(fmtt, "bullet"))
+				fmt.format.bullet = fmtt.bullet == "true";
+			if (Reflect.hasField(fmtt, "indent"))
+				fmt.format.indent = Std.parseInt(fmtt.indent);
+			if (Reflect.hasField(fmtt, "leftMargin"))
+				fmt.format.leftMargin = Std.parseInt(fmtt.leftMargin);
+			if (Reflect.hasField(fmtt, "letterSpacing"))
+				fmt.format.letterSpacing = Std.parseFloat(fmtt.letterSpacing);
+			if (Reflect.hasField(fmtt, "rightMargin"))
+				fmt.format.rightMargin = Std.parseInt(fmtt.rightMargin);
+			if (Reflect.hasField(fmtt, "tabStops"))
+				fmt.format.tabStops = [for (x in cast(fmtt.tabStops, String).split(",")) Std.parseInt(x)];
+			if (Reflect.hasField(fmtt, "underline"))
+				fmt.format.underline = fmtt.underline == "true";
 			text.addFormat(fmt, start, end);
 		}
 		return text;
@@ -763,11 +870,13 @@ final class CoolUtil
 	 * @param spr Sprite to load the graphic for
 	 * @param path Path to the graphic
 	 */
-	public static function loadAnimatedGraphic(spr:FlxSprite, path:String, fps:Float = 24.0) {
+	public static function loadAnimatedGraphic(spr:FlxSprite, path:String, fps:Float = 24.0)
+	{
 		spr.frames = Paths.getFrames(path, true);
 
-		if (spr.frames != null && spr.frames.frames != null) {
-			spr.animation.add("idle", [for(i in 0...spr.frames.frames.length) i], fps, true);
+		if (spr.frames != null && spr.frames.frames != null)
+		{
+			spr.animation.add("idle", [for (i in 0...spr.frames.frames.length) i], fps, true);
 			spr.animation.play("idle");
 		}
 
@@ -779,15 +888,16 @@ final class CoolUtil
 	 * @param color1 Color transform to copy to
 	 * @param color2 Color transform to copy from
 	 */
-	public static inline function copyColorTransform(color1:ColorTransform, color2:ColorTransform) {
-		color1.alphaMultiplier 	= color2.alphaMultiplier;
-		color1.alphaOffset 		= color2.alphaOffset;
-		color1.blueMultiplier 	= color2.blueMultiplier;
-		color1.blueOffset 		= color2.blueOffset;
-		color1.greenMultiplier 	= color2.greenMultiplier;
-		color1.greenOffset 		= color2.greenOffset;
-		color1.redMultiplier 	= color2.redMultiplier;
-		color1.redOffset 		= color2.redOffset;
+	public static inline function copyColorTransform(color1:ColorTransform, color2:ColorTransform)
+	{
+		color1.alphaMultiplier = color2.alphaMultiplier;
+		color1.alphaOffset = color2.alphaOffset;
+		color1.blueMultiplier = color2.blueMultiplier;
+		color1.blueOffset = color2.blueOffset;
+		color1.greenMultiplier = color2.greenMultiplier;
+		color1.greenOffset = color2.greenOffset;
+		color1.redMultiplier = color2.redMultiplier;
+		color1.redOffset = color2.redOffset;
 	}
 
 	/**
@@ -796,7 +906,8 @@ final class CoolUtil
 	 * @param x New X position
 	 * @param y New Y position
 	 */
-	public static function resetSprite(spr:FlxSprite, x:Float, y:Float) {
+	public static function resetSprite(spr:FlxSprite, x:Float, y:Float)
+	{
 		spr.reset(x, y);
 		spr.alpha = 1;
 		spr.visible = true;
@@ -812,7 +923,8 @@ final class CoolUtil
 	/**
 	 * Gets the macro class created by hscript-improved for an abstract / enum
 	 */
-	@:noUsing public static inline function getMacroAbstractClass(className:String) {
+	@:noUsing public static inline function getMacroAbstractClass(className:String)
+	{
 		return Type.resolveClass(className + '_HSC');
 	}
 
@@ -822,14 +934,15 @@ final class CoolUtil
 	 * @param element Element
 	 * @return Index, or -1 if unsuccessful.
 	 */
-	public static inline function indexOfFromLast<T>(array:Array<T>, element:T):Int {
+	public static inline function indexOfFromLast<T>(array:Array<T>, element:T):Int
+	{
 		/*var i = array.length - 1;
-		while(i >= 0) {
-			if (array[i] == element)
-				break;
-			i--;
-		}
-		return i;*/
+			while(i >= 0) {
+				if (array[i] == element)
+					break;
+				i--;
+			}
+			return i; */
 		// Reason for change:
 		// Old one was made because at the time we didnt know the lastIndexOf function.
 		return array.lastIndexOf(element);
@@ -838,7 +951,8 @@ final class CoolUtil
 	/**
 	 * Clears the content of an array
 	 */
-	public static inline function clear<T>(array:Array<T>):Array<T> {
+	public static inline function clear<T>(array:Array<T>):Array<T>
+	{
 		// while(array.length > 0)
 		// 	array.shift();
 		array.resize(0);
@@ -851,8 +965,9 @@ final class CoolUtil
 	 * @param ...args Group entries
 	 * @return Array<T>
 	 */
-	public static inline function pushGroup<T>(array:Array<T>, ...args:T):Array<T> {
-		for(a in args)
+	public static inline function pushGroup<T>(array:Array<T>, ...args:T):Array<T>
+	{
+		for (a in args)
 			array.push(a);
 		return array;
 	}
@@ -861,12 +976,14 @@ final class CoolUtil
 	 * Opens an URL in the browser.
 	 * @param url
 	 */
-	@:noUsing public static inline function openURL(url:String) {
+	@:noUsing public static inline function openURL(url:String)
+	{
 		#if linux
 		// generally `xdg-open` should work in every distro
 		var cmd = Sys.command("xdg-open", [url]);
 		// run old command JUST IN CASE it fails, which it shouldn't
-		if (cmd != 0) cmd = Sys.command("/usr/bin/xdg-open", [url]);
+		if (cmd != 0)
+			cmd = Sys.command("/usr/bin/xdg-open", [url]);
 		#else
 		FlxG.openURL(url);
 		#end
@@ -876,7 +993,8 @@ final class CoolUtil
 	 * Browse a path in the operating system's explorer
 	 * @param path
 	 */
-	public static inline function browsePath(path:String) {
+	public static inline function browsePath(path:String)
+	{
 		var formattedPath:String = Path.normalize(path);
 
 		#if windows
@@ -886,7 +1004,8 @@ final class CoolUtil
 		Sys.command("open", [formattedPath]);
 		#elseif linux
 		var cmd = Sys.command("xdg-open", [formattedPath]);
-		if (cmd != 0) cmd = Sys.command("/usr/bin/xdg-open", [formattedPath]);
+		if (cmd != 0)
+			cmd = Sys.command("/usr/bin/xdg-open", [formattedPath]);
 		#end
 	}
 
@@ -900,7 +1019,8 @@ final class CoolUtil
 	 * Stops a sound, set its time to 0 then play it again.
 	 * @param sound Sound to replay.
 	 */
-	public static inline function replay(sound:FlxSound) sound.play(true, 0);
+	public static inline function replay(sound:FlxSound)
+		sound.play(true, 0);
 
 	/**
 	 * Equivalent of `Math.max`, except doesn't require a Int -> Float -> Int conversion.
@@ -924,7 +1044,8 @@ final class CoolUtil
 	 * Equivalent of `Math.floor`, except doesn't require a Int -> Float -> Int conversion.
 	 * @param e Value to get the floor of.
 	 */
-	public static inline function floorInt(e:Float) {
+	public static inline function floorInt(e:Float)
+	{
 		var r = Std.int(e);
 		if (e < 0 && r != e)
 			r--;
@@ -940,7 +1061,8 @@ final class CoolUtil
 	 * @param Value Value to quantize
 	 * @param Quant Quantization amount
 	 */
-	@:noUsing public static inline function quantize(Value:Float, Quant:Float) {
+	@:noUsing public static inline function quantize(Value:Float, Quant:Float)
+	{
 		return Math.fround(Value * Quant) / Quant;
 	}
 
@@ -950,10 +1072,13 @@ final class CoolUtil
 	 * @param frontEnd SoundFrontEnd to set the music of
 	 * @param music Music
 	 */
-	public static inline function setMusic(frontEnd:SoundFrontEnd, music:FlxSound) {
-		if (frontEnd.music == music) return;
+	public static inline function setMusic(frontEnd:SoundFrontEnd, music:FlxSound)
+	{
+		if (frontEnd.music == music)
+			return;
 
-		if (frontEnd.music != null) @:privateAccess frontEnd.destroySound(frontEnd.music);
+		if (frontEnd.music != null)
+			@:privateAccess frontEnd.destroySound(frontEnd.music);
 		frontEnd.list.remove(music);
 		frontEnd.defaultMusicGroup.add(frontEnd.music = music);
 	}
@@ -971,15 +1096,19 @@ final class CoolUtil
 	 * @param path Path to get the filename from
 	 * @return Filename
 	 */
-	@:noUsing public static inline function getFilename(file:String) {
+	@:noUsing public static inline function getFilename(file:String)
+	{
 		var file = new haxe.io.Path(file);
 		return file.file;
 	}
 
-	@:noUsing public static function getClosestAngle(angle:Float, targetAngle:Float):Float {
+	@:noUsing public static function getClosestAngle(angle:Float, targetAngle:Float):Float
+	{
 		var diff:Float = angle - targetAngle;
-		if (diff < -180) diff += 360;
-		else if (diff > 180) diff -= 360;
+		if (diff < -180)
+			diff += 360;
+		else if (diff > 180)
+			diff -= 360;
 		return angle - diff;
 	}
 
@@ -991,7 +1120,8 @@ final class CoolUtil
 	 * @param   result  Optional arg for the returning point
 	 * @return  The screen position of the object.
 	 */
-	public static function worldToScreenPosition(object:FlxObject, ?camera:FlxCamera, ?result:FlxPoint) {
+	public static function worldToScreenPosition(object:FlxObject, ?camera:FlxCamera, ?result:FlxPoint)
+	{
 		if (result == null)
 			result = FlxPoint.get();
 		if (camera == null)
@@ -1011,7 +1141,8 @@ final class CoolUtil
 	 * @param   result  Optional arg for the returning point
 	 * @return  The screen position of the object.
 	 */
-	 public static function pointToScreenPosition(object:FlxPoint, ?camera:FlxCamera, ?result:FlxPoint) {
+	public static function pointToScreenPosition(object:FlxPoint, ?camera:FlxCamera, ?result:FlxPoint)
+	{
 		if (result == null)
 			result = FlxPoint.get();
 		if (camera == null)
@@ -1032,11 +1163,14 @@ final class CoolUtil
 	 * @param   camera  The camera you want to check overlap on. Uses the sprite's camera by default.
 	 * @return  Bool
 	 */
-	public static function mouseOverlaps(sprite:FlxObject, ?camera:FlxCamera) {
+	public static function mouseOverlaps(sprite:FlxObject, ?camera:FlxCamera)
+	{
 		var camToCheck:FlxCamera = camera ?? sprite.camera;
 		var posthing:FlxPoint = FlxG.mouse.getWorldPosition(camToCheck);
 
-		return posthing != null && FlxMath.inBounds(posthing.x, sprite.x, sprite.x + sprite.width) && FlxMath.inBounds(posthing.y, sprite.y, sprite.y + sprite.height);
+		return posthing != null
+			&& FlxMath.inBounds(posthing.x, sprite.x, sprite.x + sprite.width)
+			&& FlxMath.inBounds(posthing.y, sprite.y, sprite.y + sprite.height);
 	}
 
 	/**
@@ -1044,14 +1178,19 @@ final class CoolUtil
 	 * @param array Array to sort
 	 * @param lowercase Whenever the array should be sorted in lowercase
 	 */
-	public static function sortAlphabetically(array:Array<String>, ?lowercase:Bool=false) {
-		array.sort(function(a1, a2):Int {
-			if(lowercase) {
+	public static function sortAlphabetically(array:Array<String>, ?lowercase:Bool = false)
+	{
+		array.sort(function(a1, a2):Int
+		{
+			if (lowercase)
+			{
 				a1 = a1.toLowerCase();
 				a2 = a2.toLowerCase();
 			}
-			if (a1 < a2) return -1;
-			if (a1 > a2) return 1;
+			if (a1 < a2)
+				return -1;
+			if (a1 > a2)
+				return 1;
 			return 0;
 		});
 		return array;
@@ -1062,7 +1201,8 @@ final class CoolUtil
 	 * @param array Array to push to
 	 * @param element Element to push
 	 */
-	public static inline function pushOnce<T>(array:Array<T>, element:T) {
+	public static inline function pushOnce<T>(array:Array<T>, element:T)
+	{
 		#if (haxe >= "4.0.0")
 		if (!array.contains(element))
 			array.push(element);
@@ -1072,25 +1212,27 @@ final class CoolUtil
 		#end
 	}
 
-	#if !(haxe >= "4.0.0")
-	/**
+	#if !(haxe >= "4.0.0") /**
 	 * Checks if an array contains an element.
 	 * @param array Array to check
 	 * @param element Element to check
 	 */
-	public static inline function contains<T>(array:Array<T>, element:T) {
+	public static inline function contains<T>(array:Array<T>, element:T)
+	{
 		return array.indexOf(element) != -1;
 	}
 	#end
 
-	public static inline function repeat(str:String, times:Int) {
+	public static inline function repeat(str:String, times:Int)
+	{
 		var r = new StringBuf();
-		for(i in 0...times)
+		for (i in 0...times)
 			r.add(str);
 		return r.toString();
 	}
 
-	public static inline function bound(Value:Float, Min:Float, Max:Float):Float {
+	public static inline function bound(Value:Float, Min:Float, Max:Float):Float
+	{
 		#if cpp
 		var _hx_tmp1:Float = Value;
 		var _hx_tmp2:Float = Min;
@@ -1101,7 +1243,8 @@ final class CoolUtil
 		#end
 	}
 
-	public static inline function boundInt(Value:Int, Min:Int, Max:Int):Int {
+	public static inline function boundInt(Value:Int, Min:Int, Max:Int):Int
+	{
 		#if cpp
 		var _hx_tmp1:Int = Value;
 		var _hx_tmp2:Int = Min;
@@ -1112,7 +1255,8 @@ final class CoolUtil
 		#end
 	}
 
-	public static inline function boolToInt(b:Bool):Int {
+	public static inline function boolToInt(b:Bool):Int
+	{
 		#if cpp
 		return untyped __cpp__("(({0}) ? 1 : 0)", b);
 		#else
@@ -1125,33 +1269,45 @@ final class CoolUtil
 	 * @param input String to parse
 	 * @return Array of numbers
 	 */
-	public static function parseNumberRange(input:String):Array<Int> {
+	public static function parseNumberRange(input:String):Array<Int>
+	{
 		var result:Array<Int> = [];
 		var parts:Array<String> = input.split(",");
 
-		for (part in parts) {
+		for (part in parts)
+		{
 			part = part.trim();
 			var idx = part.indexOf("..");
-			if (idx != -1) {
+			if (idx != -1)
+			{
 				var start = Std.parseInt(part.substring(0, idx).trim());
 				var end = Std.parseInt(part.substring(idx + 2).trim());
 
-				if(start == null || end == null) {
+				if (start == null || end == null)
+				{
 					continue;
 				}
 
-				if (start < end) {
-					for (j in start...end + 1) {
+				if (start < end)
+				{
+					for (j in start...end + 1)
+					{
 						result.push(j);
 					}
-				} else {
-					for (j in end...start + 1) {
+				}
+				else
+				{
+					for (j in end...start + 1)
+					{
 						result.push(start + end - j);
 					}
 				}
-			} else {
+			}
+			else
+			{
 				var num = Std.parseInt(part);
-				if (num != null) {
+				if (num != null)
+				{
 					result.push(num);
 				}
 			}
@@ -1166,37 +1322,51 @@ final class CoolUtil
 	 * @param separator Separator between ranges
 	 * @return String representing the ranges
 	 */
-	public static function formatNumberRange(numbers:Array<Int>, separator:String = ","):String {
-		if (numbers.length == 0) return "";
+	public static function formatNumberRange(numbers:Array<Int>, separator:String = ","):String
+	{
+		if (numbers.length == 0)
+			return "";
 
 		var result:Array<String> = [];
 		var i = 0;
 
-		while (i < numbers.length) {
+		while (i < numbers.length)
+		{
 			var start = numbers[i];
 			var end = start;
 			var direction = 0; // 0: no sequence, 1: increasing, -1: decreasing
 
-			if (i + 1 < numbers.length) { // detect direction of sequence
-				if (numbers[i + 1] == end + 1) {
+			if (i + 1 < numbers.length)
+			{ // detect direction of sequence
+				if (numbers[i + 1] == end + 1)
+				{
 					direction = 1;
-				} else if (numbers[i + 1] == end - 1) {
+				}
+				else if (numbers[i + 1] == end - 1)
+				{
 					direction = -1;
 				}
 			}
 
-			if(direction != 0) {
-				while (i + 1 < numbers.length && (numbers[i + 1] == end + direction)) {
+			if (direction != 0)
+			{
+				while (i + 1 < numbers.length && (numbers[i + 1] == end + direction))
+				{
 					end = numbers[i + 1];
 					i++;
 				}
 			}
 
-			if (start == end) { // no direction
+			if (start == end)
+			{ // no direction
 				result.push('${start}');
-			} else if (start + direction == end) { // 1 step increment
+			}
+			else if (start + direction == end)
+			{ // 1 step increment
 				result.push('${start},${end}');
-			} else { // store as range
+			}
+			else
+			{ // store as range
 				result.push('${start}..${end}');
 			}
 
@@ -1212,13 +1382,20 @@ final class CoolUtil
 	 * @param arr Array to flatten
 	 * @param result Result array
 	 */
-	public static function deepFlatten(arr:Array<Dynamic>, ?result:Array<Dynamic>):Array<Dynamic> {
-		if(arr == null) return [];
-		if(result == null) result = [];
-		for (e in arr) {
-			if (Std.isOfType(e, Array)) {
+	public static function deepFlatten(arr:Array<Dynamic>, ?result:Array<Dynamic>):Array<Dynamic>
+	{
+		if (arr == null)
+			return [];
+		if (result == null)
+			result = [];
+		for (e in arr)
+		{
+			if (Std.isOfType(e, Array))
+			{
 				deepFlatten(e, result);
-			} else {
+			}
+			else
+			{
 				result.push(e);
 			}
 		}
@@ -1229,9 +1406,10 @@ final class CoolUtil
 	 * Gets the luminance of the given color
 	 * @param color Color to use
 	 * @return Number between 0 and 1
-	*/
-	public static function getLuminance(color:FlxColor):Float {
-		return (0.2126*color.redFloat + 0.7152*color.greenFloat + 0.0722*color.blueFloat);
+	 */
+	public static function getLuminance(color:FlxColor):Float
+	{
+		return (0.2126 * color.redFloat + 0.7152 * color.greenFloat + 0.0722 * color.blueFloat);
 	}
 
 	/**
@@ -1239,16 +1417,21 @@ final class CoolUtil
 	 * @param path
 	 * @return Bool
 	 */
-	public static function imageHasFrameData(path:String):String {
-		if (FileSystem.exists(Path.withExtension(path, "xml"))) return "xml";
-		if (FileSystem.exists(Path.withExtension(path, "txt"))) return "txt";
-		if (FileSystem.exists(Path.withExtension(path, "json"))) return "json";
+	public static function imageHasFrameData(path:String):String
+	{
+		if (FileSystem.exists(Path.withExtension(path, "xml")))
+			return "xml";
+		if (FileSystem.exists(Path.withExtension(path, "txt")))
+			return "txt";
+		if (FileSystem.exists(Path.withExtension(path, "json")))
+			return "json";
 
 		return null;
 	}
 
 	// loads frames with no image, but with data, so you can parse it
-	public static function loadFramesFromData(data:String, ext:String = null):FlxFramesCollection {
+	public static function loadFramesFromData(data:String, ext:String = null):FlxFramesCollection
+	{
 		var frames:FlxFramesCollection = null;
 		var tempBitmap:BitmapData = new BitmapData(1, 1, false);
 
@@ -1260,27 +1443,40 @@ final class CoolUtil
 			graphic.height = 9999999;
 		}
 
-		try {
-			switch (ext) {
-				case "xml": frames = FlxAtlasFrames.fromSparrow(graphic, Xml.parse(data));
-				case "txt": frames = FlxAtlasFrames.fromSpriteSheetPacker(graphic, data);
-				case "json": frames = FlxAtlasFrames.fromAseprite(graphic, data);
+		try
+		{
+			switch (ext)
+			{
+				case "xml":
+					frames = FlxAtlasFrames.fromSparrow(graphic, Xml.parse(data));
+				case "txt":
+					frames = FlxAtlasFrames.fromSpriteSheetPacker(graphic, data);
+				case "json":
+					frames = FlxAtlasFrames.fromAseprite(graphic, data);
 			}
-		} catch (e) {trace(e);}
+		}
+		catch (e)
+		{
+			trace(e);
+		}
 
 		return frames;
 	}
 
-	public static function removeBOM(str:String):String {
+	public static function removeBOM(str:String):String
+	{
 		return StringTools.replace(str, String.fromCharCode(0xFEFF), "");
 	}
 
-	public static function getAnimsListFromFrames(frames:FlxFramesCollection, ext:String = null):Array<String> {
-		if (frames == null) return [];
+	public static function getAnimsListFromFrames(frames:FlxFramesCollection, ext:String = null):Array<String>
+	{
+		if (frames == null)
+			return [];
 
 		var animsList:Array<String> = [];
-		for (frame in frames.frames) {
-			var animName:String = ext == "txt" ? frame.name.split("_")[0] : frame.name.substr(0, frame.name.length-4);
+		for (frame in frames.frames)
+		{
+			var animName:String = ext == "txt" ? frame.name.split("_")[0] : frame.name.substr(0, frame.name.length - 4);
 			if (!animsList.contains(animName))
 				animsList.push(animName);
 		}
@@ -1288,31 +1484,42 @@ final class CoolUtil
 		return animsList;
 	}
 
-	public static function getAnimsListFromAtlas(atlas:AnimationJson):Array<String> {
-		if (atlas == null) return [];
+	public static function getAnimsListFromAtlas(atlas:AnimationJson):Array<String>
+	{
+		if (atlas == null)
+			return [];
 
 		var animsList:Array<String> = [];
-		if (atlas.AN.SN != null) animsList.push(atlas.AN.SN);
+		if (atlas.AN.SN != null)
+			animsList.push(atlas.AN.SN);
 		if (atlas.SD != null)
 			for (symbol in atlas.SD)
-				if (symbol.SN != null) animsList.push(symbol.SN);
+				if (symbol.SN != null)
+					animsList.push(symbol.SN);
 
 		return animsList;
 	}
 
-	public static function getAnimsListFromSprite(spr:FunkinSprite):Array<String> {
+	public static function getAnimsListFromSprite(spr:FunkinSprite):Array<String>
+	{
 		return getAnimsListFromFrames(spr.frames);
 	}
 
 	// TODO: check this for bugs
 	// Code from https://github.com/elnabo/equals/blob/master/src/equals/Equal.hx, (MIT License), but updated to work with haxe 4
-	public static function deepEqual<T> (a:T, b:T) : Bool {
-		if (a == b) { return true; } // if physical equality
-		if (isNull(a) ||  isNull(b)) {
+	public static function deepEqual<T>(a:T, b:T):Bool
+	{
+		if (a == b)
+		{
+			return true;
+		} // if physical equality
+		if (isNull(a) || isNull(b))
+		{
 			return false;
 		}
 
-		switch (Type.typeof(a)) {
+		switch (Type.typeof(a))
+		{
 			case TNull, TInt, TBool, TUnknown:
 				return a == b;
 			case TFloat:
@@ -1320,66 +1527,86 @@ final class CoolUtil
 			case TFunction:
 				return Reflect.compareMethods(a, b); // only physical equality can be tested for function
 			case TEnum(_):
-				if (EnumValueTools.getIndex(cast a) != EnumValueTools.getIndex(cast b)) {
+				if (EnumValueTools.getIndex(cast a) != EnumValueTools.getIndex(cast b))
+				{
 					return false;
 				}
 				var a_args = EnumValueTools.getParameters(cast a);
 				var b_args = EnumValueTools.getParameters(cast b);
 				return deepEqual(a_args, b_args);
 			case TClass(_):
-				if ((a is String) && (b is String)) {
+				if ((a is String) && (b is String))
+				{
 					return a == b;
 				}
-				if ((a is Array) && (b is Array)) {
+				if ((a is Array) && (b is Array))
+				{
 					var a = cast(a, Array<Dynamic>);
 					var b = cast(b, Array<Dynamic>);
-					if (a.length != b.length) { return false; }
-					for (i in 0...a.length) {
-						if (!deepEqual(a[i], b[i])) {
+					if (a.length != b.length)
+					{
+						return false;
+					}
+					for (i in 0...a.length)
+					{
+						if (!deepEqual(a[i], b[i]))
+						{
 							return false;
 						}
 					}
 					return true;
 				}
 
-				if ((a is IMap) && (b is IMap)) {
+				if ((a is IMap) && (b is IMap))
+				{
 					var a = cast(a, IMap<Dynamic, Dynamic>);
 					var b = cast(b, IMap<Dynamic, Dynamic>);
-					var a_keys = [ for (key in a.keys()) key ];
-					var b_keys = [ for (key in b.keys()) key ];
+					var a_keys = [for (key in a.keys()) key];
+					var b_keys = [for (key in b.keys()) key];
 					a_keys.sort(Reflect.compare);
 					b_keys.sort(Reflect.compare);
-					if (!deepEqual(a_keys, b_keys)) { return false; }
-					for (key in a_keys) {
-						if (!deepEqual(a.get(key), b.get(key))) {
+					if (!deepEqual(a_keys, b_keys))
+					{
+						return false;
+					}
+					for (key in a_keys)
+					{
+						if (!deepEqual(a.get(key), b.get(key)))
+						{
 							return false;
 						}
 					}
 					return true;
 				}
 
-				if ((a is Date) && (b is Date)) {
+				if ((a is Date) && (b is Date))
+				{
 					return cast(a, Date).getTime() == cast(b, Date).getTime();
 				}
 
-				if ((a is haxe.io.Bytes) && (b is haxe.io.Bytes)) {
+				if ((a is haxe.io.Bytes) && (b is haxe.io.Bytes))
+				{
 					return deepEqual(cast(a, haxe.io.Bytes).getData(), cast(b, haxe.io.Bytes).getData());
 				}
 
 			case TObject:
 		}
 
-		for (field in Reflect.fields(a)) {
+		for (field in Reflect.fields(a))
+		{
 			var pa = Reflect.field(a, field);
 			var pb = Reflect.field(b, field);
-			if (isFunction(pa)) {
+			if (isFunction(pa))
+			{
 				// ignore function as only physical equality can be tested, unless null
-				if (isNull(pa) != isNull(pb)) {
+				if (isNull(pa) != isNull(pb))
+				{
 					return false;
 				}
 				continue;
 			}
-			if (!deepEqual(pa, pb)) {
+			if (!deepEqual(pa, pb))
+			{
 				return false;
 			}
 		}
@@ -1387,29 +1614,38 @@ final class CoolUtil
 		return true;
 	}
 
-	static inline function isNull(a:Dynamic):Bool {
+	static inline function isNull(a:Dynamic):Bool
+	{
 		return Type.enumEq(Type.typeof(a), TNull);
 	}
 
-	static inline function isFunction(a:Dynamic):Bool {
+	static inline function isFunction(a:Dynamic):Bool
+	{
 		return Type.enumEq(Type.typeof(a), TFunction);
 	}
 
-	public static inline function isMapEmpty<K, V>(map: Map<K, V>): Bool {
+	public static inline function isMapEmpty<K, V>(map:Map<K, V>):Bool
+	{
 		return !map.keys().hasNext();
 	}
 
-	public inline static function parsePropertyString(fieldPath:String):Array<OneOfTwo<String, Int>> {
+	public inline static function parsePropertyString(fieldPath:String):Array<OneOfTwo<String, Int>>
+	{
 		return FlxTween.parseFieldString(fieldPath);
 	}
 
-	public static function stringifyFieldsPath(fields:Array<OneOfTwo<String, Int>>):String {
+	public static function stringifyFieldsPath(fields:Array<OneOfTwo<String, Int>>):String
+	{
 		var str = new StringBuf();
 		var first = true;
-		for (field in fields) {
-			if (Type.typeof(field) == TInt) {
+		for (field in fields)
+		{
+			if (Type.typeof(field) == TInt)
+			{
 				str.add('[${field}]');
-			} else {
+			}
+			else
+			{
 				if (!first)
 					str.add('.');
 				str.add(field);
@@ -1419,22 +1655,31 @@ final class CoolUtil
 		return str.toString();
 	}
 
-	public static function parseProperty(target:Dynamic, fields:OneOfTwo<String, Array<OneOfTwo<String, Int>>>):Dynamic {
-		var fields:Array<OneOfTwo<String, Int>> = {
-			if((fields is String)) CoolUtil.parsePropertyString(fields);
-			else fields;
-		}
+	public static function parseProperty(target:Dynamic, fields:OneOfTwo<String, Array<OneOfTwo<String, Int>>>):Dynamic
+	{
+		var fields:Array<OneOfTwo<String, Int>> =
+			{
+				if ((fields is String))
+					CoolUtil.parsePropertyString(fields);
+				else
+					fields;
+			}
 
 		var field = CoolUtil.last(fields);
-		for (i in 0...fields.length - 1) {
+		for (i in 0...fields.length - 1)
+		{
 			var component = fields[i];
-			if (Type.typeof(component) == TInt) {
-				if ((target is Array)) {
+			if (Type.typeof(component) == TInt)
+			{
+				if ((target is Array))
+				{
 					var index:Int = cast component;
 					var arr:Array<Dynamic> = cast target;
 					target = arr[index];
 				}
-			} else { // TClass(String)
+			}
+			else
+			{ // TClass(String)
 				target = Reflect.getProperty(target, component);
 			}
 			if (!Reflect.isObject(target) && !(target is Array))
@@ -1443,21 +1688,25 @@ final class CoolUtil
 		return new PropertyInfo(target, field);
 	}
 
-	public static function cloneProperty(toTarget:Dynamic, fields:OneOfTwo<String, Array<OneOfTwo<String, Int>>>, fromTarget:Dynamic):Dynamic {
-		var fields:Array<OneOfTwo<String, Int>> = {
-			if((fields is String)) CoolUtil.parsePropertyString(fields);
-			else fields;
-		}
+	public static function cloneProperty(toTarget:Dynamic, fields:OneOfTwo<String, Array<OneOfTwo<String, Int>>>, fromTarget:Dynamic):Dynamic
+	{
+		var fields:Array<OneOfTwo<String, Int>> =
+			{
+				if ((fields is String))
+					CoolUtil.parsePropertyString(fields);
+				else
+					fields;
+			}
 
 		var toProperty = CoolUtil.parseProperty(toTarget, fields);
 		var fromProperty = CoolUtil.parseProperty(fromTarget, fields);
 
 		return toProperty.setValue(fromProperty.getValue());
 	}
-
 }
 
-class PropertyInfo {
+class PropertyInfo
+{
 	public var object:Dynamic;
 	public var field:OneOfTwo<String, Int>;
 	public var typeOfField:Type.ValueType;
@@ -1466,7 +1715,8 @@ class PropertyInfo {
 	public var custom:hscript.IHScriptCustomBehaviour;
 	#end
 
-	public function new(object:Dynamic, field:OneOfTwo<String, Int>) {
+	public function new(object:Dynamic, field:OneOfTwo<String, Int>)
+	{
 		this.object = object;
 		this.field = field;
 		#if hscript_improved
@@ -1522,7 +1772,8 @@ class PropertyInfo {
 /**
  * SFXs to play using `CoolUtil.playMenuSFX`.
  */
-enum abstract CoolSfx(Int) from Int {
+enum abstract CoolSfx(Int) from Int
+{
 	var SCROLL = 0;
 	var CONFIRM = 1;
 	var CANCEL = 2;

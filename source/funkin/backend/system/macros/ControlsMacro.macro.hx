@@ -1,26 +1,23 @@
 package funkin.backend.system.macros;
 
-
 import haxe.macro.Context;
 import haxe.macro.Expr;
 
 using StringTools;
-
 using haxe.macro.Tools;
-
 
 // Macro made by Ne_Eo
 class ControlsMacro
 {
-	static var _allControls: Array<String> = null;
-	static var _allInternalControls: Array<String> = null;
-	static var _allDevModeOnlyControls: Array<String> = null;
-	static var _currentControls: Map<String, Array<Expr>> = null;
-	static var _currentGamepadControls: Map<String, Expr> = null;
-	static var _keySet: Map<String, String> = null;
-	static var _internalMap: Map<String, String> = null;
+	static var _allControls:Array<String> = null;
+	static var _allInternalControls:Array<String> = null;
+	static var _allDevModeOnlyControls:Array<String> = null;
+	static var _currentControls:Map<String, Array<Expr>> = null;
+	static var _currentGamepadControls:Map<String, Expr> = null;
+	static var _keySet:Map<String, String> = null;
+	static var _internalMap:Map<String, String> = null;
 
-	public static macro function build(): Array<Field>
+	public static macro function build():Array<Field>
 	{
 		var fields = Context.getBuildFields();
 		var clRef = Context.getLocalClass();
@@ -54,10 +51,10 @@ class ControlsMacro
 			name: "addDefaultGamepad",
 			access: [APublic],
 			kind: FFun({
-				ret: macro : Void,
+				ret: macro :Void,
 				params: [],
 				expr: generateGamepadCode(),
-				args: [{name: "id", type: macro : Int}]
+				args: [{name: "id", type: macro :Int}]
 			}),
 			pos: Context.currentPos(),
 			doc: null,
@@ -69,7 +66,7 @@ class ControlsMacro
 			name: "macro_addKeysToActions",
 			access: [APublic, AInline],
 			kind: FFun({
-				ret: macro : Void,
+				ret: macro :Void,
 				params: [],
 				expr: macro $b{_allInternalControls.map((s) -> macro add($i{s}))},
 				args: []
@@ -79,7 +76,8 @@ class ControlsMacro
 			meta: []
 		});
 
-		function buildBindControl(s:String, prefix:String) {
+		function buildBindControl(s:String, prefix:String)
+		{
 			var prefixed = prefix + s;
 
 			return macro bindKeys(Control.$s, Options.$prefixed);
@@ -89,9 +87,10 @@ class ControlsMacro
 			name: "macro_bindControls",
 			access: [],
 			kind: FFun({
-				ret: macro : Void,
+				ret: macro :Void,
 				params: [],
-				expr: macro switch(keyScheme) {
+				expr: macro switch (keyScheme)
+				{
 					case Solo:
 						$a{_allControls.map(buildBindControl.bind(_, "SOLO_"))};
 					case Duo(true):
@@ -101,10 +100,12 @@ class ControlsMacro
 					case None: // nothing
 					case Custom: // nothing
 				},
-				args: [{
-					name: "keyScheme",
-					type: macro : funkin.backend.system.Controls.KeyboardScheme
-				}]
+				args: [
+					{
+						name: "keyScheme",
+						type: macro :funkin.backend.system.Controls.KeyboardScheme
+					}
+				]
 			}),
 			pos: Context.currentPos(),
 			doc: null,
@@ -115,17 +116,17 @@ class ControlsMacro
 			name: "macro_forEachBound",
 			access: [],
 			kind: FFun({
-				ret: macro : Void,
+				ret: macro :Void,
 				params: [],
 				expr: generateForEachBoundCode(macro control),
 				args: [
 					{
 						name: "control",
-						type: macro : Control
+						type: macro :Control
 					},
 					{
 						name: "func",
-						type: macro : FlxActionDigital -> FlxInputState -> Void
+						type: macro :FlxActionDigital->FlxInputState->Void
 					}
 				]
 			}),
@@ -138,13 +139,15 @@ class ControlsMacro
 			name: "macro_getActionFromControl",
 			access: [APrivate],
 			kind: FFun({
-				ret: macro : FlxActionDigital,
+				ret: macro :FlxActionDigital,
 				params: [],
 				expr: generateGetActionFromControlCode(macro control),
-				args: [{
-					name: "control",
-					type: macro : Control
-				}]
+				args: [
+					{
+						name: "control",
+						type: macro :Control
+					}
+				]
 			}),
 			pos: Context.currentPos(),
 			doc: null,
@@ -165,7 +168,7 @@ class ControlsMacro
 		return fields;
 	}
 
-	static function generateSwitchCase(expr:Expr, cases:Array<Case>, defaultCase:Expr): Expr
+	static function generateSwitchCase(expr:Expr, cases:Array<Case>, defaultCase:Expr):Expr
 	{
 		return {
 			expr: ESwitch(expr, cases, defaultCase),
@@ -173,18 +176,21 @@ class ControlsMacro
 		}
 	}
 
-	static function generateGetActionFromControlCode(value:Expr): Expr
+	static function generateGetActionFromControlCode(value:Expr):Expr
 	{
-		return macro return ${generateSwitchCase(value, [
-			for (short => internal in _internalMap)
-				{
-					values: [macro Control.$short],
-					expr: macro $i{internal}
-				}
-		], macro null)};
+		return macro return $
+		{
+			generateSwitchCase(value, [
+				for (short => internal in _internalMap)
+					{
+						values: [macro Control.$short],
+						expr: macro $i{internal}
+					}
+			], macro null)
+		};
 	}
 
-	static function generateForEachBoundCode(value:Expr): Expr
+	static function generateForEachBoundCode(value:Expr):Expr
 	{
 		return generateSwitchCase(value, [
 			for (field => code in _currentControls)
@@ -192,23 +198,25 @@ class ControlsMacro
 					values: [macro Control.$field],
 					expr: macro $b{code}
 				}
-		], macro {});
+		], macro
+			{});
 	}
 
-	static function generateGamepadCode(): Expr
+	static function generateGamepadCode():Expr
 	{
-		var map: Array<Expr> = [];
+		var map:Array<Expr> = [];
 		for (name in _allControls)
 		{
 			var expr = _currentGamepadControls.get(name);
-			if(expr == null) continue;
+			if (expr == null)
+				continue;
 			map.push(macro @:pos(expr.pos) Control.$name => ${expr});
 		}
 
 		return macro addGamepad(id, $a{map});
 	}
 
-	static function extractString(e: Expr): String
+	static function extractString(e:Expr):String
 	{
 		switch (e.expr)
 		{
@@ -220,7 +228,7 @@ class ControlsMacro
 		}
 	}
 
-	static function camelCase(s: String): String
+	static function camelCase(s:String):String
 	{
 		s = s.split("_").map((s) ->
 		{
@@ -230,7 +238,7 @@ class ControlsMacro
 		return s.charAt(0).toLowerCase() + s.substr(1);
 	}
 
-	static function swapAB(e: Expr): Expr
+	static function swapAB(e:Expr):Expr
 	{
 		return switch (e.expr)
 		{
@@ -240,7 +248,7 @@ class ControlsMacro
 		}
 	}
 
-	static function handleControl(field: Field, get: String, set: String, _: ComplexType, e: Expr): Array<Field>
+	static function handleControl(field:Field, get:String, set:String, _:ComplexType, e:Expr):Array<Field>
 	{
 		var name = field.name;
 		var shortName = name;
@@ -261,8 +269,8 @@ class ControlsMacro
 		if (type != "")
 			internalName += type.substr(1);
 
-		var keyset: Null<String> = null;
-		var expr: Expr = null;
+		var keyset:Null<String> = null;
+		var expr:Expr = null;
 		var metasToRemove = [];
 		for (meta in field.meta)
 		{
@@ -321,10 +329,10 @@ class ControlsMacro
 			_internalMap.set(shortName, internalNameNoType);
 
 		// Generated Code: var _uiUp = new FlxActionDigital("_uiUp");
-		var internalField: Field = {
+		var internalField:Field = {
 			name: internalName,
 			access: [APrivate],
-			kind: FVar(macro : FlxActionDigital, macro new FlxActionDigital($v{internalName})),
+			kind: FVar(macro :FlxActionDigital, macro new FlxActionDigital($v{internalName})),
 			pos: field.pos,
 			doc: null,
 			meta: []
@@ -333,15 +341,14 @@ class ControlsMacro
 		// Generated Code:
 		// inline function get_UI_UP(): Bool
 		//     return _uiUp.check(); or return Options.devMode && _uiUp.check(); depending if its dev mode
-		var getField: Field = {
+		var getField:Field = {
 			name: "get_" + name,
 			access: [APrivate, AInline],
 			kind: FFun({
-				ret: macro : Bool,
+				ret: macro :Bool,
 				params: [],
-				expr: _allDevModeOnlyControls.contains(shortName) ?
-					(macro return Options.devMode && $i{internalName}.check()) :
-					(macro return $i{internalName}.check()),
+				expr: _allDevModeOnlyControls.contains(shortName) ? (macro return Options.devMode && $i{internalName}.check()) : (macro return
+					$i{internalName}.check()),
 				args: []
 			}),
 			pos: field.pos,
@@ -352,17 +359,17 @@ class ControlsMacro
 		// Generated Code:
 		// inline function set_UI_UP(val: Bool): Bool
 		//     return @:privateAccess _uiUp._checked = val;
-		var setField: Field = {
+		var setField:Field = {
 			name: "set_" + name,
 			access: [APrivate, AInline],
 			kind: FFun({
-				ret: macro : Bool,
+				ret: macro :Bool,
 				params: [],
 				expr: macro
 				{
 					return @:privateAccess $i{internalName}._checked = val;
 				},
-				args: [{name: "val", type: macro : Bool}]
+				args: [{name: "val", type: macro :Bool}]
 			}),
 			pos: field.pos,
 			doc: field.doc,

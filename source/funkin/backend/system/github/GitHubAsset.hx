@@ -2,7 +2,8 @@ package funkin.backend.system.github;
 
 import funkin.backend.system.github.GitHubUser;
 
-typedef GitHubAsset = {
+typedef GitHubAsset =
+{
 	var url:String;
 	var id:Int;
 	var node_id:String;

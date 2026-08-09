@@ -1,6 +1,7 @@
 package funkin.backend.system.github;
 
-typedef GitHubReactions = {
+typedef GitHubReactions =
+{
 	var url:String;
 	var total_count:Int;
 	// +1 and -1 cant be added, you need to use Reflect.field

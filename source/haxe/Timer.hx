@@ -96,7 +96,8 @@ class Timer
 	public function stop()
 	{
 		#if (flash || js)
-		if (id == null) return;
+		if (id == null)
+			return;
 		#if flash
 		untyped __global__["flash.utils.clearInterval"](id);
 		#elseif js
@@ -130,7 +131,9 @@ class Timer
 		Once bound, it can still be rebound to different functions until `this`
 		Timer is stopped through a call to `this.stop`.
 	**/
-	public dynamic function run() {}
+	public dynamic function run()
+	{
+	}
 
 	/**
 		Invokes `f` after `time_ms` milliseconds.
@@ -260,7 +263,9 @@ class Timer
 		return r;
 	}
 
-	dynamic public function run() {}
+	dynamic public function run()
+	{
+	}
 
 	public static inline function stamp():Float
 	{
@@ -271,16 +276,16 @@ class Timer
 	public function stop():Void
 	{
 		/*if (mRunning)
-		{
-
-			for (i in 0...sRunningTimers.length)
 			{
-				if (sRunningTimers[i] == this)
+
+				for (i in 0...sRunningTimers.length)
 				{
-					sRunningTimers[i] = null;
-					break;
+					if (sRunningTimers[i] == this)
+					{
+						sRunningTimers[i] = null;
+						break;
+					}
 				}
-			}
 		}*/
 		mRunning = false;
 	}

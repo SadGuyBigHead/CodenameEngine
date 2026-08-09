@@ -636,14 +636,17 @@ class Sound extends EventDispatcher
 
 		var pan = SoundMixer.__soundTransform.pan + sndTransform.pan;
 
-		if (pan > 1) pan = 1;
-		else if (pan < -1) pan = -1;
+		if (pan > 1)
+			pan = 1;
+		else if (pan < -1)
+			pan = -1;
 
 		var volume = SoundMixer.__soundTransform.volume * sndTransform.volume;
 
 		var source = new AudioSource(__buffer);
 		source.offset = Std.int(startTime);
-		if (loops > 1) source.loops = loops - 1;
+		if (loops > 1)
+			source.loops = loops - 1;
 
 		source.gain = volume;
 
@@ -672,8 +675,10 @@ class Sound extends EventDispatcher
 			#if (js && html5 && howlerjs)
 			return __buffer.src.duration() * 1000;
 			#else
-			if (__buffer.data != null) return (__buffer.data.length >> 0) / __buffer.channels / (__buffer.bitsPerSample >> 3) / __buffer.sampleRate * 1000;
-			else if (__buffer.__srcVorbisFile != null) {
+			if (__buffer.data != null)
+				return (__buffer.data.length >> 0) / __buffer.channels / (__buffer.bitsPerSample >> 3) / __buffer.sampleRate * 1000;
+			else if (__buffer.__srcVorbisFile != null)
+			{
 				var x = __buffer.__srcVorbisFile.pcmTotal();
 				return (x.high * 4294967296. + (x.low >> 0)) / __buffer.sampleRate * 1000;
 			}

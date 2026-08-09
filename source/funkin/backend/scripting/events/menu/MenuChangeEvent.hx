@@ -1,6 +1,7 @@
 package funkin.backend.scripting.events.menu;
 
-final class MenuChangeEvent extends CancellableEvent {
+final class MenuChangeEvent extends CancellableEvent
+{
 	/**
 	 * Value before the change
 	 */

@@ -3,6 +3,7 @@ package funkin.backend.utils.native;
 #if windows
 import funkin.backend.utils.NativeAPI.FileAttribute;
 import funkin.backend.utils.NativeAPI.MessageBoxIcon;
+
 @:buildXml('
 <target id="haxe">
 	<lib name="dwmapi.lib" if="windows" />
@@ -12,7 +13,6 @@ import funkin.backend.utils.NativeAPI.MessageBoxIcon;
 	<lib name="uxtheme.lib" if="windows" />
 </target>
 ')
-
 // majority is taken from Microsoft's doc
 @:cppFileCode('
 #include "mmdeviceapi.h"
@@ -114,17 +114,18 @@ class AudioFixClient : public IMMNotificationClient {
 AudioFixClient *curAudioFix;
 ')
 @:dox(hide)
-final class Windows {
-
-	public static var __audioChangeCallback:Void->Void = function() {
+final class Windows
+{
+	public static var __audioChangeCallback:Void->Void = function()
+	{
 		trace("test");
 	};
-
 
 	@:functionCode('
 	if (!curAudioFix) curAudioFix = new AudioFixClient();
 	')
-	public static function registerAudio() {
+	public static function registerAudio()
+	{
 		funkin.backend.system.Main.audioDisconnected = false;
 	}
 
@@ -143,7 +144,9 @@ final class Windows {
 		}
 		UpdateWindow(window);
 	')
-	public static function setDarkMode(title:String, enable:Bool) {}
+	public static function setDarkMode(title:String, enable:Bool)
+	{
+	}
 
 	@:functionCode('
 	HWND window = FindWindowA(NULL, title.c_str());
@@ -165,7 +168,9 @@ final class Windows {
 
 	UpdateWindow(window);
 	')
-	public static function setWindowBorderColor(title:String, color:Array<Int>, setHeader:Bool = true, setBorder:Bool = true) {}
+	public static function setWindowBorderColor(title:String, color:Array<Int>, setHeader:Bool = true, setBorder:Bool = true)
+	{
+	}
 
 	@:functionCode('
 	HWND window = FindWindowA(NULL, title.c_str());
@@ -183,7 +188,9 @@ final class Windows {
 	DwmSetWindowAttribute(window, 36, &finalColor, sizeof(COLORREF));
 	UpdateWindow(window);
 	')
-	public static function setWindowTitleColor(title:String, color:Array<Int>) {}
+	public static function setWindowTitleColor(title:String, color:Array<Int>)
+	{
+	}
 
 	@:functionCode('
 	HWND window = GetConsoleWindow();
@@ -192,8 +199,9 @@ final class Windows {
 	SendMessage(window, WM_SETICON, ICON_SMALL, (LPARAM)smallIcon);
 	SendMessage(window, WM_SETICON, ICON_BIG, (LPARAM)icon);    
 	')
-	public static function setWindowIcon(path:String) {}
-
+	public static function setWindowIcon(path:String)
+	{
+	}
 
 	@:functionCode('
 	// https://stackoverflow.com/questions/15543571/allocconsole-not-displaying-cout
@@ -208,7 +216,8 @@ final class Windows {
 	SetConsoleOutputCP(65001);
 	SetConsoleCP(65001);
 	')
-	public static function allocConsole() {
+	public static function allocConsole()
+	{
 	}
 
 	@:functionCode('
@@ -227,35 +236,35 @@ final class Windows {
 		return 0;
 	}
 
-
 	@:functionCode('
 		HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 		SetConsoleTextAttribute(console, color);
 	')
-	public static function setConsoleColors(color:Int) {
-
+	public static function setConsoleColors(color:Int)
+	{
 	}
 
 	@:functionCode('
 		system("CLS");
 		std::cout<< "" <<std::flush;
 	')
-	public static function clearScreen() {
-
+	public static function clearScreen()
+	{
 	}
-
 
 	@:functionCode('
 		MessageBox(GetActiveWindow(), message, caption, icon | MB_SETFOREGROUND);
 	')
-	public static function showMessageBox(caption:String, message:String, icon:MessageBoxIcon = MSG_WARNING) {
-
+	public static function showMessageBox(caption:String, message:String, icon:MessageBoxIcon = MSG_WARNING)
+	{
 	}
 
 	@:functionCode('
 		SetProcessDPIAware();
 	')
-	public static function registerAsDPICompatible() {}
+	public static function registerAsDPICompatible()
+	{
+	}
 
 	@:functionCode("
 		// simple but effective code

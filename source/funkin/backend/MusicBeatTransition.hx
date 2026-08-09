@@ -9,8 +9,10 @@ import funkin.backend.scripting.events.TransitionCreationEvent;
 import funkin.backend.utils.FunkinParentDisabler;
 import funkin.editors.ui.UIState;
 
-class MusicBeatTransition extends MusicBeatSubstate {
+class MusicBeatTransition extends MusicBeatSubstate
+{
 	public static var script:String = Flags.DEFAULT_TRANSITION_SCRIPT;
+
 	public var transitionScript:Script;
 
 	var nextFrameSkip:Bool = false;
@@ -24,12 +26,15 @@ class MusicBeatTransition extends MusicBeatSubstate {
 
 	public var blackSpr:FlxSprite;
 	public var transitionSprite:FunkinSprite;
-	public function new(?newState:FlxState) {
+
+	public function new(?newState:FlxState)
+	{
 		super();
 		this.newState = newState;
 	}
 
-	public override function create() {
+	public override function create()
+	{
 		if (newState != null)
 			add(new FunkinParentDisabler(true, false));
 
@@ -49,7 +54,8 @@ class MusicBeatTransition extends MusicBeatSubstate {
 		transOut = event.transOut;
 		newState = event.newState;
 
-		if (event.cancelled) {
+		if (event.cancelled)
+		{
 			super.create();
 			return;
 		}
@@ -61,9 +67,10 @@ class MusicBeatTransition extends MusicBeatSubstate {
 
 		transitionCamera.flipY = !transOut;
 		transitionCamera.scroll.y = transitionCamera.height;
-		transitionTween = FlxTween.tween(transitionCamera.scroll, {y: -transitionCamera.height}, 2/3, {
+		transitionTween = FlxTween.tween(transitionCamera.scroll, {y: -transitionCamera.height}, 2 / 3, {
 			ease: FlxEase.sineOut,
-			onComplete: function(_) {
+			onComplete: function(_)
+			{
 				finish();
 			}
 		});
@@ -72,28 +79,36 @@ class MusicBeatTransition extends MusicBeatSubstate {
 		transitionScript.call('postCreate', [event]);
 	}
 
-	public override function update(elapsed:Float) {
+	public override function update(elapsed:Float)
+	{
 		transitionScript.call('update', [elapsed]);
 		super.update(elapsed);
 
-		if (nextFrameSkip) {
+		if (nextFrameSkip)
+		{
 			var event = new CancellableEvent();
 			transitionScript.call('onSkip', [event]);
-			if (!event.cancelled) {
+			if (!event.cancelled)
+			{
 				finish();
 				return;
 			}
 		}
 
-		if (allowSkip && !parent.persistentUpdate && FlxG.keys.pressed.SHIFT) {
+		if (allowSkip && !parent.persistentUpdate && FlxG.keys.pressed.SHIFT)
+		{
 			// skip
-			if (newState != null) {
+			if (newState != null)
+			{
 				nextFrameSkip = true;
 				parent.persistentDraw = false;
-			} else {
+			}
+			else
+			{
 				var event = new CancellableEvent();
 				transitionScript.call('onSkip', [event]);
-				if (!event.cancelled) {
+				if (!event.cancelled)
+				{
 					finish();
 				}
 			}
@@ -101,28 +116,35 @@ class MusicBeatTransition extends MusicBeatSubstate {
 		transitionScript.call('postUpdate', [elapsed]);
 	}
 
-	public override function onResize(w:Int, h:Int) {
+	public override function onResize(w:Int, h:Int)
+	{
 		super.onResize(w, h);
-		if (FlxG.state is UIState && UIState.resolutionAware) resizeDefaultSprites();
+		if (FlxG.state is UIState && UIState.resolutionAware)
+			resizeDefaultSprites();
 		transitionScript.call('onResize', [EventManager.get(ResizeEvent).recycle(w, h, null, null)]);
 	}
 
-	public function resizeDefaultSprites() {
-		if (blackSpr != null) {
+	public function resizeDefaultSprites()
+	{
+		if (blackSpr != null)
+		{
 			blackSpr.scale.set(transitionCamera.width, transitionCamera.height);
 			blackSpr.updateHitbox();
 		}
 
-		if (transitionSprite != null) {
+		if (transitionSprite != null)
+		{
 			transitionSprite.setGraphicSize(transitionCamera.width, transitionCamera.height);
 			transitionSprite.updateHitbox();
 		}
 	}
 
-	public function finish() {
+	public function finish()
+	{
 		var event = new CancellableEvent();
 		transitionScript.call('onFinish', [event]);
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		if (newState != null)
 			FlxG.switchState(newState);
@@ -131,13 +153,17 @@ class MusicBeatTransition extends MusicBeatSubstate {
 		transitionScript.call('onPostFinish');
 	}
 
-	public override function destroy() {
+	public override function destroy()
+	{
 		transitionScript.call('destroy');
 
-		if (transitionTween != null) transitionTween.cancel();
+		if (transitionTween != null)
+			transitionTween.cancel();
 		transitionTween = FlxDestroyUtil.destroy(transitionTween);
-		if (newState == null && FlxG.cameras.list.contains(transitionCamera)) FlxG.cameras.remove(transitionCamera);
-		else transitionCamera.bgColor = 0xFF000000;
+		if (newState == null && FlxG.cameras.list.contains(transitionCamera))
+			FlxG.cameras.remove(transitionCamera);
+		else
+			transitionCamera.bgColor = 0xFF000000;
 
 		transitionScript.destroy();
 		super.destroy();

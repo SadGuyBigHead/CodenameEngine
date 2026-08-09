@@ -4,14 +4,15 @@ import flixel.util.FlxColor;
 import flixel.text.FlxText;
 import funkin.backend.FunkinText;
 
-class WarningState extends MusicBeatState {
+class WarningState extends MusicBeatState
+{
 	var titleAlphabet:Alphabet;
 	var disclaimer:FunkinText;
 
 	var transitioning:Bool = false;
 
-	public override function create() {
-
+	public override function create()
+	{
 		titleAlphabet = new Alphabet(0, 0, "WARNING", true);
 		titleAlphabet.screenCenter(X);
 		add(titleAlphabet);
@@ -22,12 +23,10 @@ class WarningState extends MusicBeatState {
 
 		super.create();
 
-		disclaimer.applyMarkup(disclaimer.text,
-			[
-				new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFFF4444), "*"),
-				new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFFFFF44), "#")
-			]
-		);
+		disclaimer.applyMarkup(disclaimer.text, [
+			new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFFF4444), "*"),
+			new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFFFFF44), "#")
+		]);
 		add(disclaimer);
 
 		var off = Std.int((FlxG.height - (disclaimer.y + disclaimer.height)) / 2);
@@ -37,24 +36,30 @@ class WarningState extends MusicBeatState {
 		DiscordUtil.call("onMenuLoaded", ["Beta Warning"]);
 	}
 
-	public override function update(elapsed:Float) {
+	public override function update(elapsed:Float)
+	{
 		super.update(elapsed);
 
-		if (controls.ACCEPT && transitioning) {
-			FlxG.camera.stopFX(); FlxG.camera.visible = false;
+		if (controls.ACCEPT && transitioning)
+		{
+			FlxG.camera.stopFX();
+			FlxG.camera.visible = false;
 			goToTitle();
 		}
 
-		if (controls.ACCEPT && !transitioning) {
+		if (controls.ACCEPT && !transitioning)
+		{
 			transitioning = true;
 			CoolUtil.playMenuSFX(CONFIRM);
-			FlxG.camera.flash(FlxColor.WHITE, 1, function() {
+			FlxG.camera.flash(FlxColor.WHITE, 1, function()
+			{
 				FlxG.camera.fade(FlxColor.BLACK, 2.5, false, goToTitle);
 			});
 		}
 	}
 
-	private function goToTitle() {
+	private function goToTitle()
+	{
 		MusicBeatState.skipTransIn = MusicBeatState.skipTransOut = true;
 		FlxG.switchState(new TitleState());
 	}

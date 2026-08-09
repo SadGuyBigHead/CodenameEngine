@@ -8,19 +8,22 @@ import funkin.backend.shaders.CustomShader;
 import openfl.filters.ShaderFilter;
 
 // TODO: make UIWarningSubstate extend this
-class UISubstateWindow extends MusicBeatSubstate {
+class UISubstateWindow extends MusicBeatSubstate
+{
 	var camShaders:Array<FlxCamera> = [];
-	var blurShader:CustomShader = {
-		var _ = new CustomShader(Options.intensiveBlur ? "engine/editorBlur" : "engine/editorBlurFast");
-		if(!Options.intensiveBlur) {
-			var noiseTexture:ShaderInput<openfl.display.BitmapData> = _.data.noiseTexture;
-			noiseTexture.input = Assets.getBitmapData("assets/shaders/noise256.png");
-			noiseTexture.wrap = REPEAT;
-			var noiseTextureSize:ShaderParameter<Float> = _.data.noiseTextureSize;
-			noiseTextureSize.value = [noiseTexture.input.width, noiseTexture.input.height];
-		}
-		_;
-	};
+	var blurShader:CustomShader =
+		{
+			var _ = new CustomShader(Options.intensiveBlur ? "engine/editorBlur" : "engine/editorBlurFast");
+			if (!Options.intensiveBlur)
+			{
+				var noiseTexture:ShaderInput<openfl.display.BitmapData> = _.data.noiseTexture;
+				noiseTexture.input = Assets.getBitmapData("assets/shaders/noise256.png");
+				noiseTexture.wrap = REPEAT;
+				var noiseTextureSize:ShaderParameter<Float> = _.data.noiseTextureSize;
+				noiseTextureSize.value = [noiseTexture.input.width, noiseTexture.input.height];
+			}
+			_;
+		};
 
 	var titleSpr:UIText;
 	var messageSpr:UIText;
@@ -29,7 +32,8 @@ class UISubstateWindow extends MusicBeatSubstate {
 
 	var windowSpr:UISliceSprite;
 
-	public override function onSubstateOpen() {
+	public override function onSubstateOpen()
+	{
 		super.onSubstateOpen();
 		parent.persistentUpdate = false;
 		parent.persistentDraw = true;
@@ -40,27 +44,34 @@ class UISubstateWindow extends MusicBeatSubstate {
 	var winTitle:String = "";
 	var winSkin:String = "editors/ui/normal-popup";
 
-	public override function create() {
+	public override function create()
+	{
 		super.create();
 
-		for(c in FlxG.cameras.list) {
+		for (c in FlxG.cameras.list)
+		{
 			// Prevent adding a shader if it already has one
-			@:privateAccess if(c._filters != null) {
+			@:privateAccess if (c._filters != null)
+			{
 				var shouldSkip = false;
-				for(filter in c._filters) {
-					if(filter is ShaderFilter) {
+				for (filter in c._filters)
+				{
+					if (filter is ShaderFilter)
+					{
 						var filter:ShaderFilter = cast filter;
-						if(filter.shader is CustomShader) {
+						if (filter.shader is CustomShader)
+						{
 							var shader:CustomShader = cast filter.shader;
 
-							if(shader.path == blurShader.path) {
+							if (shader.path == blurShader.path)
+							{
 								shouldSkip = true;
 								break;
 							}
 						}
 					}
 				}
-				if(shouldSkip)
+				if (shouldSkip)
 					continue;
 			}
 			camShaders.push(c);
@@ -76,7 +87,8 @@ class UISubstateWindow extends MusicBeatSubstate {
 		windowSpr = new UISliceSprite(0, 0, winWidth, winHeight, winSkin);
 		add(windowSpr);
 
-		if(winTitle != null) {
+		if (winTitle != null)
+		{
 			add(titleSpr = new UIText(windowSpr.x + 25, windowSpr.y, windowSpr.bWidth - 50, winTitle, 15, -1));
 			titleSpr.y = windowSpr.y + ((30 - titleSpr.height) / 2);
 		}
@@ -85,10 +97,11 @@ class UISubstateWindow extends MusicBeatSubstate {
 		FlxTween.tween(camera, {zoom: 1}, 0.66, {ease: FlxEase.elasticOut});
 	}
 
-	public override function destroy() {
+	public override function destroy()
+	{
 		UIState.playEditorSound(Flags.DEFAULT_EDITOR_WINDOWCLOSE_SOUND);
 		super.destroy();
-		for(e in camShaders)
+		for (e in camShaders)
 			e.removeShader(blurShader);
 
 		blurShader = null;
@@ -96,7 +109,8 @@ class UISubstateWindow extends MusicBeatSubstate {
 		FlxG.cameras.remove(subCam);
 	}
 
-	public override function update(elapsed:Float) {
+	public override function update(elapsed:Float)
+	{
 		super.update(elapsed);
 		subCam.scroll.set(Std.int(-(FlxG.width - windowSpr.bWidth) / 2), Std.int(-(FlxG.height - windowSpr.bHeight) / 2));
 	}

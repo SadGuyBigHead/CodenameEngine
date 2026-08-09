@@ -10,7 +10,8 @@ import funkin.editors.ui.UITopMenu.UITopMenuButton;
 import funkin.game.Character;
 import funkin.game.HealthIcon;
 
-class CharterStrumline extends UISprite {
+class CharterStrumline extends UISprite
+{
 	public var strumLine:ChartStrumLine;
 
 	public var draggingSprite:UISprite;
@@ -30,37 +31,50 @@ class CharterStrumline extends UISprite {
 
 	public var keyCount:Int = 4;
 	public var startingID(get, null):Int;
+
 	private var __startingID:Int = -1;
-	public function get_startingID():Int {
-		if (__startingID != -1) return __startingID;
+
+	public function get_startingID():Int
+	{
+		if (__startingID != -1)
+			return __startingID;
 
 		var index = Charter.instance.strumLines.members.indexOf(this);
-		if (index < 1) return __startingID = 0; //-1 or 0
+		if (index < 1)
+			return __startingID = 0; //-1 or 0
 
 		var v:Int = 0;
-		for (i in 0...index) v += Charter.instance.strumLines.members[i].keyCount;
+		for (i in 0...index)
+			v += Charter.instance.strumLines.members[i].keyCount;
 		return __startingID = v;
 	}
 
 	public var selectedWaveform(default, set):Int = -1;
-	public function set_selectedWaveform(value:Int):Int {
-		if (value == -1) waveformShader = null;
-		else {
+
+	public function set_selectedWaveform(value:Int):Int
+	{
+		if (value == -1)
+			waveformShader = null;
+		else
+		{
 			var shaderName:String = Charter.waveformHandler.waveformList[value];
 			waveformShader = Charter.waveformHandler.waveShaders.get(shaderName);
 		}
 		return selectedWaveform = value;
 	}
+
 	public var waveformShader:CustomShader;
 
-	public function new(strumLine:ChartStrumLine) {
+	public function new(strumLine:ChartStrumLine)
+	{
 		super();
 		this.strumLine = strumLine;
 
 		scrollFactor.set(1, 0);
 		alpha = 0;
 
-		if(strumLine.visible == null) strumLine.visible = true;
+		if (strumLine.visible == null)
+			strumLine.visible = true;
 
 		var icons = strumLine.characters != null ? strumLine.characters : [];
 
@@ -69,13 +83,14 @@ class CharterStrumline extends UISprite {
 		healthIcons = new FlxSpriteGroup(x, y);
 
 		var maxCol = icons.length < 4 ? icons.length : 4;
-		var maxRow = Math.floor((icons.length-1) / 4) + 1;
-		for (i=>icon in icons) {
+		var maxRow = Math.floor((icons.length - 1) / 4) + 1;
+		for (i => icon in icons)
+		{
 			var healthIcon = new HealthIcon(Character.getIconFromCharName(icon));
 			healthIcon.scale.x = healthIcon.scale.y = Math.max((0.6 - (icons.length / 20)), 0.35);
 			healthIcon.updateHitbox();
-			healthIcon.x = FlxMath.lerp(0, Math.min(icons.length * 20, 120), (maxCol-1 != 0 ? (i % 4) / (maxCol-1) : 0));
-			healthIcon.y = (draggable ? 29 : 7) + FlxMath.lerp(0, Math.min(maxRow * 15, 60), (maxRow-1 != 0 ? Math.floor(i / 4) / (maxRow-1) : 0));
+			healthIcon.x = FlxMath.lerp(0, Math.min(icons.length * 20, 120), (maxCol - 1 != 0 ? (i % 4) / (maxCol - 1) : 0));
+			healthIcon.y = (draggable ? 29 : 7) + FlxMath.lerp(0, Math.min(maxRow * 15, 60), (maxRow - 1 != 0 ? Math.floor(i / 4) / (maxRow - 1) : 0));
 			healthIcon.alpha = strumLine.visible ? 1 : 0.4;
 			healthIcons.add(healthIcon);
 		}
@@ -101,27 +116,31 @@ class CharterStrumline extends UISprite {
 	private var __healthYOffset:Float = 0;
 	private var __draggingYOffset:Float = 0;
 
-	public override function update(elapsed:Float) {
-		if (FlxG.keys.justPressed.K) draggable = !draggable;
+	public override function update(elapsed:Float)
+	{
+		if (FlxG.keys.justPressed.K)
+			draggable = !draggable;
 
-		healthIcons.follow(this, ((40 * keyCount) - healthIcons.width) / 2, 7 + (__healthYOffset = FlxMath.lerp(__healthYOffset, draggable ? 8 : 0, 1/20)));
+		healthIcons.follow(this, ((40 * keyCount) - healthIcons.width) / 2, 7 + (__healthYOffset = FlxMath.lerp(__healthYOffset, draggable ? 8 : 0, 1 / 20)));
 
 		draggingSprite.selectable = draggable;
 		draggingSprite.updateSpriteRect();
 
-		var dragScale:Float = FlxMath.lerp(draggingSprite.scale.x, draggable ? 1 : 0.8, 1/16);
+		var dragScale:Float = FlxMath.lerp(draggingSprite.scale.x, draggable ? 1 : 0.8, 1 / 16);
 		draggingSprite.scale.set(dragScale, dragScale);
 		draggingSprite.updateHitbox();
 
-		draggingSprite.follow(this, ((keyCount*40)/2) - (draggingSprite.width/2), 6 + (__draggingYOffset = FlxMath.lerp(__draggingYOffset, draggable ? 3 : 0, 1/12)));
+		draggingSprite.follow(this, ((keyCount * 40) / 2) - (draggingSprite.width / 2),
+			6 + (__draggingYOffset = FlxMath.lerp(__draggingYOffset, draggable ? 3 : 0, 1 / 12)));
 		var fullAlpha:Float = UIState.state.isOverlapping(draggingSprite, @:privateAccess draggingSprite.__rect) || dragging ? 0.9 : 0.35;
-		draggingSprite.alpha = FlxMath.lerp(draggingSprite.alpha, draggable ? fullAlpha : 0, 1/12);
+		draggingSprite.alpha = FlxMath.lerp(draggingSprite.alpha, draggable ? fullAlpha : 0, 1 / 12);
 		button.follow(this, 0, 95);
 
 		super.update(elapsed);
 	}
 
-	public function updateInfo() {
+	public function updateInfo()
+	{
 		var icons = strumLine.characters != null ? strumLine.characters : [];
 
 		keyCount = strumLine.keyCount != null ? strumLine.keyCount : 4;
@@ -129,58 +148,71 @@ class CharterStrumline extends UISprite {
 		healthIcons.clear();
 
 		var maxCol = icons.length < 4 ? icons.length : 4;
-		var maxRow = Math.floor((icons.length-1) / 4) + 1;
-		for (i=>icon in icons) {
+		var maxRow = Math.floor((icons.length - 1) / 4) + 1;
+		for (i => icon in icons)
+		{
 			var healthIcon = new HealthIcon(Character.getIconFromCharName(icon));
-			healthIcon.scale.x = healthIcon.scale.y = Math.max((0.6 - (icons.length / 20)), 0.35) * (150 / Math.max(healthIcon.frameWidth, healthIcon.frameHeight));
+			healthIcon.scale.x = healthIcon.scale.y = Math.max((0.6 - (icons.length / 20)),
+				0.35) * (150 / Math.max(healthIcon.frameWidth, healthIcon.frameHeight));
 			healthIcon.updateHitbox();
-			healthIcon.x = FlxMath.lerp(0, Math.min(icons.length * 20, 120), (maxCol-1 != 0 ? (i % 4) / (maxCol-1) : 0));
-			healthIcon.y = (draggable ? 14 : 7) + FlxMath.lerp(0, Math.min(maxRow * 15, 60), (maxRow-1 != 0 ? Math.floor(i / 4) / (maxRow-1) : 0));
+			healthIcon.x = FlxMath.lerp(0, Math.min(icons.length * 20, 120), (maxCol - 1 != 0 ? (i % 4) / (maxCol - 1) : 0));
+			healthIcon.y = (draggable ? 14 : 7) + FlxMath.lerp(0, Math.min(maxRow * 15, 60), (maxRow - 1 != 0 ? Math.floor(i / 4) / (maxRow - 1) : 0));
 			healthIcon.alpha = strumLine.visible ? 1 : 0.4;
 			healthIcons.add(healthIcon);
 		}
 
-		var asset = strumLine.vocalsSuffix.length > 0 ? Assets.getSound(Paths.voices(PlayState.SONG.meta.name, PlayState.difficulty, strumLine.vocalsSuffix)) : null;
+		var asset = strumLine.vocalsSuffix.length > 0 ? Assets.getSound(Paths.voices(PlayState.SONG.meta.name, PlayState.difficulty,
+			strumLine.vocalsSuffix)) : null;
 
-		if (vocals == null) FlxG.sound.list.add(vocals = new FlxSound());
-		if (asset != null) {
+		if (vocals == null)
+			FlxG.sound.list.add(vocals = new FlxSound());
+		if (asset != null)
+		{
 			vocals.reset();
 			vocals.loadEmbedded(asset);
 			hasVocals = true;
 		}
-		else {
+		else
+		{
 			vocals.destroy();
 			hasVocals = false;
 		}
 		vocals.group = FlxG.sound.defaultMusicGroup;
 
 		highlightColor = 0xFFFFFFFF;
-		if (icons[0] != null) {
+		if (icons[0] != null)
+		{
 			var characterXML = Character.getXMLFromCharName(icons[0]);
-			if (characterXML != null && characterXML.x.exists("color")) highlightColor = FlxColor.fromString(characterXML.x.get("color"));
+			if (characterXML != null && characterXML.x.exists("color"))
+				highlightColor = FlxColor.fromString(characterXML.x.get("color"));
 
-			//make darker colors more visible for the highlight
+			// make darker colors more visible for the highlight
 			highlightColor.brightness = Math.max(highlightColor.brightness, 0.65);
 		}
 	}
 }
 
-class CharterStrumlineOptions extends UITopMenuButton {
+class CharterStrumlineOptions extends UITopMenuButton
+{
 	var strLine:CharterStrumline;
-	public function new(parent:CharterStrumline) {
+
+	public function new(parent:CharterStrumline)
+	{
 		// TODO: better id for this
 		super(0, 95, null, TU.translate("charter.strumLine.button-name"), []);
 		strLine = parent;
 	}
 
-	public override function update(elapsed:Float) {
+	public override function update(elapsed:Float)
+	{
 		super.update(elapsed);
-		alpha = FlxMath.lerp(1/20, 1, alpha); // so that instead of 0% it is 33% visible
+		alpha = FlxMath.lerp(1 / 20, 1, alpha); // so that instead of 0% it is 33% visible
 		bWidth = 40 * strLine.keyCount;
 		this.label.fieldWidth = bWidth;
 	}
 
-	public override function openContextMenu() {
+	public override function openContextMenu()
+	{
 		contextMenu = [
 			{
 				label: TU.translate("charter.strumLine.hitsounds"),
@@ -188,7 +220,8 @@ class CharterStrumlineOptions extends UITopMenuButton {
 					min: 0,
 					max: 1,
 					value: strLine.hitsoundVolume,
-					onChange: function(t) {
+					onChange: function(t)
+					{
 						strLine.hitsoundVolume = t.slider.value;
 						t.icon = t.slider.value > 0.5 ? 7 : (t.slider.value > 0 ? 8 : 9);
 					}
@@ -199,7 +232,8 @@ class CharterStrumlineOptions extends UITopMenuButton {
 			null,
 			{
 				label: TU.translate("charter.strumLine.edit"),
-				onSelect: function (_) {
+				onSelect: function(_)
+				{
 					Charter.instance.editStrumline(strLine.strumLine);
 				},
 				color: 0xFF959829,
@@ -207,7 +241,8 @@ class CharterStrumlineOptions extends UITopMenuButton {
 			},
 			{
 				label: TU.translate("charter.strumLine.delete"),
-				onSelect: function (_) {
+				onSelect: function(_)
+				{
 					Charter.instance.deleteStrumlineFromData(strLine.strumLine);
 				},
 				color: 0xFF982929,
@@ -215,14 +250,16 @@ class CharterStrumlineOptions extends UITopMenuButton {
 			}
 		];
 
-		if (strLine.hasVocals) {
+		if (strLine.hasVocals)
+		{
 			contextMenu.insert(1, {
 				label: TU.translate("charter.strumLine.vocals"),
 				slider: {
 					min: 0,
 					max: 1,
 					value: strLine.vocalsVolume,
-					onChange: function(t) {
+					onChange: function(t)
+					{
 						strLine.vocalsVolume = t.slider.value;
 						strLine.vocals.volume = Charter.instance.vocals.volume * strLine.vocalsVolume;
 						t.icon = t.slider.value > 0.5 ? 7 : (t.slider.value > 0 ? 8 : 9);
@@ -236,7 +273,10 @@ class CharterStrumlineOptions extends UITopMenuButton {
 		var waveformOptions:Array<UIContextMenuOption> = [
 			{
 				label: TU.translate("charter.strumLine.noWaveform"),
-				onSelect: function(_) {strLine.selectedWaveform = -1;},
+				onSelect: function(_)
+				{
+					strLine.selectedWaveform = -1;
+				},
 				icon: strLine.selectedWaveform == -1 ? 1 : 0
 			}
 		];
@@ -244,7 +284,10 @@ class CharterStrumlineOptions extends UITopMenuButton {
 		for (i => name in Charter.waveformHandler.waveformList)
 			waveformOptions.push({
 				label: name,
-				onSelect: function(_) {strLine.selectedWaveform = i;},
+				onSelect: function(_)
+				{
+					strLine.selectedWaveform = i;
+				},
 				icon: strLine.selectedWaveform == i ? 6 : 5
 			});
 
@@ -256,7 +299,7 @@ class CharterStrumlineOptions extends UITopMenuButton {
 
 		var cam = Charter.instance.charterCamera;
 		var point = CoolUtil.worldToScreenPosition(this, cam);
-		curMenu = UIState.state.openContextMenu(contextMenu, null, point.x, point.y + (bHeight*cam.zoom), Std.int(bWidth * cam.zoom));
+		curMenu = UIState.state.openContextMenu(contextMenu, null, point.x, point.y + (bHeight * cam.zoom), Std.int(bWidth * cam.zoom));
 		point.put();
 	}
 }

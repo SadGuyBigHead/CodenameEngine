@@ -13,10 +13,20 @@ import haxe.Timer;
  * hi gray itsa me yoshicrafter29 i fixed it hehe
  */
 @:dox(hide)
-class AudioSwitchFix {
+class AudioSwitchFix
+{
 	public static function onAudioDisconnected() @:privateAccess {
-		var sources:Array<{source:AudioSource, playing:Bool, time:Float, gain:Float, pitch:Float, position:lime.math.Vector4}> = [];
-		for (source in AudioSource.activeSources) {
+		var sources:Array<
+			{
+				source:AudioSource,
+				playing:Bool,
+				time:Float,
+				gain:Float,
+				pitch:Float,
+				position:lime.math.Vector4
+			}> = [];
+		for (source in AudioSource.activeSources)
+		{
 			var wasPlaying = source.playing;
 			sources.push({
 				source: source,
@@ -28,7 +38,8 @@ class AudioSwitchFix {
 			});
 
 			source.__backend.dispose();
-			if (wasPlaying) source.__backend.playing = true;
+			if (wasPlaying)
+				source.__backend.playing = true;
 		}
 
 		AudioManager.shutdown();
@@ -44,15 +55,17 @@ class AudioSwitchFix {
 		// 	alc.processContext(ctx);
 		// }
 		// #end
-		
-		for (d in sources) {
+
+		for (d in sources)
+		{
 			d.source.__backend.init();
 			d.source.currentTime = d.time;
 			d.source.gain = d.gain;
 			d.source.pitch = d.pitch;
 			d.source.position = d.position;
 
-			if (d.playing) d.source.play();
+			if (d.playing)
+				d.source.play();
 		}
 
 		Main.changeID++;
@@ -61,9 +74,14 @@ class AudioSwitchFix {
 
 	private static var timer:Timer;
 
-	private static function onRun() if (Main.audioDisconnected) onAudioDisconnected();
-	public static function init() {
+	private static function onRun()
+		if (Main.audioDisconnected)
+			onAudioDisconnected();
+
+	public static function init()
+	{
 		NativeAPI.registerAudio();
-		if (timer == null) (timer = new Timer(1000)).run = onRun;
+		if (timer == null)
+			(timer = new Timer(1000)).run = onRun;
 	}
 }

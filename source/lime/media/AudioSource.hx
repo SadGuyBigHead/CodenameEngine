@@ -7,6 +7,7 @@ import lime.math.Vector4;
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
+
 /**
 	The `AudioSource` class provides a way to control audio playback in a Lime application. 
 	It allows for playing, pausing, and stopping audio, as well as controlling various 
@@ -131,7 +132,8 @@ class AudioSource
 	@:noCompletion inline private function init():Void
 	{
 		__backend.init();
-		if (!activeSources.contains(this)) activeSources.push(this);
+		if (!activeSources.contains(this))
+			activeSources.push(this);
 	}
 
 	/**

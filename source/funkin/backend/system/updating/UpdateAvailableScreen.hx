@@ -7,7 +7,8 @@ import funkin.backend.system.updating.UpdateUtil.UpdateCheckCallback;
 import funkin.backend.utils.MarkdownUtil;
 import funkin.menus.MainMenuState;
 
-class UpdateAvailableScreen extends MusicBeatState {
+class UpdateAvailableScreen extends MusicBeatState
+{
 	public var bg:FlxSprite;
 
 	public var versionCheckBG:FlxSprite;
@@ -22,16 +23,20 @@ class UpdateAvailableScreen extends MusicBeatState {
 
 	public var installSelected:Bool = true;
 
-	public function new(check:UpdateCheckCallback) {
+	public function new(check:UpdateCheckCallback)
+	{
 		super();
 
 		this.check = check;
-		if (Date.now().getTime() - check.date.getTime() > 15000) {
-			if ((check = UpdateUtil.checkForUpdates(true)).newUpdate) this.check = check;
+		if (Date.now().getTime() - check.date.getTime() > 15000)
+		{
+			if ((check = UpdateUtil.checkForUpdates(true)).newUpdate)
+				this.check = check;
 		}
 	}
 
-	public override function create() {
+	public override function create()
+	{
 		super.create();
 		MusicBeatState.skipTransIn = true;
 		FlxG.mouse.visible = true;
@@ -105,21 +110,27 @@ class UpdateAvailableScreen extends MusicBeatState {
 	var destY:Float = 0;
 	var oldPos:FlxPoint;
 
-	public override function update(elapsed:Float) {
+	public override function update(elapsed:Float)
+	{
 		super.update(elapsed);
 
-		destY = CoolUtil.bound(destY - (FlxG.mouse.wheel * 75), 0, Math.max(0, changeLogText.height - FlxG.height + versionCheckBG.height + 20 + optionsBG.height));
-		FlxG.camera.scroll.y = lerp(FlxG.camera.scroll.y, destY, 1/3);
+		destY = CoolUtil.bound(destY - (FlxG.mouse.wheel * 75), 0,
+			Math.max(0, changeLogText.height - FlxG.height + versionCheckBG.height + 20 + optionsBG.height));
+		FlxG.camera.scroll.y = lerp(FlxG.camera.scroll.y, destY, 1 / 3);
 
-		if (controls.LEFT_P || controls.RIGHT_P) {
+		if (controls.LEFT_P || controls.RIGHT_P)
+		{
 			installSelected = !installSelected;
 			changeSelection();
 		}
 
 		var newPos = FlxG.mouse.getScreenPosition();
-		if (oldPos.x != newPos.x || oldPos.y != newPos.y) {
-			if (newPos.y >= optionsBG.y) {
-				if (installSelected != (installSelected = (newPos.x < (FlxG.width / 2)))) {
+		if (oldPos.x != newPos.x || oldPos.y != newPos.y)
+		{
+			if (newPos.y >= optionsBG.y)
+			{
+				if (installSelected != (installSelected = (newPos.x < (FlxG.width / 2))))
+				{
 					changeSelection();
 				}
 			}
@@ -130,11 +141,15 @@ class UpdateAvailableScreen extends MusicBeatState {
 			select();
 	}
 
-	public function select() {
-		if (installSelected) {
+	public function select()
+	{
+		if (installSelected)
+		{
 			CoolUtil.playMenuSFX(CONFIRM);
 			FlxG.switchState(new UpdateScreen(check));
-		} else {
+		}
+		else
+		{
 			CoolUtil.playMenuSFX(CANCEL);
 			FlxG.switchState(new MainMenuState());
 		}
@@ -143,7 +158,8 @@ class UpdateAvailableScreen extends MusicBeatState {
 	var installText = TU.translate("updateAvailable.install");
 	var skipText = TU.translate("updateAvailable.skip");
 
-	public function changeSelection(playSFX:Bool = true) {
+	public function changeSelection(playSFX:Bool = true)
+	{
 		CoolUtil.playMenuSFX(SCROLL, 0.7);
 
 		// keeping this local just incase we wanna change this later
@@ -154,7 +170,8 @@ class UpdateAvailableScreen extends MusicBeatState {
 		skipButton.text = wrap(skipText, !installSelected);
 	}
 
-	public override function destroy() {
+	public override function destroy()
+	{
 		super.destroy();
 		FlxG.mouse.visible = false;
 		oldPos.put();

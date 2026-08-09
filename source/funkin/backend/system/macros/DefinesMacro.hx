@@ -5,7 +5,8 @@ import haxe.macro.Context;
 import haxe.macro.Expr;
 #end
 
-class DefinesMacro {
+class DefinesMacro
+{
 	/**
 	 * Returns the defined values
 	 */
@@ -19,7 +20,8 @@ class DefinesMacro {
 
 	// INTERNAL MACROS
 	#if REGION
-	private static macro function __getDefines() {
+	private static macro function __getDefines()
+	{
 		#if display
 		return macro $v{[]};
 		#else

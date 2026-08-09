@@ -1,7 +1,9 @@
 package funkin.editors.charter;
 
-class CharterEventAdd extends UISliceSprite {
+class CharterEventAdd extends UISliceSprite
+{
 	var text:UIText;
+
 	public var sprAlpha:Float = 0;
 	public var step:Float = 0;
 
@@ -10,14 +12,16 @@ class CharterEventAdd extends UISliceSprite {
 	public var sideText:UIText;
 	public var global:Bool = false;
 
-	public function new(global:Bool) {
+	public function new(global:Bool)
+	{
 		super(0, 0, 100, 34, 'editors/charter/event-spr-add');
 
 		this.global = global;
 		flipX = (global != Options.charterSwapEventSides);
 
 		sideText = new UIText(0, -40, 0, TU.translate("charter.eventType-" + (global ? "global" : "local")), 12);
-		sideText.alignment = "center"; sideText.alpha = 0.75;
+		sideText.alignment = "center";
+		sideText.alpha = 0.75;
 
 		text = new UIText(0, 0, 0, "");
 		members.push(text);
@@ -25,12 +29,15 @@ class CharterEventAdd extends UISliceSprite {
 		cursor = CLICK;
 	}
 
-	public override function onHovered() {
+	public override function onHovered()
+	{
 		super.onHovered();
-		if (FlxG.mouse.justReleased && FlxG.state.subState == null) {
+		if (FlxG.mouse.justReleased && FlxG.state.subState == null)
+		{
 			if (curCharterEvent != null)
 				Charter.instance.openSubState(new CharterEventScreenNew(curCharterEvent));
-			else {
+			else
+			{
 				CharterEventGroup.stopThisFuckingShitDudeIstg = true;
 				var chartEvent = new CharterEvent(step, [], global);
 				chartEvent.global = global;
@@ -46,36 +53,49 @@ class CharterEventAdd extends UISliceSprite {
 		}
 	}
 
-	public override function update(elapsed:Float) {
+	public override function update(elapsed:Float)
+	{
 		super.update(elapsed);
 
-		if (FlxG.state.subState != null) return;
-		text.follow(this, (global != Options.charterSwapEventSides) ? bWidth - text.width - (text.text == TU.translate("charter.addEvent") ? 15 : 20) : 20, (bHeight - text.height) / 2);
-		sideText.follow(this, (bWidth/2) - (sideText.fieldWidth/2), -(sideText.height + 2));
+		if (FlxG.state.subState != null)
+			return;
+		text.follow(this, (global != Options.charterSwapEventSides) ? bWidth - text.width - (text.text == TU.translate("charter.addEvent") ? 15 : 20) : 20,
+			(bHeight - text.height) / 2);
+		sideText.follow(this, (bWidth / 2) - (sideText.fieldWidth / 2), -(sideText.height + 2));
 		alpha = sprAlpha * 0.75;
 		text.alpha = sprAlpha;
 
 		sideText.alpha = sprAlpha;
 	}
 
-	public function updatePos(step:Float) {
-		if (FlxG.state.subState != null) return;
+	public function updatePos(step:Float)
+	{
+		if (FlxG.state.subState != null)
+			return;
 		curCharterEvent = null;
 		this.step = step;
 		this.y = (step * 40) - (bHeight / 2);
 		text.text = TU.translate("charter.addEvent");
-		framesOffset = 0; bWidth = 37 + Math.ceil(text.width);
-		x = (global != Options.charterSwapEventSides) ? Charter.instance.strumLines.members[Charter.instance.strumLines.members.length-1].x + (40*Charter.instance.strumLines.members[Charter.instance.strumLines.members.length-1].keyCount) : -(bWidth);
+		framesOffset = 0;
+		bWidth = 37 + Math.ceil(text.width);
+		x = (global != Options.charterSwapEventSides) ? Charter.instance.strumLines.members[Charter.instance.strumLines.members.length - 1].x
+			+ (40 * Charter.instance.strumLines.members[Charter.instance.strumLines.members.length - 1].keyCount) :
+				-(bWidth);
 		sideText.text = TU.translate("charter.eventType-" + (global ? "global" : "local"));
 	}
 
-	public function updateEdit(event:CharterEvent) {
-		if (FlxG.state.subState != null) return;
+	public function updateEdit(event:CharterEvent)
+	{
+		if (FlxG.state.subState != null)
+			return;
 		curCharterEvent = event;
 		this.y = event.y;
 		text.text = TU.translate("charter.editEvent");
-		framesOffset = 9; bWidth = 27 + Math.ceil(text.width) + event.bWidth;
-		x = (event.global != Options.charterSwapEventSides) ? Charter.instance.strumLines.members[Charter.instance.strumLines.members.length-1].x + (40*Charter.instance.strumLines.members[Charter.instance.strumLines.members.length-1].keyCount) : -(bWidth);
+		framesOffset = 9;
+		bWidth = 27 + Math.ceil(text.width) + event.bWidth;
+		x = (event.global != Options.charterSwapEventSides) ? Charter.instance.strumLines.members[Charter.instance.strumLines.members.length - 1].x
+			+ (40 * Charter.instance.strumLines.members[Charter.instance.strumLines.members.length - 1].keyCount) :
+				-(bWidth);
 		sideText.text = TU.translate("charter.eventType-" + (event.global ? "global" : "local"));
 	}
 }

@@ -28,6 +28,7 @@ class GameOverSubstate extends MusicBeatSubstate
 
 	public var gameoverScript:Script;
 	public var game:PlayState = PlayState.instance; // shortcut
+
 	public static var instance:GameOverSubstate = null;
 
 	private var __cancelDefault:Bool = false;
@@ -102,15 +103,20 @@ class GameOverSubstate extends MusicBeatSubstate
 		if (__cancelDefault)
 			return;
 
-		if (controls.ACCEPT) endBullshit();
-		if (controls.BACK) exit();
+		if (controls.ACCEPT)
+			endBullshit();
+		if (controls.BACK)
+			exit();
 
-		if (!isEnding && ((!lossSFX.playing) || (character.getAnimName() == "firstDeath" && character.isAnimFinished())) && (FlxG.sound.music == null || !FlxG.sound.music.playing))
+		if (!isEnding
+			&& ((!lossSFX.playing) || (character.getAnimName() == "firstDeath" && character.isAnimFinished()))
+			&& (FlxG.sound.music == null || !FlxG.sound.music.playing))
 		{
 			var event = new CancellableEvent();
 			gameoverScript.call("deathStart", [event]);
 
-			if (event.cancelled) return;
+			if (event.cancelled)
+				return;
 
 			CoolUtil.playMusic(Paths.music(gameOverSong), false, 1, true, Flags.DEFAULT_BPM);
 			character.playAnim("deathLoop", true, DANCE);
@@ -181,11 +187,15 @@ class GameOverSubstate extends MusicBeatSubstate
 		if (event.cancelled)
 			return;
 
-		if (PlayState.chartingMode && Charter.undos.unsaved) game.saveWarn(false);
-		else {
-			if (Charter.instance != null) Charter.instance.__clearStatics();
+		if (PlayState.chartingMode && Charter.undos.unsaved)
+			game.saveWarn(false);
+		else
+		{
+			if (Charter.instance != null)
+				Charter.instance.__clearStatics();
 
-			if (FlxG.sound.music != null) FlxG.sound.music.stop();
+			if (FlxG.sound.music != null)
+				FlxG.sound.music.stop();
 			FlxG.sound.music = null;
 
 			FlxG.switchState(PlayState.isStoryMode ? new StoryMenuState() : new FreeplayState());

@@ -4,7 +4,8 @@ import flixel.util.FlxColor;
 import flixel.math.FlxPoint;
 import funkin.backend.chart.ChartData.ChartBookmark;
 
-class CharterBookmarkCreation extends UISubstateWindow {
+class CharterBookmarkCreation extends UISubstateWindow
+{
 	public var saveButton:UIButton;
 	public var closeButton:UIButton;
 	public var textBox:UITextBox;
@@ -27,11 +28,13 @@ class CharterBookmarkCreation extends UISubstateWindow {
 		bookmarkStep = step;
 	}
 
-	public override function create() {
+	public override function create()
+	{
 		FlxG.sound.music.pause();
 		Charter.instance.vocals.pause();
 
-		function addLabelOn(ui:UISprite, text:String):UIText {
+		function addLabelOn(ui:UISprite, text:String):UIText
+		{
 			var text:UIText = new UIText(ui.x, ui.y - 24, 0, text);
 			ui.members.push(text);
 			return text;
@@ -43,18 +46,21 @@ class CharterBookmarkCreation extends UISubstateWindow {
 		textBox.antialiasing = true;
 		add(textBox);
 		addLabelOn(textBox, TU.translate("charter.bookmarks.createBookmarkName"));
-		
+
 		colorPicker = new UICompactColorwheel(textBox.x, textBox.y + textBox.bHeight + 34, flixel.util.FlxColor.RED);
 		add(colorPicker);
 		addLabelOn(colorPicker, TU.translate("charter.bookmarks.createBookmarkColor"));
 
-		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20 - 125, windowSpr.y + windowSpr.bHeight - 16 - 32, TU.translate("editor.saveClose"), function() {
-			callback(true, textBox.label.text, colorPicker.curColor, bookmarkStep);
-			close();
-		}, 125);
+		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20 - 125, windowSpr.y + windowSpr.bHeight - 16 - 32, TU.translate("editor.saveClose"),
+			function()
+			{
+				callback(true, textBox.label.text, colorPicker.curColor, bookmarkStep);
+				close();
+			}, 125);
 		add(saveButton);
 
-		closeButton = new UIButton(saveButton.x - 20, saveButton.y, TU.translate("editor.close"), function() {
+		closeButton = new UIButton(saveButton.x - 20, saveButton.y, TU.translate("editor.close"), function()
+		{
 			callback(false, "", FlxColor.TRANSPARENT, -1);
 			close();
 		}, 125);

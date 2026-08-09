@@ -7,21 +7,27 @@ import funkin.backend.shaders.CustomShader;
  * Option type that has a portrait.
  * Used in the credits menu.
 **/
-class PortraitOption extends TextOption {
+class PortraitOption extends TextOption
+{
 	public var portrait:FlxSprite = null;
 
-	public function new(name:String, desc:String, callback:Void->Void, ?graphic:FlxGraphic, size:Int = 96, usePortrait:Bool = true) {
+	public function new(name:String, desc:String, callback:Void->Void, ?graphic:FlxGraphic, size:Int = 96, usePortrait:Bool = true)
+	{
 		super(name, desc, callback);
 		__text.x = 100;
 
-		if (graphic != null) addPortrait(graphic, size, usePortrait);
+		if (graphic != null)
+			addPortrait(graphic, size, usePortrait);
 	}
 
-	public function addPortrait(graphic:FlxGraphic, size:Int = 96, usePortrait:Bool = true) {
-		if (portrait == null) {
+	public function addPortrait(graphic:FlxGraphic, size:Int = 96, usePortrait:Bool = true)
+	{
+		if (portrait == null)
+		{
 			portrait = new FlxSprite();
 			portrait.antialiasing = true;
-			if(usePortrait) portrait.shader = new CustomShader('engine/circleProfilePicture');
+			if (usePortrait)
+				portrait.shader = new CustomShader('engine/circleProfilePicture');
 			add(portrait);
 		}
 		portrait.loadGraphic(graphic);

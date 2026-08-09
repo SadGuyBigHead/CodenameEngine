@@ -3,7 +3,8 @@ package funkin.options.type;
 import funkin.menus.ui.Slider;
 import funkin.options.TreeMenu.ITreeFloatOption;
 
-class SliderOption extends TextOption implements ITreeFloatOption {
+class SliderOption extends TextOption implements ITreeFloatOption
+{
 	public var changedCallback:Float->Void;
 
 	public var min:Float;
@@ -20,12 +21,15 @@ class SliderOption extends TextOption implements ITreeFloatOption {
 
 	var __mouseControl:Bool;
 
-	function getValue():Float return (currentValue - min) / (max - min);
+	function getValue():Float
+		return (currentValue - min) / (max - min);
 
-	override function set_text(v:String) {
+	override function set_text(v:String)
+	{
 		super.set_text(v);
 		slider.x = __text.x + __text.width + 30;
-		if (dynamicWidth) {
+		if (dynamicWidth)
+		{
 			slider.barWidth = 1100 - __text.width;
 			slider.updateHitbox();
 		}
@@ -33,7 +37,7 @@ class SliderOption extends TextOption implements ITreeFloatOption {
 	}
 
 	public function new(text:String, desc:String, min:Float, max:Float, step:Float = 1, ?segments:Int, ?optionName:String, barWidth = -1,
-		?changedCallback:Float->Void = null, ?parent:Dynamic)
+			?changedCallback:Float->Void = null, ?parent:Dynamic)
 	{
 		this.changedCallback = changedCallback;
 		this.min = min;
@@ -42,7 +46,8 @@ class SliderOption extends TextOption implements ITreeFloatOption {
 		this.optionName = optionName;
 		this.parent = parent = parent != null ? parent : Options;
 
-		if (Reflect.field(parent, optionName) != null) currentValue = Reflect.field(parent, optionName);
+		if (Reflect.field(parent, optionName) != null)
+			currentValue = Reflect.field(parent, optionName);
 
 		slider = new Slider(12, 0, getValue(), (dynamicWidth = barWidth < 0) ? 600 : barWidth, segments);
 		slider.scale.set(0.75, 0.75);
@@ -53,14 +58,20 @@ class SliderOption extends TextOption implements ITreeFloatOption {
 		slider.y = Math.floor(__text.y + (__text.height - slider.height) * 0.5 + 2);
 	}
 
-	override function update(elapsed:Float) {
-		if (slider.selected = selected && !locked) {
-			if (__mouseControl && FlxG.mouse.justReleased) __mouseControl = false;
-			else if (FlxG.mouse.justPressed) __mouseControl = slider.overlapsPoint(FlxG.mouse.getPosition(@:privateAccess flixel.input.FlxPointer._cachedPoint), true);
+	override function update(elapsed:Float)
+	{
+		if (slider.selected = selected && !locked)
+		{
+			if (__mouseControl && FlxG.mouse.justReleased)
+				__mouseControl = false;
+			else if (FlxG.mouse.justPressed)
+				__mouseControl = slider.overlapsPoint(FlxG.mouse.getPosition(@:privateAccess flixel.input.FlxPointer._cachedPoint), true);
 
-			if (__mouseControl) {
+			if (__mouseControl)
+			{
 				var p = @:privateAccess flixel.input.FlxPointer._cachedPoint;
-				if (!FlxG.mouse.justPressed) FlxG.mouse.getPosition(p);
+				if (!FlxG.mouse.justPressed)
+					FlxG.mouse.getPosition(p);
 				p.subtractPoint(camera.scroll);
 
 				slider.getScreenPosition(_point, camera);
@@ -71,18 +82,24 @@ class SliderOption extends TextOption implements ITreeFloatOption {
 			__mouseControl = false;
 
 		slider.value = getValue();
-		//__text.x = slider.x + slider.width + 30;
+		// __text.x = slider.x + slider.width + 30;
 
 		super.update(elapsed);
 	}
 
-	public function changeValue(change:Float):Void {
-		if (locked) return;
-		if (currentValue == (currentValue = FlxMath.bound(currentValue + change * step, min, max))) return;
+	public function changeValue(change:Float):Void
+	{
+		if (locked)
+			return;
+		if (currentValue == (currentValue = FlxMath.bound(currentValue + change * step, min, max)))
+			return;
 
 		Reflect.setField(parent, optionName, currentValue);
-		if (changedCallback != null) changedCallback(currentValue);
+		if (changedCallback != null)
+			changedCallback(currentValue);
 	}
 
-	override function select() {}
+	override function select()
+	{
+	}
 }

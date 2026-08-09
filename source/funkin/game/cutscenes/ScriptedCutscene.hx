@@ -12,11 +12,13 @@ import funkin.backend.scripting.events.StateEvent;
  * Substate made for scripted cutscenes.
  * To add cutscenes to your songs, add a `cutscene.hx` file in your song's directory (ex: `songs/song/cutscene.hx`)
  */
-class ScriptedCutscene extends Cutscene {
+class ScriptedCutscene extends Cutscene
+{
 	var scriptPath:String;
 	var script:Script;
 
-	public function new(scriptPath:String, callback:Void->Void) {
+	public function new(scriptPath:String, callback:Void->Void)
+	{
 		super(callback);
 
 		script = Script.create(this.scriptPath = Paths.script(Path.withoutExtension(scriptPath), null, scriptPath.startsWith('assets')));
@@ -25,15 +27,17 @@ class ScriptedCutscene extends Cutscene {
 		script.load();
 	}
 
-	public override function create() {
+	public override function create()
+	{
 		super.create();
 		script.call("create");
 
-		if(Std.isOfType(script, DummyScript))
+		if (Std.isOfType(script, DummyScript))
 			onErrorScriptLoading();
 	}
 
-	public function onErrorScriptLoading() {
+	public function onErrorScriptLoading()
+	{
 		Logs.trace('Could not find script for scripted cutscene at "${scriptPath}"', ERROR, RED);
 		close();
 	}
@@ -56,25 +60,29 @@ class ScriptedCutscene extends Cutscene {
 	{
 		var event = new CancellableEvent();
 		script.call("pauseCutscene", [event]);
-		if(!event.cancelled) super.pauseCutscene();
+		if (!event.cancelled)
+			super.pauseCutscene();
 	}
 
 	public override function onSkipCutscene(event:NameEvent)
 	{
 		script.call("onSkipCutscene", [event]);
-		if(!event.cancelled) super.onSkipCutscene(event);
+		if (!event.cancelled)
+			super.onSkipCutscene(event);
 	}
 
 	public override function onRestartCutscene(event:NameEvent)
 	{
 		script.call("onRestartCutscene", [event]);
-		if(!event.cancelled) super.onRestartCutscene(event);
+		if (!event.cancelled)
+			super.onRestartCutscene(event);
 	}
 
 	public override function onResumeCutscene(event:NameEvent)
 	{
 		script.call("onResumeCutscene", [event]);
-		if(!event.cancelled) super.onResumeCutscene(event);
+		if (!event.cancelled)
+			super.onResumeCutscene(event);
 	}
 
 	public override function measureHit(curMeasure:Int)
@@ -111,7 +119,8 @@ class ScriptedCutscene extends Cutscene {
 			super.closeSubState();
 	}
 
-	public override function destroy() {
+	public override function destroy()
+	{
 		script.call("destroy");
 		script.destroy();
 		super.destroy();
@@ -119,9 +128,11 @@ class ScriptedCutscene extends Cutscene {
 
 	// VIDEOS
 	#if REGION
-	public function startVideo(path:String, ?callback:Void->Void) {
+	public function startVideo(path:String, ?callback:Void->Void)
+	{
 		persistentDraw = false;
-		openSubState(new VideoCutscene(path, function() {
+		openSubState(new VideoCutscene(path, function()
+		{
 			if (callback != null)
 				callback();
 		}));
@@ -135,9 +146,11 @@ class ScriptedCutscene extends Cutscene {
 
 	// DIALOGUE
 	#if REGION
-	public function startDialogue(path:String, ?callback:Void->Void) {
+	public function startDialogue(path:String, ?callback:Void->Void)
+	{
 		persistentDraw = true;
-		openSubState(new DialogueCutscene(path, function() {
+		openSubState(new DialogueCutscene(path, function()
+		{
 			if (callback != null)
 				callback();
 		}));

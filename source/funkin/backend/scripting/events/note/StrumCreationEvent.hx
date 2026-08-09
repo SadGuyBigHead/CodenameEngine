@@ -2,9 +2,9 @@ package funkin.backend.scripting.events.note;
 
 import funkin.game.Strum;
 
-final class StrumCreationEvent extends CancellableEvent {
+final class StrumCreationEvent extends CancellableEvent
+{
 	@:dox(hide) public var __doAnimation = true;
-
 
 	/**
 	 * The strum that is being created
@@ -34,6 +34,13 @@ final class StrumCreationEvent extends CancellableEvent {
 	/**
 	 * Cancels the animation that makes the strum "land" in the strumline.
 	 */
-	public function cancelAnimation() {__doAnimation = false;}
-	@:dox(hide) public function preventAnimation() {cancelAnimation();}
+	public function cancelAnimation()
+	{
+		__doAnimation = false;
+	}
+
+	@:dox(hide) public function preventAnimation()
+	{
+		cancelAnimation();
+	}
 }

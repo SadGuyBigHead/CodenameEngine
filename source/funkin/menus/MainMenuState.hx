@@ -31,7 +31,6 @@ class MainMenuState extends MusicBeatState
 
 	override function create()
 	{
-
 		super.create();
 
 		DiscordUtil.call("onMenuLoaded", ["Main Menu"]);
@@ -49,7 +48,8 @@ class MainMenuState extends MusicBeatState
 		magenta.color = 0xFFfd719b;
 		add(magenta);
 
-		for(bg in [bg, magenta]) {
+		for (bg in [bg, magenta])
+		{
 			bg.scrollFactor.set(0, 0.18);
 			bg.scale.set(1.15, 1.15);
 			bg.updateHitbox();
@@ -60,7 +60,7 @@ class MainMenuState extends MusicBeatState
 		menuItems = new FlxTypedGroup<FlxSprite>();
 		add(menuItems);
 
-		for (i=>option in optionShit)
+		for (i => option in optionShit)
 		{
 			var menuItem:FlxSprite = new FlxSprite(0, 60 + (i * 160));
 			menuItem.frames = Paths.getFrames('menus/mainmenu/${option}');
@@ -106,23 +106,27 @@ class MainMenuState extends MusicBeatState
 
 		if (!selectedSomethin)
 		{
-			if (canAccessDebugMenus) {
-				if (controls.DEV_ACCESS) {
+			if (canAccessDebugMenus)
+			{
+				if (controls.DEV_ACCESS)
+				{
 					persistentUpdate = false;
 					persistentDraw = true;
 					openSubState(new funkin.editors.EditorPicker());
 				}
 				/*
-				if (FlxG.keys.justPressed.SEVEN)
-					FlxG.switchState(new funkin.desktop.DesktopMain());
-				if (FlxG.keys.justPressed.EIGHT) {
-					CoolUtil.safeSaveFile("chart.json", Json.stringify(funkin.backend.chart.Chart.parse("dadbattle", "hard")));
-				}
-				*/
+					if (FlxG.keys.justPressed.SEVEN)
+						FlxG.switchState(new funkin.desktop.DesktopMain());
+					if (FlxG.keys.justPressed.EIGHT) {
+						CoolUtil.safeSaveFile("chart.json", Json.stringify(funkin.backend.chart.Chart.parse("dadbattle", "hard")));
+					}
+				 */
 			}
-			if (!Options.devMode && FlxG.keys.justPressed.SEVEN) {
+			if (!Options.devMode && FlxG.keys.justPressed.SEVEN)
+			{
 				FlxG.sound.play(Paths.sound(Flags.DEFAULT_EDITOR_DELETE_SOUND));
-				if (devModeCount++ == 2) {
+				if (devModeCount++ == 2)
+				{
 					FlxTween.tween(devModeWarning, {alpha: 1}, 0.4);
 				}
 				FlxTween.completeTweensOf(devModeWarning);
@@ -136,14 +140,15 @@ class MainMenuState extends MusicBeatState
 			var downP = controls.DOWN_P;
 			var scroll = FlxG.mouse.wheel;
 
-			if (upP || downP || scroll != 0)  // like this we wont break mods that expect a 0 change event when calling sometimes  - Nex
+			if (upP || downP || scroll != 0) // like this we wont break mods that expect a 0 change event when calling sometimes  - Nex
 				changeItem((upP ? -1 : 0) + (downP ? 1 : 0) - scroll);
 
 			if (controls.BACK)
 				FlxG.switchState(new TitleState());
 
 			#if MOD_SUPPORT
-			if (controls.SWITCHMOD) {
+			if (controls.SWITCHMOD)
+			{
 				openSubState(new ModSwitchMenu());
 				persistentUpdate = false;
 				persistentDraw = true;
@@ -157,46 +162,59 @@ class MainMenuState extends MusicBeatState
 		super.update(elapsed);
 
 		if (forceCenterX)
-		menuItems.forEach(function(spr:FlxSprite)
-		{
-			spr.screenCenter(X);
-		});
+			menuItems.forEach(function(spr:FlxSprite)
+			{
+				spr.screenCenter(X);
+			});
 	}
 
-	public override function switchTo(nextState:FlxState):Bool {
-		try {
-			menuItems.forEach(function(spr:FlxSprite) {
+	public override function switchTo(nextState:FlxState):Bool
+	{
+		try
+		{
+			menuItems.forEach(function(spr:FlxSprite)
+			{
 				FlxTween.tween(spr, {alpha: 0}, 0.5, {ease: FlxEase.quintOut});
 			});
 		}
 		return super.switchTo(nextState);
 	}
 
-	function selectItem() {
+	function selectItem()
+	{
 		selectedSomethin = true;
 		CoolUtil.playMenuSFX(CONFIRM);
 
-		if (Options.flashingMenu) FlxFlicker.flicker(magenta, 1.1, 0.15, false);
+		if (Options.flashingMenu)
+			FlxFlicker.flicker(magenta, 1.1, 0.15, false);
 
 		FlxFlicker.flicker(menuItems.members[curSelected], 1, Options.flashingMenu ? 0.06 : 0.15, false, false, function(flick:FlxFlicker)
 		{
 			var daChoice:String = optionShit[curSelected];
 
 			var event = event("onSelectItem", EventManager.get(NameEvent).recycle(daChoice));
-			if (event.cancelled) return;
+			if (event.cancelled)
+				return;
 			switch (event.name)
 			{
-				case 'story mode': FlxG.switchState(new StoryMenuState());
-				case 'freeplay': FlxG.switchState(new FreeplayState());
-				case 'donate', 'credits': FlxG.switchState(new CreditsMain());  // kept donate for not breaking scripts, if you don't want donate to bring you to the credits menu, thats easy softcodable  - Nex
-				case 'options': FlxG.switchState(new OptionsMenu());
+				case 'story mode':
+					FlxG.switchState(new StoryMenuState());
+				case 'freeplay':
+					FlxG.switchState(new FreeplayState());
+				case 'donate', 'credits':
+					FlxG.switchState(new CreditsMain()); // kept donate for not breaking scripts, if you don't want donate to bring you to the credits menu, thats easy softcodable  - Nex
+				case 'options':
+					FlxG.switchState(new OptionsMenu());
 			}
 		});
 	}
+
 	function changeItem(huh:Int = 0)
 	{
-		var event = event("onChangeItem", EventManager.get(MenuChangeEvent).recycle(curSelected, FlxMath.wrap(curSelected + huh, 0, menuItems.length-1), huh, huh != 0));
-		if (event.cancelled) return;
+		var event = event("onChangeItem",
+			EventManager.get(MenuChangeEvent).recycle(curSelected, FlxMath.wrap(curSelected + huh, 0, menuItems.length - 1), huh, huh != 0));
+		if (event.cancelled)
+			return;
 
 		curSelected = event.value;
 

@@ -2,7 +2,8 @@ package funkin.backend.chart;
 
 import flixel.util.FlxColor;
 
-typedef ChartData = {
+typedef ChartData =
+{
 	public var strumLines:Array<ChartStrumLine>;
 	public var events:Array<ChartEvent>;
 	public var meta:ChartMetaData;
@@ -16,7 +17,8 @@ typedef ChartData = {
 	public var ?fromMods:Bool;
 }
 
-typedef ChartMetaData = {
+typedef ChartMetaData =
+{
 	public var name:String;
 	public var ?variant:String;
 	public var ?displayName:String;
@@ -41,7 +43,8 @@ typedef ChartMetaData = {
 	public var ?needsVoices:Bool;
 }
 
-typedef ChartStrumLine = {
+typedef ChartStrumLine =
+{
 	var characters:Array<String>;
 	var type:ChartStrumLineType;
 	var notes:Array<ChartNote>;
@@ -57,35 +60,41 @@ typedef ChartStrumLine = {
 	var ?strumLinePos:Float; // Backwards compatibility
 }
 
-typedef ChartNote = {
+typedef ChartNote =
+{
 	var time:Float; // time at which the note will be hit (ms)
 	var id:Int; // strum id of the note
 	var type:Int; // type (int) of the note
 	var sLen:Float; // sustain length of the note (ms)
 }
 
-typedef ChartBookmark = {
+typedef ChartBookmark =
+{
 	var time:Float;
 	var name:String;
 	var color:String;
 }
 
-typedef ChartEvent = {
+typedef ChartEvent =
+{
 	var name:String;
 	var time:Float;
 	var params:Array<Dynamic>;
-	var ?global:Bool;  // If its from a global event file like events.json; this field might be saved rarely in the chart json directly but modders can mess with this for messing with the saving funcs too  - Nex
+	var ?global:Bool; // If its from a global event file like events.json; this field might be saved rarely in the chart json directly but modders can mess with this for messing with the saving funcs too  - Nex
 }
 
-enum abstract ChartStrumLineType(Int) from Int to Int {
+enum abstract ChartStrumLineType(Int) from Int to Int
+{
 	/**
 	 * STRUMLINE IS MARKED AS OPPONENT - WILL BE PLAYED BY CPU, OR PLAYED BY PLAYER IF OPPONENT MODE IS ON
 	 */
 	var OPPONENT = 0;
+
 	/**
 	 * STRUMLINE IS MARKED AS PLAYER - WILL BE PLAYED AS PLAYER, OR PLAYED AS CPU IF OPPONENT MODE IS ON
 	 */
 	var PLAYER = 1;
+
 	/**
 	 * STRUMLINE IS MARKED AS ADDITIONAL - WILL BE PLAYED AS CPU EVEN IF OPPONENT MODE IS ENABLED
 	 */

@@ -18,7 +18,8 @@ import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 
-interface IPrePostDraw {
+interface IPrePostDraw
+{
 	public function preDraw():Void;
 	public function postDraw():Void;
 }
@@ -27,13 +28,17 @@ interface IPrePostDraw {
 @:access(flixel.FlxSprite)
 @:access(flixel.math.FlxMatrix)
 @:access(openfl.geom.Matrix)
-final class MatrixUtil {
-	public static function getMatrixPosition(sprite:FlxSprite, points:OneOfTwo<FlxPoint, Array<FlxPoint>>, ?camera:FlxCamera, _width:Float = 1, _height:Float = 1):Array<FlxPoint>
+final class MatrixUtil
+{
+	public static function getMatrixPosition(sprite:FlxSprite, points:OneOfTwo<FlxPoint, Array<FlxPoint>>, ?camera:FlxCamera, _width:Float = 1,
+			_height:Float = 1):Array<FlxPoint>
 	{
-		//if(_width == -1) _width = sprite.width;
-		//if(_height == -1) _height = sprite.height;
-		if(camera == null) camera = sprite.camera;
-		if(points is FlxBasePoint) points = [points];
+		// if(_width == -1) _width = sprite.width;
+		// if(_height == -1) _height = sprite.height;
+		if (camera == null)
+			camera = sprite.camera;
+		if (points is FlxBasePoint)
+			points = [points];
 
 		var nc:FakeCamera = FakeCamera.instance;
 		nc.zoom = camera.zoom;
@@ -42,12 +47,15 @@ final class MatrixUtil {
 
 		var points:Array<FlxPoint> = cast points;
 
-		if(sprite is IPrePostDraw) {
+		if (sprite is IPrePostDraw)
+		{
 			var postDraw = cast(sprite, IPrePostDraw);
 			postDraw.preDraw();
 			sprite.drawComplex(nc);
 			postDraw.postDraw();
-		} else {
+		}
+		else
+		{
 			sprite.drawComplex(nc);
 		}
 		transformPoints(sprite, points, sprite._matrix, camera, _width, _height);
@@ -58,21 +66,27 @@ final class MatrixUtil {
 	/**
 	 * Warning: modifies the points in the array
 	**/
-	public static function transformPoints(sprite:FlxSprite, points:Array<FlxPoint>, matrix:FlxMatrix, ?camera:FlxCamera, _width:Float = 1, _height:Float = 1, doCameraTransform:Bool = true):Array<FlxPoint> {
+	public static function transformPoints(sprite:FlxSprite, points:Array<FlxPoint>, matrix:FlxMatrix, ?camera:FlxCamera, _width:Float = 1, _height:Float = 1,
+			doCameraTransform:Bool = true):Array<FlxPoint>
+	{
 		var isFunkinSprite = sprite is FunkinSprite;
 		var funkinSprite:FunkinSprite = null;
-		if(isFunkinSprite) funkinSprite = cast sprite;
+		if (isFunkinSprite)
+			funkinSprite = cast sprite;
 
-		for(point in points) {
+		for (point in points)
+		{
 			var x = matrix.__transformX(point.x * _width, point.y * _height);
 			var y = matrix.__transformY(point.x * _width, point.y * _height);
 
-			if(doCameraTransform) {
+			if (doCameraTransform)
+			{
 				// reset to ingame coords
 				x += camera.scroll.x;
 				y += camera.scroll.y;
 
-				if(isFunkinSprite) {
+				if (isFunkinSprite)
+				{
 					var ratio = 1 - FlxMath.lerp(1 / camera.zoom, 1, funkinSprite.zoomFactor);
 					x += camera.width / 2 * ratio;
 					y += camera.height / 2 * ratio;
@@ -83,8 +97,10 @@ final class MatrixUtil {
 		return points;
 	}
 
-	private static function rawTransformPoints(points:Array<FlxPoint>, matrix:FlxMatrix, _width:Float = 1, _height:Float = 1):Array<FlxPoint> {
-		for(point in points) {
+	private static function rawTransformPoints(points:Array<FlxPoint>, matrix:FlxMatrix, _width:Float = 1, _height:Float = 1):Array<FlxPoint>
+	{
+		for (point in points)
+		{
 			var x = matrix.__transformX(point.x * _width, point.y * _height);
 			var y = matrix.__transformY(point.x * _width, point.y * _height);
 

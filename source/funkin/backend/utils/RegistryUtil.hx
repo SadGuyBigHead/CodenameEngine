@@ -1,12 +1,14 @@
 package funkin.backend.utils;
 
-enum abstract RegistryHive(Int) {
+enum abstract RegistryHive(Int)
+{
 	var HKEY_CLASSES_ROOT = 0x80000000;
 	var HKEY_CURRENT_USER = 0x80000001;
 	var HKEY_LOCAL_MACHINE = 0x80000002;
 	var HKEY_USERS = 0x80000003;
 	var HKEY_CURRENT_CONFIG = 0x80000005;
 }
+
 #if windows
 @:cppFileCode('
 #include <windows.h>
@@ -15,7 +17,8 @@ enum abstract RegistryHive(Int) {
 #include <vector>
 ')
 #end
-class RegistryUtil {
+class RegistryUtil
+{
 	#if windows
 	@:functionCode('
 		HKEY hKey;
@@ -114,7 +117,8 @@ class RegistryUtil {
 		return result == ERROR_SUCCESS;
 	')
 	#end
-	public static function delete(hive:RegistryHive, key:String, string:String):Bool {
+	public static function delete(hive:RegistryHive, key:String, string:String):Bool
+	{
 		return false;
 	}
 }

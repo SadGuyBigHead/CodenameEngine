@@ -30,30 +30,37 @@ class MusicBeatSubstate extends FlxSubState implements IBeatCancellableReceiver
 	 * Whether this specific substate can open custom transitions
 	 */
 	public var canOpenCustomTransition:Bool = false;
+
 	/**
 	 * Current step
 	 */
 	public var curStep(get, never):Int;
+
 	/**
 	 * Current beat
 	 */
 	public var curBeat(get, never):Int;
+
 	/**
 	 * Current beat
 	 */
 	public var curMeasure(get, never):Int;
+
 	/**
 	 * Current step, as a `Float` (ex: 4.94, instead of 4)
 	 */
 	public var curStepFloat(get, never):Float;
+
 	/**
 	 * Current beat, as a `Float` (ex: 1.24, instead of 1)
 	 */
 	public var curBeatFloat(get, never):Float;
+
 	/**
 	 * Current beat, as a `Float` (ex: 1.24, instead of 1)
 	 */
 	public var curMeasureFloat(get, never):Float;
+
 	/**
 	 * Current song position (in milliseconds).
 	 */
@@ -61,16 +68,22 @@ class MusicBeatSubstate extends FlxSubState implements IBeatCancellableReceiver
 
 	inline function get_curStep():Int
 		return Conductor.curStep;
+
 	inline function get_curBeat():Int
 		return Conductor.curBeat;
+
 	inline function get_curMeasure():Int
 		return Conductor.curMeasure;
+
 	inline function get_curStepFloat():Float
 		return Conductor.curStepFloat;
+
 	inline function get_curBeatFloat():Float
 		return Conductor.curBeatFloat;
+
 	inline function get_curMeasureFloat():Float
 		return Conductor.curMeasureFloat;
+
 	inline function get_songPos():Float
 		return Conductor.songPosition;
 
@@ -100,43 +113,52 @@ class MusicBeatSubstate extends FlxSubState implements IBeatCancellableReceiver
 
 	inline function get_controls():Controls
 		return PlayerSettings.solo.controls;
+
 	inline function get_controlsP1():Controls
 		return PlayerSettings.player1.controls;
+
 	inline function get_controlsP2():Controls
 		return PlayerSettings.player2.controls;
 
-
-	public function new(scriptsAllowed:Bool = true, ?scriptName:String) {
+	public function new(scriptsAllowed:Bool = true, ?scriptName:String)
+	{
 		super();
 		this.scriptsAllowed = #if SOFTCODED_STATES scriptsAllowed #else false #end;
 		this.scriptName = scriptName;
 	}
 
-	function loadScript() {
+	function loadScript()
+	{
 		var className = Type.getClassName(Type.getClass(this));
 		if (stateScripts == null)
 			(stateScripts = new ScriptPack(className)).setParent(this);
-		if (scriptsAllowed) {
-			if (stateScripts.scripts.length == 0) {
-				var scriptName = this.scriptName != null ? this.scriptName : className.substr(className.lastIndexOf(".")+1);
-				for (i in funkin.backend.assets.ModsFolder.getLoadedMods()) {
+		if (scriptsAllowed)
+		{
+			if (stateScripts.scripts.length == 0)
+			{
+				var scriptName = this.scriptName != null ? this.scriptName : className.substr(className.lastIndexOf(".") + 1);
+				for (i in funkin.backend.assets.ModsFolder.getLoadedMods())
+				{
 					var path = Paths.script('data/states/${scriptName}/LIB_$i');
 					var script = Script.create(path);
-					if (script is DummyScript) continue;
+					if (script is DummyScript)
+						continue;
 					script.remappedNames.set(script.fileName, '$i:${script.fileName}');
 					stateScripts.add(script);
 					script.load();
 				}
 			}
 			#if EXPERMENTAL_SCRIPT_RELOADING
-			else stateScripts.reload();
+			else
+				stateScripts.reload();
 			#end
 		}
 	}
 
 	public override function tryUpdate(elapsed:Float):Void
 	{
-		if (persistentUpdate || subState == null) {
+		if (persistentUpdate || subState == null)
+		{
 			call("preUpdate", [elapsed]);
 			update(elapsed);
 			call("postUpdate", [elapsed]);
@@ -148,7 +170,8 @@ class MusicBeatSubstate extends FlxSubState implements IBeatCancellableReceiver
 		// 	parent.openSubState(test);
 		// }
 
-		if (_requestSubStateReset) {
+		if (_requestSubStateReset)
+		{
 			_requestSubStateReset = false;
 			resetSubState();
 		}
@@ -157,9 +180,11 @@ class MusicBeatSubstate extends FlxSubState implements IBeatCancellableReceiver
 			subState.tryUpdate(elapsed);
 	}
 
-	override function close() {
+	override function close()
+	{
 		var event = event("onClose", new CancellableEvent());
-		if (!event.cancelled) {
+		if (!event.cancelled)
+		{
 			super.close();
 			call("onClosePost");
 		}
@@ -172,19 +197,23 @@ class MusicBeatSubstate extends FlxSubState implements IBeatCancellableReceiver
 		call("create");
 	}
 
-	public override function createPost() {
+	public override function createPost()
+	{
 		super.createPost();
 		call("postCreate");
 	}
-	public function call(name:String, ?args:Array<Dynamic>, ?defaultVal:Dynamic):Dynamic {
+
+	public function call(name:String, ?args:Array<Dynamic>, ?defaultVal:Dynamic):Dynamic
+	{
 		// calls the function on the assigned script
-		if(stateScripts != null)
+		if (stateScripts != null)
 			return stateScripts.call(name, args);
 		return defaultVal;
 	}
 
-	public function event<T:CancellableEvent>(name:String, event:T):T {
-		if(stateScripts != null)
+	public function event<T:CancellableEvent>(name:String, event:T):T
+	{
+		if (stateScripts != null)
 			stateScripts.call(name, [event]);
 		return event;
 	}
@@ -197,19 +226,25 @@ class MusicBeatSubstate extends FlxSubState implements IBeatCancellableReceiver
 
 	@:dox(hide) public function stepHit(curStep:Int):Void
 	{
-		for(e in members) if (e is IBeatReceiver) ({var _:IBeatReceiver=cast e;_;}).stepHit(curStep);
+		for (e in members)
+			if (e is IBeatReceiver)
+				({var _:IBeatReceiver = cast e; _;}).stepHit(curStep);
 		call("stepHit", [curStep]);
 	}
 
 	@:dox(hide) public function beatHit(curBeat:Int):Void
 	{
-		for(e in members) if (e is IBeatReceiver) ({var _:IBeatReceiver=cast e;_;}).beatHit(curBeat);
+		for (e in members)
+			if (e is IBeatReceiver)
+				({var _:IBeatReceiver = cast e; _;}).beatHit(curBeat);
 		call("beatHit", [curBeat]);
 	}
 
 	@:dox(hide) public function measureHit(curMeasure:Int):Void
 	{
-		for(e in members) if (e is IBeatReceiver) ({var _:IBeatReceiver=cast e;_;}).measureHit(curMeasure);
+		for (e in members)
+			if (e is IBeatReceiver)
+				({var _:IBeatReceiver = cast e; _;}).measureHit(curMeasure);
 		call("measureHit", [curMeasure]);
 	}
 
@@ -220,7 +255,8 @@ class MusicBeatSubstate extends FlxSubState implements IBeatCancellableReceiver
 	 * @param ratio Ratio
 	 * @param fpsSensitive Whenever the ratio should not be adjusted to run at the same speed independent of framerate.
 	 */
-	public function lerp(v1:Float, v2:Float, ratio:Float, fpsSensitive:Bool = false) {
+	public function lerp(v1:Float, v2:Float, ratio:Float, fpsSensitive:Bool = false)
+	{
 		if (fpsSensitive)
 			return FlxMath.lerp(v1, v2, ratio);
 		else
@@ -230,53 +266,64 @@ class MusicBeatSubstate extends FlxSubState implements IBeatCancellableReceiver
 	/**
 	 * SCRIPTING STUFF
 	 */
-	public override function openSubState(subState:FlxSubState) {
+	public override function openSubState(subState:FlxSubState)
+	{
 		var e = event("onOpenSubState", EventManager.get(StateEvent).recycle(subState));
 		if (!e.cancelled)
 			super.openSubState(e.substate is FlxSubState ? cast e.substate : subState);
 	}
 
-	public override function closeSubState() {
+	public override function closeSubState()
+	{
 		var e = event("onCloseSubState", EventManager.get(StateEvent).recycle(subState));
 		if (!e.cancelled)
 			super.closeSubState();
 	}
 
-	public override function onResize(w:Int, h:Int) {
+	public override function onResize(w:Int, h:Int)
+	{
 		super.onResize(w, h);
 		event("onResize", EventManager.get(ResizeEvent).recycle(w, h, null, null));
 	}
 
-	public override function destroy() {
+	public override function destroy()
+	{
 		super.destroy();
 		call("destroy");
 		stateScripts = FlxDestroyUtil.destroy(stateScripts);
 	}
 
-	public override function switchTo(nextState:FlxState) {
+	public override function switchTo(nextState:FlxState)
+	{
 		var e = event("onStateSwitch", EventManager.get(StateEvent).recycle(nextState));
 		if (e.cancelled)
 			return false;
 		return super.switchTo(e.substate);
 	}
 
-	public override function onFocus() {
+	public override function onFocus()
+	{
 		super.onFocus();
 		call("onFocus");
 	}
 
-	public override function onFocusLost() {
+	public override function onFocusLost()
+	{
 		super.onFocusLost();
 		call("onFocusLost");
 	}
 
 	public var parent:FlxState;
 
-	public function onSubstateOpen() {}
+	public function onSubstateOpen()
+	{
+	}
 
-	public override function resetSubState() {
+	public override function resetSubState()
+	{
 		super.resetSubState();
-		if (subState != null && subState is MusicBeatSubstate) {
+		if (subState != null && subState is MusicBeatSubstate)
+		{
 			var subState:MusicBeatSubstate = cast subState;
 			subState.parent = this;
 			subState.onSubstateOpen();

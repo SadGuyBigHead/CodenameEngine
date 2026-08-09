@@ -6,7 +6,8 @@ import openfl.ui.MouseCursor;
 
 @:allow(funkin.editors.ui.UIState)
 @:allow(funkin.editors.ui.UIUtil)
-class UISprite extends FlxSprite {
+class UISprite extends FlxSprite
+{
 	public var members:Array<FlxBasic> = [];
 
 	private var __lastDrawCameras:Array<FlxCamera> = [];
@@ -31,18 +32,23 @@ class UISprite extends FlxSprite {
 	private inline function get_focused():Bool
 		return UIState.state.currentFocus == cast this;
 
-	private inline function set_focused(b:Bool):Bool {
-		if (get_focused()) {
+	private inline function set_focused(b:Bool):Bool
+	{
+		if (get_focused())
+		{
 			if (!b)
 				UIState.state.currentFocus = null;
-		} else {
+		}
+		else
+		{
 			if (b)
 				UIState.state.currentFocus = cast this;
 		}
 		return b;
 	}
 
-	public override function update(elapsed:Float) {
+	public override function update(elapsed:Float)
+	{
 		hovered = false;
 		pressed = false;
 		hoveredByChild = false;
@@ -55,61 +61,69 @@ class UISprite extends FlxSprite {
 			__oldDefCams = FlxCamera._defaultCameras;
 			FlxCamera._defaultCameras = cameras;
 
-			for(m in members)
-				if(m.exists && m.active)
+			for (m in members)
+				if (m.exists && m.active)
 					m.update(elapsed);
 
 			FlxCamera._defaultCameras = __oldDefCams;
 		}
-
 	}
 
-	public override function draw() {
+	public override function draw()
+	{
 		drawSuper();
 		drawMembers();
 	}
 
-	public function drawSuper() {
+	public function drawSuper()
+	{
 		super.draw();
 		__lastDrawCameras = cameras.copy();
 	}
 
-	public function drawMembers() {
+	public function drawMembers()
+	{
 		@:privateAccess {
 			__oldDefCams = FlxCamera._defaultCameras;
 			FlxCamera._defaultCameras = cameras;
 
-			for(m in members)
-				if(m.exists && m.visible)
+			for (m in members)
+				if (m.exists && m.visible)
 					m.draw();
 
 			FlxCamera._defaultCameras = __oldDefCams;
 		}
 	}
 
-	public override function destroy() {
+	public override function destroy()
+	{
 		super.destroy();
 		members = FlxDestroyUtil.destroyArray(members);
 	}
 
-	public function updateButton() {
-		if(canBeHovered)
+	public function updateButton()
+	{
+		if (canBeHovered)
 			updateButtonHandler();
-		else {
-			if(FlxG.mouse.pressed) {
+		else
+		{
+			if (FlxG.mouse.pressed)
+			{
 				updateButtonHandler();
 			}
 		}
 	}
 
-	public function updateButtonHandler() {
+	public function updateButtonHandler()
+	{
 		UIState.state.updateButtonHandler(this, onHovered);
 	}
 
 	/**
 	 * Called whenever the sprite is being hovered by the mouse.
 	 */
-	public function onHovered() {
+	public function onHovered()
+	{
 		hovered = true;
 		if (FlxG.mouse.pressed)
 			pressed = true;
@@ -117,7 +131,8 @@ class UISprite extends FlxSprite {
 			hoverCallback();
 	}
 
-	public function updateSpriteRect() {
+	public function updateSpriteRect()
+	{
 		__rect.set(x, y, width, height);
 	}
 }

@@ -5,7 +5,8 @@ import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
 
-class FramerateCategory extends Sprite {
+class FramerateCategory extends Sprite
+{
 	public var title:TextField;
 	public var text:TextField;
 
@@ -13,7 +14,8 @@ class FramerateCategory extends Sprite {
 
 	private var _text:String = "";
 
-	public function new(title:String, text:String = "") {
+	public function new(title:String, text:String = "")
+	{
 		super();
 
 		x = 10;
@@ -24,7 +26,8 @@ class FramerateCategory extends Sprite {
 		bgSprite.alpha = 0.5;
 		addChild(bgSprite);
 
-		for(label in [this.title, this.text]) {
+		for (label in [this.title, this.text])
+		{
 			label.autoSize = LEFT;
 			label.x = 0;
 			label.y = 0;
@@ -36,14 +39,17 @@ class FramerateCategory extends Sprite {
 		this.title.multiline = this.title.wordWrap = false;
 		this.text.multiline = true;
 
-
 		this.text.y = this.title.y + this.title.height + 2;
 	}
 
-	public function reload() {}
+	public function reload()
+	{
+	}
 
-	public override function __enterFrame(t:Int) {
-		if (alpha <= 0.05) return;
+	public override function __enterFrame(t:Int)
+	{
+		if (alpha <= 0.05)
+			return;
 		super.__enterFrame(t);
 
 		var width = Math.max(this.title.width, this.text.width) + (Framerate.instance.x * 2);
@@ -53,7 +59,9 @@ class FramerateCategory extends Sprite {
 		bgSprite.scaleY = height;
 	}
 
-	public static inline function addLine(buf:StringBuf, ...values:Array<Dynamic>):Void {
-		for (v in values) buf.add(v);
+	public static inline function addLine(buf:StringBuf, ...values:Array<Dynamic>):Void
+	{
+		for (v in values)
+			buf.add(v);
 	}
 }

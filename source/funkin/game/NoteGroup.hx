@@ -7,7 +7,8 @@ import funkin.backend.system.Conductor;
  * Group of notes, that handles updating and rendering only the visible notes.
  * To only get the visible notes you gotta do `group.forEach()` or `group.forEachAlive()` instead of `group.members`.
 **/
-class NoteGroup extends FlxTypedGroup<Note> {
+class NoteGroup extends FlxTypedGroup<Note>
+{
 	var __loopSprite:Note;
 	var i:Int = 0;
 	var __currentlyLooping:Bool = false;
@@ -15,13 +16,14 @@ class NoteGroup extends FlxTypedGroup<Note> {
 
 	/**
 	 * How many milliseconds it should show a note before it should be hit
-	 **/
+	**/
 	public var limit:Float = Flags.DEFAULT_NOTE_MS_LIMIT;
 
 	/**
 	 * Preallocates the members array with nulls, but if theres anything in the array already it clears it
-	 **/
-	public inline function preallocate(len:Int) {
+	**/
+	public inline function preallocate(len:Int)
+	{
 		members = cast new haxe.ds.Vector<Note>(len);
 		length = len;
 	}
@@ -29,16 +31,20 @@ class NoteGroup extends FlxTypedGroup<Note> {
 	/**
 	 * Adds an array of notes to the group, and sorts them.
 	**/
-	public inline function addNotes(notes:Array<Note>) {
-		for(e in notes) add(e);
+	public inline function addNotes(notes:Array<Note>)
+	{
+		for (e in notes)
+			add(e);
 		sortNotes();
 	}
 
 	/**
 	 * Sorts the notes in the group.
 	**/
-	public inline function sortNotes() {
-		sort(function(i, n1, n2) {
+	public inline function sortNotes()
+	{
+		sort(function(i, n1, n2)
+		{
 			if (n1.strumTime == n2.strumTime)
 				return n1.isSustainNote ? 1 : -1;
 			return FlxSort.byValues(FlxSort.DESCENDING, n1.strumTime, n2.strumTime);
@@ -50,32 +56,40 @@ class NoteGroup extends FlxTypedGroup<Note> {
 	@:dox(hide) private inline function __getSongPos()
 		return __forcedSongPos == null ? Conductor.songPosition : __forcedSongPos;
 
-	public override function update(elapsed:Float) {
-		i = length-1;
+	public override function update(elapsed:Float)
+	{
+		i = length - 1;
 		__loopSprite = null;
 		__time = __getSongPos() + limit;
-		while(i >= 0) {
+		while (i >= 0)
+		{
 			__loopSprite = members[i--];
-			if (__loopSprite == null || !__loopSprite.exists || !__loopSprite.active) continue;
-			if (__loopSprite.strumTime > __time) break;
+			if (__loopSprite == null || !__loopSprite.exists || !__loopSprite.active)
+				continue;
+			if (__loopSprite.strumTime > __time)
+				break;
 			__loopSprite.update(elapsed);
 		}
 	}
 
 	public override function draw() @:privateAccess {
 		var oldDefaultCameras = FlxCamera._defaultCameras;
-		if (_cameras != null) FlxCamera._defaultCameras = _cameras;
+		if (_cameras != null)
+			FlxCamera._defaultCameras = _cameras;
 
 		var oldCur = __currentlyLooping;
 		__currentlyLooping = true;
 
-		i = length-1;
+		i = length - 1;
 		__loopSprite = null;
 		__time = __getSongPos() + limit;
-		while(i >= 0) {
+		while (i >= 0)
+		{
 			__loopSprite = members[i--];
-			if (__loopSprite == null || !__loopSprite.exists || !__loopSprite.visible) continue;
-			if (__loopSprite.strumTime > __time) break;
+			if (__loopSprite == null || !__loopSprite.exists || !__loopSprite.visible)
+				continue;
+			if (__loopSprite.strumTime > __time)
+				break;
 			__loopSprite.draw();
 		}
 		__currentlyLooping = oldCur;
@@ -85,30 +99,39 @@ class NoteGroup extends FlxTypedGroup<Note> {
 
 	/**
 	 * Gets the correct order of notes
-	 **/
-	public function get(id:Int) {
+	**/
+	public function get(id:Int)
+	{
 		return members[length - 1 - id];
 	}
 
-	public override function forEach(noteFunc:Note->Void, recursive:Bool = false) {
-		i = length-1;
+	public override function forEach(noteFunc:Note->Void, recursive:Bool = false)
+	{
+		i = length - 1;
 		__loopSprite = null;
 		__time = __getSongPos() + limit;
 
 		var oldCur = __currentlyLooping;
 		__currentlyLooping = true;
 
-		while(i >= 0) {
+		while (i >= 0)
+		{
 			__loopSprite = members[i--];
-			if (__loopSprite == null || !__loopSprite.exists) continue;
-			if (__loopSprite.strumTime > __time) break;
+			if (__loopSprite == null || !__loopSprite.exists)
+				continue;
+			if (__loopSprite.strumTime > __time)
+				break;
 			noteFunc(__loopSprite);
 		}
 		__currentlyLooping = oldCur;
 	}
-	public override function forEachAlive(noteFunc:Note->Void, recursive:Bool = false) {
-		forEach(function(note) {
-			if (note.alive) noteFunc(note);
+
+	public override function forEachAlive(noteFunc:Note->Void, recursive:Bool = false)
+	{
+		forEach(function(note)
+		{
+			if (note.alive)
+				noteFunc(note);
 		}, recursive);
 	}
 

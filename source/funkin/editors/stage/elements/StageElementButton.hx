@@ -5,7 +5,8 @@ import haxe.xml.Access;
 
 using flixel.util.FlxColorTransformUtil;
 
-class StageElementButton extends UIButton {
+class StageElementButton extends UIButton
+{
 	public var xml:Access;
 
 	public var editButton:UIButton;
@@ -24,9 +25,11 @@ class StageElementButton extends UIButton {
 
 	public var tagColor:UISliceSprite;
 
-	public function new(x:Float,y:Float, xml:Access) {
+	public function new(x:Float, y:Float, xml:Access)
+	{
 		this.xml = xml;
-		super(x,y, getInfoText(), function () {
+		super(x, y, getInfoText(), function()
+		{
 			onSelect();
 		}, StageEditor.SPRITE_WINDOW_WIDTH, StageEditor.SPRITE_WINDOW_BUTTON_HEIGHT);
 		autoAlpha = false;
@@ -35,13 +38,14 @@ class StageElementButton extends UIButton {
 		tagColor.alpha = 1; // Make entire sprite transparent
 		tagColor.selectable = false;
 		tagColor.active = false;
-		//members.push(tagColor);
+		// members.push(tagColor);
 
 		topAlpha = middleAlpha = bottomAlpha = 0.7;
 
 		field.alignment = LEFT;
 
-		visibilityButton = new UIButton(x+282+17, y, null, function () {
+		visibilityButton = new UIButton(x + 282 + 17, y, null, function()
+		{
 			onVisiblityToggle();
 		}, 32);
 		visibilityButton.autoAlpha = false;
@@ -55,7 +59,8 @@ class StageElementButton extends UIButton {
 		visibilityIcon.updateHitbox();
 		members.push(visibilityIcon);
 
-		editButton = new UIButton(visibilityButton.x+32+17, y, null, function () {
+		editButton = new UIButton(visibilityButton.x + 32 + 17, y, null, function()
+		{
 			onEdit();
 		}, 32);
 		editButton.frames = Paths.getFrames("editors/ui/grayscale-button");
@@ -69,7 +74,8 @@ class StageElementButton extends UIButton {
 		editIcon.antialiasing = false;
 		members.push(editIcon);
 
-		deleteButton = new UIButton(editButton.x+32+17, y, null, function () {
+		deleteButton = new UIButton(editButton.x + 32 + 17, y, null, function()
+		{
 			onDelete();
 		}, 32);
 		deleteButton.color = FlxColor.RED;
@@ -83,20 +89,22 @@ class StageElementButton extends UIButton {
 		setEditNormal();
 	}
 
-	public function setEditNormal() {
+	public function setEditNormal()
+	{
 		editIcon.animation.play("edit");
 		editButton.color = FlxColor.YELLOW;
 	}
 
-	public function setEditAdvanced() {
+	public function setEditAdvanced()
+	{
 		editIcon.animation.play("advanced");
 		editButton.color = 0xFFFF5B0F;
 	}
 
-
 	var _lastSelected:Bool = false;
 
-	public override function update(elapsed:Float) {
+	public override function update(elapsed:Float)
+	{
 		editButton.selectable = visibilityButton.selectable = deleteButton.selectable = selectable;
 		editButton.shouldPress = visibilityButton.shouldPress = deleteButton.shouldPress = shouldPress;
 
@@ -105,10 +113,14 @@ class StageElementButton extends UIButton {
 		super.update(elapsed);
 		field.x += 12;
 
-		if(hasAdvancedEdit) {
-			if(FlxG.keys.pressed.SHIFT) {
+		if (hasAdvancedEdit)
+		{
+			if (FlxG.keys.pressed.SHIFT)
+			{
 				setEditAdvanced();
-			} else {
+			}
+			else
+			{
 				setEditNormal();
 			}
 		}
@@ -116,11 +128,13 @@ class StageElementButton extends UIButton {
 		tagColor.color = color;
 	}
 
-	//private var _lastHovered:Bool = false;
+	// private var _lastHovered:Bool = false;
 
-	public override function draw() {
-		//if(_lastHovered != (_lastHovered = hovered && !pressed)) {
-		if(_lastSelected != (_lastSelected = selected)) {
+	public override function draw()
+	{
+		// if(_lastHovered != (_lastHovered = hovered && !pressed)) {
+		if (_lastSelected != (_lastSelected = selected))
+		{
 			updateColorTransform();
 		}
 		super.draw();
@@ -132,26 +146,31 @@ class StageElementButton extends UIButton {
 		if(hovered && pressed) _frameOffset = 18;
 		framesOffset = _frameOffset;
 	}*/
-
-	public override function updateColorTransform() {
+	public override function updateColorTransform()
+	{
 		super.updateColorTransform();
 
-		if(selected) {
+		if (selected)
+		{
 			useColorTransform = true;
 			colorTransform.setOffsets(70, 70, 70, 0);
-		} else {
+		}
+		else
+		{
 			colorTransform.setOffsets(0, 0, 0, 0);
 		}
 	}
 
-	public function updateInfo() {
+	public function updateInfo()
+	{
 		field.text = getInfoText();
 
 		visibilityIcon.animation.play(isHidden ? "invisible" : "visible");
 		visibilityIcon.alpha = !isHidden ? 1 : 0.5;
 	}
 
-	public function updatePos() {
+	public function updatePos()
+	{
 		// buttons
 		var spacing = 8;
 		var buttonY = y + (bHeight - 32) / 2;
@@ -161,54 +180,67 @@ class StageElementButton extends UIButton {
 		editButton.y = buttonY;
 		visibilityButton.x = editButton.x - visibilityButton.bWidth - spacing;
 		visibilityButton.y = buttonY;
-		//deleteButton.x = (editButton.x = (visibilityButton.x = (x+282+17))+32+17)+32+17;
-		//deleteButton.y = editButton.y = visibilityButton.y = y;
+		// deleteButton.x = (editButton.x = (visibilityButton.x = (x+282+17))+32+17)+32+17;
+		// deleteButton.y = editButton.y = visibilityButton.y = y;
 		// icons
-		visibilityIcon.x = visibilityButton.x + 8; visibilityIcon.y = visibilityButton.y + 8;
-		editIcon.x = editButton.x + 8; editIcon.y = editButton.y + 8;
-		deleteIcon.x = deleteButton.x + 8; deleteIcon.y = deleteButton.y + 8;
+		visibilityIcon.x = visibilityButton.x + 8;
+		visibilityIcon.y = visibilityButton.y + 8;
+		editIcon.x = editButton.x + 8;
+		editIcon.y = editButton.y + 8;
+		deleteIcon.x = deleteButton.x + 8;
+		deleteIcon.y = deleteButton.y + 8;
 
-		tagColor.x = x;// + bWidth - tagColor.bWidth;
+		tagColor.x = x; // + bWidth - tagColor.bWidth;
 		tagColor.y = y;
 	}
 
-	public function getSprite():FunkinSprite {
+	public function getSprite():FunkinSprite
+	{
 		return null;
 	}
 
-	public function canRender() {
+	public function canRender()
+	{
 		return true;
 	}
 
-	public function getName():String {
+	public function getName():String
+	{
 		return "UNKNOWN";
 	}
 
-	public function onSelect() {
+	public function onSelect()
+	{
 		// TODO: implement
 	}
 
-	public function onVisiblityToggle() {
+	public function onVisiblityToggle()
+	{
 		// TODO: implement
 	}
 
-	public function onEdit() {
+	public function onEdit()
+	{
 		// TODO: implement
 	}
 
-	public function onDelete() {
+	public function onDelete()
+	{
 		// TODO: implement
 	}
 
-	public function getPos():FlxPoint {
+	public function getPos():FlxPoint
+	{
 		return FlxPoint.get(-1, -1);
 	}
 
-	public function getInfoText():String {
+	public function getInfoText():String
+	{
 		var pos = getPos();
 		var text = '${getName()} (${CoolUtil.quantize(pos.x, 100)}, ${CoolUtil.quantize(pos.y, 100)})';
 		var sprite = getSprite();
-		if(sprite != null) {
+		if (sprite != null)
+		{
 			var scaleText = TU.getRaw("stageElement.scale");
 			var scrollText = TU.getRaw("stageElement.scroll");
 			text += '\n${scaleText.format([CoolUtil.quantize(sprite.scale.x, 100), CoolUtil.quantize(sprite.scale.y, 100)])}';

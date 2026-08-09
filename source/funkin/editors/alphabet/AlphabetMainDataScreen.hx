@@ -7,7 +7,8 @@ import funkin.menus.ui.Alphabet;
 using StringTools;
 
 // TODO: add translations
-class AlphabetMainDataScreen extends UISubstateWindow {
+class AlphabetMainDataScreen extends UISubstateWindow
+{
 	var bigLetter:Alphabet;
 	var tape:Alphabet;
 
@@ -31,13 +32,13 @@ class AlphabetMainDataScreen extends UISubstateWindow {
 	public var helpTxt:UIText;
 	public var helpScroll:UIScrollBar;
 
-	public override function create() {
+	public override function create()
+	{
 		bigLetter = AlphabetEditor.instance.bigLetter;
 		tape = AlphabetEditor.instance.tape;
 
 		// temporary until translated
-		var helpDesc = 
-"FPS - Frames per second. You get it.
+		var helpDesc = "FPS - Frames per second. You get it.
 Advance - Actually a backup advance value for missing characters and spaces.
 Line Gap - How many pixels to move down when a new line is created.
 
@@ -55,7 +56,8 @@ LOWERLETTER will be substituted with the lowercase glyph.
 UPPERLETTER and LOWERLETTTER can be used in any backup prefix.";
 
 		winTitle = "Alphabet Properties";
-		winWidth = 420; winHeight = 520;
+		winWidth = 420;
+		winHeight = 520;
 
 		super.create();
 
@@ -100,20 +102,24 @@ UPPERLETTER and LOWERLETTTER can be used in any backup prefix.";
 		add(lowerTextBox);
 		addLabelOn(lowerTextBox, "Backup Prefix (Lowercase)");
 
-		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20 - 125, windowSpr.y + windowSpr.bHeight - 16 - 32, TU.translate("editor.saveClose"), function() {
-			saveInfo();
-			close();
-		}, 125);
+		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20 - 125, windowSpr.y + windowSpr.bHeight - 16 - 32, TU.translate("editor.saveClose"),
+			function()
+			{
+				saveInfo();
+				close();
+			}, 125);
 		add(saveButton);
 
-		closeButton = new UIButton(saveButton.x - 20, saveButton.y, TU.translate("editor.close"), function() {
+		closeButton = new UIButton(saveButton.x - 20, saveButton.y, TU.translate("editor.close"), function()
+		{
 			close();
 		}, 125);
 		add(closeButton);
 		closeButton.color = 0xFFFF0000;
 		closeButton.x -= closeButton.bWidth;
 
-		helpButton = new UIButton(closeButton.x - 20, closeButton.y, "?", function() {
+		helpButton = new UIButton(closeButton.x - 20, closeButton.y, "?", function()
+		{
 			targetPercent = 1.0 - targetPercent;
 		}, 32);
 		add(helpButton);
@@ -128,11 +134,17 @@ UPPERLETTER and LOWERLETTTER can be used in any backup prefix.";
 		helpTxt.alpha = 0.0;
 		add(helpTxt);
 
-		helpScroll = new UIScrollBar(helpBG.x + helpBG.bWidth - 30, helpBG.y + 20, (helpTxt.height - helpTxt.clipRect.height), 0, (helpTxt.clipRect.height / helpTxt.height), 20, helpBG.bHeight - 40);
+		helpScroll = new UIScrollBar(helpBG.x
+			+ helpBG.bWidth
+			- 30, helpBG.y
+			+ 20, (helpTxt.height - helpTxt.clipRect.height), 0,
+			(helpTxt.clipRect.height / helpTxt.height), 20, helpBG.bHeight
+			- 40);
 		helpScroll.size *= helpScroll.height;
 		helpScroll.start -= helpScroll.size * 0.5;
 		helpScroll.alpha = 0.0;
-		helpScroll.onChange = function(v) {
+		helpScroll.onChange = function(v)
+		{
 			helpTxt.clipRect.y = v;
 			helpTxt.offset.y = v;
 			helpTxt.clipRect = helpTxt.clipRect;
@@ -141,7 +153,8 @@ UPPERLETTER and LOWERLETTTER can be used in any backup prefix.";
 		add(helpScroll);
 	}
 
-	override function update(elapsed:Float) {
+	override function update(elapsed:Float)
+	{
 		super.update(elapsed);
 
 		helpBG.alpha = FlxMath.lerp(helpBG.alpha, targetPercent, elapsed * 15);
@@ -152,7 +165,8 @@ UPPERLETTER and LOWERLETTTER can be used in any backup prefix.";
 		helpScroll.x = helpBG.x + helpBG.bWidth - 30;
 	}
 
-	public function saveInfo() {
+	public function saveInfo()
+	{
 		@:privateAccess fpsStepper.__onChange(fpsStepper.label.text);
 		@:privateAccess advanceStepper.__onChange(advanceStepper.label.text);
 		@:privateAccess lineGapStepper.__onChange(lineGapStepper.label.text);
@@ -174,14 +188,17 @@ UPPERLETTER and LOWERLETTTER can be used in any backup prefix.";
 		setDefault(2, lowerTextBox.label.text);
 	}
 
-	function setDefault(index:Int, name:String) {
+	function setDefault(index:Int, name:String)
+	{
 		tape.loaded[index].splice(0, tape.loaded[index].length);
-		if (name.trim() == "") {
+		if (name.trim() == "")
+		{
 			tape.defaults[index] = null;
 			return;
 		}
 
-		if (tape.defaults[index] != null) {
+		if (tape.defaults[index] != null)
+		{
 			tape.defaults[index].components[0].anim = name;
 			trace(tape.defaults[index].components[0].anim);
 			return;
@@ -191,25 +208,27 @@ UPPERLETTER and LOWERLETTTER can be used in any backup prefix.";
 			isDefault: true,
 			advance: 0.0,
 			advanceEmpty: true,
-			components: [{
-				anim: name,
+			components: [
+				{
+					anim: name,
 
-				x: 0.0,
-				y: 0.0,
-				scaleX: 1.0,
-				scaleY: 1.0,
+					x: 0.0,
+					y: 0.0,
+					scaleX: 1.0,
+					scaleY: 1.0,
 
-				shouldRotate: false,
-				angle: 0.0,
-				cos: 1.0,
-				sin: 0.0,
+					shouldRotate: false,
+					angle: 0.0,
+					cos: 1.0,
+					sin: 0.0,
 
-				flipX: false,
-				flipY: false,
+					flipX: false,
+					flipY: false,
 
-				hasColorMode: false,
-				colorMode: 0
-			}],
+					hasColorMode: false,
+					colorMode: 0
+				}
+			],
 			startIndex: 0
 		};
 		tape.defaults[index] = newData;

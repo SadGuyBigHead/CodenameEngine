@@ -2,22 +2,28 @@ package funkin.editors.ui;
 
 import flixel.system.scaleModes.StageSizeScaleMode;
 
-class UIScaleMode extends StageSizeScaleMode {
-	override public function onMeasure(Width:Int, Height:Int):Void {
-		if ((Width < FlxG.initialWidth || Height < FlxG.initialHeight) && !Options.bypassEditorsResize) {
+class UIScaleMode extends StageSizeScaleMode
+{
+	override public function onMeasure(Width:Int, Height:Int):Void
+	{
+		if ((Width < FlxG.initialWidth || Height < FlxG.initialHeight) && !Options.bypassEditorsResize)
+		{
 			@:privateAccess {
 				FlxG.width = FlxG.initialWidth;
 				FlxG.height = FlxG.initialHeight;
 			}
-	
+
 			updateGameSize(Width, Height);
 			updateDeviceSize(Width, Height);
 			updateScaleOffset();
 			updateGamePosition();
-		} else {
+		}
+		else
+		{
 			super.onMeasure(Width, Height);
 
-			for (camera in FlxG.cameras.list) {
+			for (camera in FlxG.cameras.list)
+			{
 				camera.width = Width;
 				camera.height = Height;
 			}
@@ -43,7 +49,8 @@ class UIScaleMode extends StageSizeScaleMode {
 		}
 
 		@:privateAccess {
-			for(camera in FlxG.cameras.list) {
+			for (camera in FlxG.cameras.list)
+			{
 				camera.width = FlxG.initialWidth;
 				camera.height = FlxG.initialHeight;
 			}

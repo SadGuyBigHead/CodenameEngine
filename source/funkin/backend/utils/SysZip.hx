@@ -5,14 +5,14 @@ import haxe.io.Input;
 import haxe.zip.Reader;
 import sys.io.File;
 import sys.io.FileInput;
-
 import haxe.io.Bytes;
 
 /**
  * Class that extends Reader allowing you to load ZIP entries without blowing your RAM up!!
  * ~~Half of the code is taken from haxe libraries btw~~ Reworked by ItsLJcool to actually work for zip files.
  */
-class SysZip {
+class SysZip
+{
 	var fileInput:FileInput;
 	var filePath:String;
 
@@ -22,13 +22,17 @@ class SysZip {
 	 * Opens a zip from a specified path.
 	 * @param path Path to the zip file. (With the extension)
 	 */
-	public static function openFromFile(path:String) { return new SysZip(path); } // keeping for compatibility.
+	public static function openFromFile(path:String)
+	{
+		return new SysZip(path);
+	} // keeping for compatibility.
 
 	/**
 	 * Creates a new SysZip from a specified path.
 	 * @param path Path to the zip file. (With the extension)
 	 */
-	public function new(path:String) {
+	public function new(path:String)
+	{
 		this.filePath = path;
 		fileInput = File.read(path, true);
 
@@ -39,20 +43,24 @@ class SysZip {
 	 * Unzips and returns all of the data present in an entry.
 	 * @param f Entry to read from.
 	 */
-	public function unzipEntry(f:SysZipEntry):Bytes {
-		if (f.fileSize <= 0) return Bytes.alloc(0);
-		
+	public function unzipEntry(f:SysZipEntry):Bytes
+	{
+		if (f.fileSize <= 0)
+			return Bytes.alloc(0);
+
 		fileInput.seek(f.seekPos, SeekBegin);
 		var data = fileInput.read(f.compressedSize);
-		
-		if (!f.compressed) return data;
+
+		if (!f.compressed)
+			return data;
 
 		var c = new haxe.zip.Uncompress(-15);
 		var s = Bytes.alloc(f.fileSize);
 		var r = c.execute(data, 0, s, 0);
 		c.close();
 
-		if (!r.done || r.read != data.length || r.write != f.fileSize) throw 'Invalid compressed data for ${f.fileName} | ${f.compressedSize} -> ${f.fileSize}';
+		if (!r.done || r.read != data.length || r.write != f.fileSize)
+			throw 'Invalid compressed data for ${f.fileName} | ${f.compressedSize} -> ${f.fileSize}';
 		return s;
 	}
 
@@ -62,19 +70,21 @@ class SysZip {
 	 * 
 	 * Note: Calling this function will hold up the game as it has to read the ENTIRE zip, so if it's large like 1GiB or more, it might take a second or more.
 	 */
-	public function updateEntries() {
-		if (entries.length > 0) {
+	public function updateEntries()
+	{
+		if (entries.length > 0)
+		{
 			entries.clear();
 			entries = new List();
 		}
-		
+
 		// --- locate End of Central Directory (EOCD) ---
 		var fileSize:Int = sys.FileSystem.stat(this.filePath).size; // probably need a better way to check the size of the file.
 		var scanSize:Int = (65535 < fileSize) ? 65535 : fileSize;
-		
+
 		// It seems this usually ends up being 0 anyways, but for cases where it might not be?? I'd just make sure. but Someone do some digging I don't know if this required.
 		fileInput.seek(fileSize - scanSize, SeekBegin);
-		
+
 		var buf = fileInput.read(scanSize);
 		var b = new haxe.io.BytesInput(buf);
 		// I LOVE USING MAGIC NUMBERS AND FORGETTING WHAT THEY DO 🔥🔥🔥🔥🔥🔥
@@ -82,8 +92,10 @@ class SysZip {
 
 		// --- read central directory ---
 		fileInput.seek(b.readInt32(), SeekBegin);
-		while (true) {
-			if (fileInput.readInt32() != 0x02014b50) break; // central dir file header signature
+		while (true)
+		{
+			if (fileInput.readInt32() != 0x02014b50)
+				break; // central dir file header signature
 
 			fileInput.seek(6, SeekCur); // version/flags
 			var compression_method = fileInput.readUInt16();
@@ -111,7 +123,8 @@ class SysZip {
 
 			// I completely forgot that we don't really need to log the FOLDER of the content because we only care about where the contents are.
 			// the folders are labled as 0 bytes anyways so this will save on storing non-required data.
-			if (name.endsWith("/")) continue;
+			if (name.endsWith("/"))
+				continue;
 
 			var zipEntry:SysZipEntry = {
 				fileName: name,
@@ -129,12 +142,15 @@ class SysZip {
 	 * calling `dispose` doesn't actually kill the class, you can still access the entries.
 	 * disposing of SysZip will free the compressed file from being used by the engine.
 	 */
-	public function dispose() {
-		if (fileInput != null) fileInput.close();
+	public function dispose()
+	{
+		if (fileInput != null)
+			fileInput.close();
 	}
 }
 
-typedef SysZipEntry = {
+typedef SysZipEntry =
+{
 	var fileName:String;
 	var fileSize:Int;
 	var seekPos:Int;

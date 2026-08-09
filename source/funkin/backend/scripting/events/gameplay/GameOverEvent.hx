@@ -2,7 +2,8 @@ package funkin.backend.scripting.events.gameplay;
 
 import funkin.game.Character;
 
-final class GameOverEvent extends CancellableEvent {
+final class GameOverEvent extends CancellableEvent
+{
 	/**
 	 * The X pos of where the gameover character will be.
 	 */

@@ -25,11 +25,14 @@ class HTML5AudioSource
 		position = new Vector4();
 	}
 
-	public function dispose():Void {
+	public function dispose():Void
+	{
 		stop();
 	}
 
-	public function init():Void {}
+	public function init():Void
+	{
+	}
 
 	public function play():Void
 	{
@@ -59,7 +62,8 @@ class HTML5AudioSource
 
 		// Calling setCurrentTime causes html5 audio to replay from this position on next frame
 		#if force_html5_audio
-		if (time == 0) setCurrentTime(time);
+		if (time == 0)
+			setCurrentTime(time);
 		#else
 		setCurrentTime(time);
 		#end
@@ -101,7 +105,8 @@ class HTML5AudioSource
 		{
 			loops--;
 			stop();
-			if (loopTime != null && loopTime > 0) setCurrentTime(loopTime);
+			if (loopTime != null && loopTime > 0)
+				setCurrentTime(loopTime);
 			play();
 			parent.onLoop.dispatch();
 			return;
@@ -133,7 +138,8 @@ class HTML5AudioSource
 		else if (parent.buffer != null && parent.buffer.__srcHowl != null)
 		{
 			var time = parent.buffer.__srcHowl.seek(id) * 1000.0 - parent.offset;
-			if (time < 0) return 0;
+			if (time < 0)
+				return 0;
 			return time;
 		}
 		#end
@@ -162,7 +168,8 @@ class HTML5AudioSource
 		{
 			// if (playing) buffer.__srcHowl.play (id);
 			var pos = (value + parent.offset) / 1000;
-			if (pos < 0) pos = 0;
+			if (pos < 0)
+				pos = 0;
 			parent.buffer.__srcHowl.seek(pos, id);
 		}
 		#end
@@ -222,11 +229,13 @@ class HTML5AudioSource
 		return loops = value;
 	}
 
-	public function getLoopTime():Float {
+	public function getLoopTime():Float
+	{
 		return loopTime;
 	}
 
-	public function setLoopTime(value:Float):Float {
+	public function setLoopTime(value:Float):Float
+	{
 		return loopTime = value;
 	}
 
@@ -248,7 +257,6 @@ class HTML5AudioSource
 		return getPitch();
 	}
 
-
 	public function getPosition():Vector4
 	{
 		return position;
@@ -262,7 +270,8 @@ class HTML5AudioSource
 		position.w = value.w;
 
 		#if lime_howlerjs
-		if (parent.buffer != null && parent.buffer.__srcHowl != null && parent.buffer.__srcHowl.pos != null) parent.buffer.__srcHowl.pos(position.x, position.y, position.z, id);
+		if (parent.buffer != null && parent.buffer.__srcHowl != null && parent.buffer.__srcHowl.pos != null)
+			parent.buffer.__srcHowl.pos(position.x, position.y, position.z, id);
 		// There are more settings to the position of the sound on the "pannerAttr()" function of howler. Maybe somebody who understands sound should look into it?
 		#end
 
@@ -277,7 +286,8 @@ class HTML5AudioSource
 	public function setPan(value:Float):Float
 	{
 		position.setTo(value, 0, -Math.sqrt(1 - value * value));
-		if (parent.buffer != null && parent.buffer.__srcHowl != null && parent.buffer.__srcHowl.stereo != null) parent.buffer.__srcHowl.stereo(value, id);
+		if (parent.buffer != null && parent.buffer.__srcHowl != null && parent.buffer.__srcHowl.stereo != null)
+			parent.buffer.__srcHowl.stereo(value, id);
 		return value;
 	}
 }

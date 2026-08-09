@@ -3,8 +3,10 @@ package funkin.backend.system.framerate;
 import funkin.backend.system.macros.GitCommitMacro;
 import openfl.text.TextField;
 
-class CodenameBuildField extends TextField {
-	public function new() {
+class CodenameBuildField extends TextField
+{
+	public function new()
+	{
 		super();
 		defaultTextFormat = Framerate.textFormat;
 		autoSize = LEFT;
@@ -12,7 +14,8 @@ class CodenameBuildField extends TextField {
 		reload();
 	}
 
-	public function reload() {
+	public function reload()
+	{
 		#if COMPILE_EXPERIMENTAL
 		text = '${Flags.VERSION_MESSAGE} (Experimental Build)';
 		#else

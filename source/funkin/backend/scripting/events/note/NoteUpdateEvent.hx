@@ -3,10 +3,12 @@ package funkin.backend.scripting.events.note;
 import funkin.game.Note;
 import funkin.game.Strum;
 
-final class NoteUpdateEvent extends CancellableEvent {
+final class NoteUpdateEvent extends CancellableEvent
+{
 	@:dox(hide) public var __updateHitWindow = true;
 	@:dox(hide) public var __autoCPUHit = true;
 	@:dox(hide) public var __reposNote = true;
+
 	/**
 	 * Note that is being updated
 	 */
@@ -25,24 +27,39 @@ final class NoteUpdateEvent extends CancellableEvent {
 	/**
 	 * Cancels the hit window update.
 	 */
-	public function cancelWindowUpdate() {
+	public function cancelWindowUpdate()
+	{
 		__updateHitWindow = false;
 	}
-	@:dox(hide) public function preventWindowUpdate() { cancelWindowUpdate(); }
+
+	@:dox(hide) public function preventWindowUpdate()
+	{
+		cancelWindowUpdate();
+	}
 
 	/**
 	 * Cancels the automatic CPU hit.
 	 */
-	public function cancelAutoCPUHit() {
+	public function cancelAutoCPUHit()
+	{
 		__autoCPUHit = false;
 	}
-	@:dox(hide) public function preventAutoCPUHit() { cancelAutoCPUHit(); }
+
+	@:dox(hide) public function preventAutoCPUHit()
+	{
+		cancelAutoCPUHit();
+	}
 
 	/**
 	 * Cancels the note position update (note will freeze).
 	 */
-	public function cancelPositionUpdate() {
+	public function cancelPositionUpdate()
+	{
 		__reposNote = false;
 	}
-	@:dox(hide) public function preventPositionUpdate() { cancelPositionUpdate(); }
+
+	@:dox(hide) public function preventPositionUpdate()
+	{
+		cancelPositionUpdate();
+	}
 }

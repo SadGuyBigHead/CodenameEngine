@@ -2,7 +2,8 @@ package funkin.game;
 
 import haxe.xml.Access;
 
-class SplashGroup extends FlxTypedGroup<Splash> {
+class SplashGroup extends FlxTypedGroup<Splash>
+{
 	/**
 	 * Whenever the splash group has successfully loaded or not.
 	 */
@@ -23,13 +24,16 @@ class SplashGroup extends FlxTypedGroup<Splash> {
 	 * Creates a new Splash group
 	 * @param path Path to the splash data (xml)
 	 */
-	public function new(path:String) {
+	public function new(path:String)
+	{
 		super();
 
-		try {
+		try
+		{
 			xml = new Access(Xml.parse(Assets.getText(path)).firstElement());
 
-			if (!xml.has.sprite) throw "The <splash> element requires a sprite attribute.";
+			if (!xml.has.sprite)
+				throw "The <splash> element requires a sprite attribute.";
 			var splash = createSplash(xml.att.sprite);
 			setupAnims(xml, splash);
 			pregenerateSplashes(splash);
@@ -39,7 +43,9 @@ class SplashGroup extends FlxTypedGroup<Splash> {
 			// TODO: change to graphics cache
 			@:privateAccess
 			splash.drawComplex(FlxG.camera);
-		} catch(e:Dynamic) {
+		}
+		catch (e:Dynamic)
+		{
 			Logs.error('Couldn\'t parse splash data for "${path}": ${e.toString()}');
 			valid = false;
 		}
@@ -50,7 +56,8 @@ class SplashGroup extends FlxTypedGroup<Splash> {
 	var _alpha:Float = 1.0;
 	var _antialiasing:Bool = true;
 
-	function createSplash(imagePath:String) {
+	function createSplash(imagePath:String)
+	{
 		var splash = new Splash();
 		splash.active = splash.visible = false;
 		splash.loadSprite(Paths.image(imagePath));
@@ -60,13 +67,18 @@ class SplashGroup extends FlxTypedGroup<Splash> {
 		return splash;
 	}
 
-	function setupAnims(xml:Access, splash:Splash) {
-		for(strum in xml.nodes.strum) {
+	function setupAnims(xml:Access, splash:Splash)
+	{
+		for (strum in xml.nodes.strum)
+		{
 			var id:Null<Int> = Std.parseInt(strum.att.id);
-			if (id != null) {
+			if (id != null)
+			{
 				animationNames[id] = [];
-				for(anim in strum.nodes.anim) {
-					if (!anim.has.name) continue;
+				for (anim in strum.nodes.anim)
+				{
+					if (!anim.has.name)
+						continue;
 					XMLUtil.addXMLAnimation(splash, anim, false);
 					animationNames[id].push(anim.att.name);
 				}
@@ -76,26 +88,34 @@ class SplashGroup extends FlxTypedGroup<Splash> {
 		// if (animationNames.length <= 0)
 		//		animationNames.push([]);
 
-		for(anim in xml.nodes.anim) {
-			if (!anim.has.name) continue;
+		for (anim in xml.nodes.anim)
+		{
+			if (!anim.has.name)
+				continue;
 			XMLUtil.addXMLAnimation(splash, anim, false);
-			for(a in animationNames) {
-				if (a == null) continue;
+			for (a in animationNames)
+			{
+				if (a == null)
+					continue;
 				a.push(anim.att.name);
 			}
 		}
-		splash.animation.finishCallback = function(name:String) {
+		splash.animation.finishCallback = function(name:String)
+		{
 			splash.active = splash.visible = false;
 			splash.strum = null;
 			splash.strumID = null;
 		};
 	}
 
-	function pregenerateSplashes(splash:Splash) {
+	function pregenerateSplashes(splash:Splash)
+	{
 		// TODO: Fix a crash somewhere here https://github.com/CodenameCrew/CodenameEngine/pull/963
-		for (i in 0...Flags.MAX_SPLASHES - 1) {
+		for (i in 0...Flags.MAX_SPLASHES - 1)
+		{
 			var spr = Splash.copyFrom(splash);
-			spr.animation.finishCallback = function(name:String) {
+			spr.animation.finishCallback = function(name:String)
+			{
 				spr.active = spr.visible = false;
 				spr.strum = null;
 				spr.strumID = null;
@@ -104,17 +124,23 @@ class SplashGroup extends FlxTypedGroup<Splash> {
 		}
 	}
 
-	public function getSplashAnim(id:Int):String {
-		if (animationNames.length <= 0) return null;
+	public function getSplashAnim(id:Int):String
+	{
+		if (animationNames.length <= 0)
+			return null;
 		id %= animationNames.length;
 		var animNames = animationNames[id];
-		if (animNames == null || animNames.length <= 0) return null;
+		if (animNames == null || animNames.length <= 0)
+			return null;
 		return animNames[FlxG.random.int(0, animNames.length - 1)];
 	}
 
 	var __splash:Splash;
-	public function showOnStrum(strum:Strum) {
-		if (!valid) return null;
+
+	public function showOnStrum(strum:Strum)
+	{
+		if (!valid)
+			return null;
 		__splash = recycle();
 
 		__splash.strum = strum;

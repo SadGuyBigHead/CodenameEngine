@@ -1,6 +1,7 @@
 package funkin.options.type;
 
-class ArrayOption extends TextOption {
+class ArrayOption extends TextOption
+{
 	public var changedCallback:String->Void;
 
 	public var options:Array<Dynamic>;
@@ -12,19 +13,24 @@ class ArrayOption extends TextOption {
 
 	var __selectionText:Alphabet;
 
-	function set_currentSelection(v:Int):Int {
+	function set_currentSelection(v:Int):Int
+	{
 		currentSelection = v;
-		if (__selectionText != null) __selectionText.text = formatTextOption();
+		if (__selectionText != null)
+			__selectionText.text = formatTextOption();
 		return v;
 	}
 
-	override function set_text(v:String) {
+	override function set_text(v:String)
+	{
 		super.set_text(v);
 		__selectionText.x = __text.x + __text.width + 12;
 		return v;
 	}
 
-	public function new(text:String, desc:String, options:Array<Dynamic>, displayOptions:Array<String>, ?optionName:String, ?changedCallback:Dynamic->Void = null, ?parent:Dynamic) {
+	public function new(text:String, desc:String, options:Array<Dynamic>, displayOptions:Array<String>, ?optionName:String,
+			?changedCallback:Dynamic->Void = null, ?parent:Dynamic)
+	{
 		this.changedCallback = changedCallback;
 		this.displayOptions = displayOptions;
 		this.options = options;
@@ -32,38 +38,50 @@ class ArrayOption extends TextOption {
 		this.parent = parent = parent != null ? parent : Options;
 
 		var fieldValue = Reflect.field(parent, optionName);
-		if (fieldValue != null) currentSelection = CoolUtil.maxInt(0, options.indexOf(fieldValue));
-	
+		if (fieldValue != null)
+			currentSelection = CoolUtil.maxInt(0, options.indexOf(fieldValue));
+
 		__selectionText = new Alphabet(0, 20, formatTextOption(), 'bold');
 		super(text, desc);
 		add(__selectionText);
 	}
 
-	override function reloadStrings() {
+	override function reloadStrings()
+	{
 		__selectionText.text = formatTextOption();
 		super.reloadStrings();
 	}
 
-	function formatTextOption() {
+	function formatTextOption()
+	{
 		var s = ": ";
 
-		if (currentSelection > 0) s += "< ";
-		else s += "  ";
+		if (currentSelection > 0)
+			s += "< ";
+		else
+			s += "  ";
 
 		s += TU.exists(displayOptions[currentSelection]) ? TU.translate(displayOptions[currentSelection]) : displayOptions[currentSelection];
 
-		if (currentSelection < options.length - 1) s += " >";
+		if (currentSelection < options.length - 1)
+			s += " >";
 
 		return s;
 	}
 
-	override function changeSelection(change:Int) {
-		if (locked || currentSelection == (currentSelection = CoolUtil.boundInt(currentSelection + change, 0, options.length - 1))) return;
+	override function changeSelection(change:Int)
+	{
+		if (locked || currentSelection == (currentSelection = CoolUtil.boundInt(currentSelection + change, 0, options.length - 1)))
+			return;
 		CoolUtil.playMenuSFX(SCROLL);
 
-		if (optionName != null) Reflect.setField(parent, optionName, options[currentSelection]);
-		if (changedCallback != null) changedCallback(options[currentSelection]);
+		if (optionName != null)
+			Reflect.setField(parent, optionName, options[currentSelection]);
+		if (changedCallback != null)
+			changedCallback(options[currentSelection]);
 	}
 
-	override function select() {}
+	override function select()
+	{
+	}
 }

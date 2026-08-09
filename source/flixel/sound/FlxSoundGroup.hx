@@ -41,7 +41,7 @@ class FlxSoundGroup
 			// remove from prev group
 			if (sound.group != null)
 				sound.group.sounds.remove(sound);
-			
+
 			sounds.push(sound);
 			@:bypassAccessor
 			sound.group = this;

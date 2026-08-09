@@ -35,11 +35,13 @@ using cpp.NativeString;
 	If the first argument to any of the methods is null, the result is
 	unspecified.
 **/
-class StringTools {
+class StringTools
+{
 	/**
 		Encode an URL by using the standard format.
 	**/
-	#if (!java && !cpp && !lua && !eval) inline #end public static function urlEncode(s:String):String {
+	#if (!java && !cpp && !lua && !eval) inline #end public static function urlEncode(s:String):String
+	{
 		#if flash
 		return untyped __global__["encodeURIComponent"](s);
 		#elseif neko
@@ -58,7 +60,8 @@ class StringTools {
 		return @:privateAccess String.__alloc__(b, len);
 		#elseif lua
 		s = lua.NativeStringTools.gsub(s, "\n", "\r\n");
-		s = lua.NativeStringTools.gsub(s, "([^%w %-%_%.%~])", function(c) {
+		s = lua.NativeStringTools.gsub(s, "([^%w %-%_%.%~])", function(c)
+		{
 			return lua.NativeStringTools.format("%%%02X", lua.NativeStringTools.byte(c) + '');
 		});
 		s = lua.NativeStringTools.gsub(s, " ", "+");
@@ -69,16 +72,20 @@ class StringTools {
 	}
 
 	#if java
-	private static function postProcessUrlEncode(s:String):String {
+	private static function postProcessUrlEncode(s:String):String
+	{
 		var ret = new StringBuf();
 		var i = 0, len = s.length;
-		while (i < len) {
-			switch (_charAt(s, i++)) {
+		while (i < len)
+		{
+			switch (_charAt(s, i++))
+			{
 				case '+'.code:
 					ret.add('%20');
 				case '%'.code if (i <= len - 2):
 					var c1 = _charAt(s, i++), c2 = _charAt(s, i++);
-					switch [c1, c2] {
+					switch [c1, c2]
+					{
 						case ['2'.code, '1'.code]:
 							ret.addChar('!'.code);
 						case ['2'.code, '7'.code]:
@@ -105,7 +112,8 @@ class StringTools {
 	/**
 		Decode an URL using the standard format.
 	**/
-	#if (!java && !cpp && !lua && !eval) inline #end public static function urlDecode(s:String):String {
+	#if (!java && !cpp && !lua && !eval) inline #end public static function urlDecode(s:String):String
+	{
 		#if flash
 		return untyped __global__["decodeURIComponent"](s.split("+").join(" "));
 		#elseif neko
@@ -127,7 +135,8 @@ class StringTools {
 		return @:privateAccess String.__alloc__(b, len);
 		#elseif lua
 		s = lua.NativeStringTools.gsub(s, "+", " ");
-		s = lua.NativeStringTools.gsub(s, "%%(%x%x)", function(h) {
+		s = lua.NativeStringTools.gsub(s, "%%(%x%x)", function(h)
+		{
 			return lua.NativeStringTools.char(lua.Lua.tonumber(h, 16));
 		});
 		s = lua.NativeStringTools.gsub(s, "\r\n", "\n");
@@ -151,10 +160,13 @@ class StringTools {
 		- `"` becomes `&quot`;
 		- `'` becomes `&#039`;
 	**/
-	public static function htmlEscape(s:String, ?quotes:Bool):String {
+	public static function htmlEscape(s:String, ?quotes:Bool):String
+	{
 		var buf = new StringBuf();
-		for (code in #if neko iterator(s) #else new haxe.iterators.StringIteratorUnicode(s) #end) {
-			switch (code) {
+		for (code in #if neko iterator(s) #else new haxe.iterators.StringIteratorUnicode(s) #end)
+		{
+			switch (code)
+			{
 				case '&'.code:
 					buf.add("&amp;");
 				case '<'.code:
@@ -186,7 +198,8 @@ class StringTools {
 		- `&quot;` becomes `"`
 		- `&#039;` becomes `'`
 	**/
-	public static function htmlUnescape(s:String):String {
+	public static function htmlUnescape(s:String):String
+	{
 		return s.split("&gt;")
 			.join(">")
 			.split("&lt;")
@@ -204,7 +217,8 @@ class StringTools {
 
 		When `value` is `null`, the result is unspecified.
 	**/
-	public static inline function contains(s:String, value:String):Bool {
+	public static inline function contains(s:String, value:String):Bool
+	{
 		#if (js && js_es >= 6)
 		return (cast s).includes(value);
 		#else
@@ -219,7 +233,8 @@ class StringTools {
 
 		If `start` is the empty String `""`, the result is true.
 	**/
-	public static #if (java || python || (js && js_es >= 6)) inline #end function startsWith(s:String, start:String):Bool {
+	public static #if (java || python || (js && js_es >= 6)) inline #end function startsWith(s:String, start:String):Bool
+	{
 		#if java
 		return (cast s : java.NativeString).startsWith(start);
 		#elseif hl
@@ -244,7 +259,8 @@ class StringTools {
 
 		If `end` is the empty String `""`, the result is true.
 	**/
-	public static #if (java || python || (js && js_es >= 6)) inline #end function endsWith(s:String, end:String):Bool {
+	public static #if (java || python || (js && js_es >= 6)) inline #end function endsWith(s:String, end:String):Bool
+	{
 		#if java
 		return (cast s : java.NativeString).endsWith(end);
 		#elseif hl
@@ -275,7 +291,8 @@ class StringTools {
 		If `s` is the empty String `""`, or if pos is not a valid position within
 		`s`, the result is false.
 	**/
-	public static function isSpace(s:String, pos:Int):Bool {
+	public static function isSpace(s:String, pos:Int):Bool
+	{
 		#if (python || lua)
 		if (s.length == 0 || pos < 0 || pos >= s.length)
 			return false;
@@ -293,10 +310,12 @@ class StringTools {
 		If `s` is the empty String `""` or consists only of space characters, the
 		result is the empty String `""`.
 	**/
-	public inline static function ltrim(s:String):String {
+	public inline static function ltrim(s:String):String
+	{
 		var l = s.length;
 		var r = 0;
-		while (r < l && isSpace(s, r)) {
+		while (r < l && isSpace(s, r))
+		{
 			r++;
 		}
 		if (r > 0)
@@ -314,15 +333,20 @@ class StringTools {
 		If `s` is the empty String `""` or consists only of space characters, the
 		result is the empty String `""`.
 	**/
-	public inline static function rtrim(s:String):String {
+	public inline static function rtrim(s:String):String
+	{
 		var l = s.length;
 		var r = 0;
-		while (r < l && isSpace(s, l - r - 1)) {
+		while (r < l && isSpace(s, l - r - 1))
+		{
 			r++;
 		}
-		if (r > 0) {
+		if (r > 0)
+		{
 			return s.substr(0, l - r);
-		} else {
+		}
+		else
+		{
 			return s;
 		}
 	}
@@ -332,22 +356,25 @@ class StringTools {
 
 		This is a convenience function for `ltrim(rtrim(s))`.
 	**/
-	public #if java inline #end static function trim(s:String):String {
+	public #if java inline #end static function trim(s:String):String
+	{
 		#if java
 		return (cast s : java.NativeString).trim();
 		#else
-		//return ltrim(rtrim(s));
+		// return ltrim(rtrim(s));
 		var l = s.length;
 		var start = 0;
 		var end = l;
 
 		// Trim leading spaces
-		while (start < l && isSpace(s, start)) {
+		while (start < l && isSpace(s, start))
+		{
 			start++;
 		}
 
 		// Trim trailing spaces
-		while (end > start && isSpace(s, end - 1)) {
+		while (end > start && isSpace(s, end - 1))
+		{
 			end--;
 		}
 
@@ -367,13 +394,15 @@ class StringTools {
 
 		If `c` is null, the result is unspecified.
 	**/
-	public static function lpad(s:String, c:String, l:Int):String {
+	public static function lpad(s:String, c:String, l:Int):String
+	{
 		if (c.length <= 0)
 			return s;
 
 		var buf = new StringBuf();
 		l -= s.length;
-		while (buf.length < l) {
+		while (buf.length < l)
+		{
 			buf.add(c);
 		}
 		buf.add(s);
@@ -392,13 +421,15 @@ class StringTools {
 
 		If `c` is null, the result is unspecified.
 	**/
-	public static function rpad(s:String, c:String, l:Int):String {
+	public static function rpad(s:String, c:String, l:Int):String
+	{
 		if (c.length <= 0)
 			return s;
 
 		var buf = new StringBuf();
 		buf.add(s);
-		while (buf.length < l) {
+		while (buf.length < l)
+		{
 			buf.add(c);
 		}
 		return buf.toString();
@@ -414,7 +445,8 @@ class StringTools {
 
 		If `sub` or `by` are null, the result is unspecified.
 	**/
-	public static function replace(s:String, sub:String, by:String):String {
+	public static function replace(s:String, sub:String, by:String):String
+	{
 		#if java
 		if (sub.length == 0)
 			return s.split(sub).join(by);
@@ -431,7 +463,8 @@ class StringTools {
 		If `digits` is specified, the resulting String is padded with "0" until
 		its `length` equals `digits`.
 	**/
-	public static function hex(n:Int, ?digits:Int) {
+	public static function hex(n:Int, ?digits:Int)
+	{
 		#if flash
 		var n:UInt = n;
 		var s:String = untyped n.toString(16);
@@ -439,15 +472,19 @@ class StringTools {
 		#else
 		var s = "";
 		var hexChars = "0123456789ABCDEF";
-		do {
+		do
+		{
 			s = hexChars.charAt(n & 15) + s;
 			n >>>= 4;
-		} while (n > 0);
+		}
+		while (n > 0);
 		#end
 		#if python
-		if (digits != null && s.length < digits) {
+		if (digits != null && s.length < digits)
+		{
 			var diff = digits - s.length;
-			for (_ in 0...diff) {
+			for (_ in 0...diff)
+			{
 				s = "0" + s;
 			}
 		}
@@ -473,7 +510,8 @@ class StringTools {
 		This operation is not guaranteed to work if `s` contains the `\0`
 		character.
 	**/
-	public static #if !eval inline #end function fastCodeAt(s:String, index:Int):Int {
+	public static #if !eval inline #end function fastCodeAt(s:String, index:Int):Int
+	{
 		#if neko
 		return untyped __dollar__sget(s.__s, index);
 		#elseif cpp
@@ -510,7 +548,8 @@ class StringTools {
 		This operation is not guaranteed to work if `s` contains the `\0`
 		character.
 	**/
-	public static #if !eval inline #end function unsafeCodeAt(s:String, index:Int):Int {
+	public static #if !eval inline #end function unsafeCodeAt(s:String, index:Int):Int
+	{
 		#if neko
 		return untyped __dollar__sget(s.__s, index);
 		#elseif cpp
@@ -543,7 +582,8 @@ class StringTools {
 		internal encoding of strings in different runtimes.
 		For the consistent cross-platform UTF8 char codes see `haxe.iterators.StringIteratorUnicode`.
 	**/
-	public static inline function iterator(s:String):StringIterator {
+	public static inline function iterator(s:String):StringIterator
+	{
 		return new StringIterator(s);
 	}
 
@@ -554,14 +594,16 @@ class StringTools {
 		internal encoding of strings in different of runtimes.
 		For the consistent cross-platform UTF8 char codes see `haxe.iterators.StringKeyValueIteratorUnicode`.
 	**/
-	public static inline function keyValueIterator(s:String):StringKeyValueIterator {
+	public static inline function keyValueIterator(s:String):StringKeyValueIterator
+	{
 		return new StringKeyValueIterator(s);
 	}
 
 	/**
 		Tells if `c` represents the end-of-file (EOF) character.
 	**/
-	@:noUsing public static inline function isEof(c:Int):Bool {
+	@:noUsing public static inline function isEof(c:Int):Bool
+	{
 		#if (flash || cpp || hl)
 		return c == 0;
 		#elseif js
@@ -582,7 +624,8 @@ class StringTools {
 	**/
 	@:noCompletion
 	@:deprecated('StringTools.quoteUnixArg() is deprecated. Use haxe.SysTools.quoteUnixArg() instead.')
-	public static function quoteUnixArg(argument:String):String {
+	public static function quoteUnixArg(argument:String):String
+	{
 		return inline haxe.SysTools.quoteUnixArg(argument);
 	}
 
@@ -608,7 +651,8 @@ class StringTools {
 	**/
 	@:noCompletion
 	@:deprecated('StringTools.quoteWinArg() is deprecated. Use haxe.SysTools.quoteWinArg() instead.')
-	public static function quoteWinArg(argument:String, escapeMetaCharacters:Bool):String {
+	public static function quoteWinArg(argument:String, escapeMetaCharacters:Bool):String
+	{
 		return inline haxe.SysTools.quoteWinArg(argument, escapeMetaCharacters);
 	}
 
@@ -625,9 +669,11 @@ class StringTools {
 	#if utf16
 	static inline var MIN_SURROGATE_CODE_POINT = 65536;
 
-	static inline function utf16CodePointAt(s:String, index:Int):Int {
+	static inline function utf16CodePointAt(s:String, index:Int):Int
+	{
 		var c = StringTools.fastCodeAt(s, index);
-		if (c >= 0xD800 && c <= 0xDBFF) {
+		if (c >= 0xD800 && c <= 0xDBFF)
+		{
 			c = ((c - 0xD7C0) << 10) | (StringTools.fastCodeAt(s, index + 1) & 0x3FF);
 		}
 		return c;

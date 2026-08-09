@@ -8,7 +8,8 @@ class HitWindowData
 	{
 		var map = new StringMap<Float>();
 
-		switch (preset) {
+		switch (preset)
+		{
 			// Old Codename, really forgiving inputs (hard to get bad ratings)
 			case CNE_CLASSIC:
 				map.set("sick", 50.0);
@@ -39,6 +40,7 @@ class HitWindowData
 	}
 
 	public static var JUDGE_SCALES:Array<Float> = [1.5, 1.33, 1.16, 1.0, 0.84, 0.66, 0.5, 0.33, 0.2];
+
 	public static function scaleWindows(windows:StringMap<Float>, scale:Float):StringMap<Float>
 	{
 		var scaled = new StringMap<Float>();

@@ -5,7 +5,8 @@ import lime.graphics.cairo.CairoImageSurface;
 import openfl.display.BitmapData;
 import openfl.geom.Rectangle;
 
-class OptimizedBitmapData extends BitmapData {
+class OptimizedBitmapData extends BitmapData
+{
 	@SuppressWarnings("checkstyle:Dynamic")
 	@:noCompletion private override function __fromImage(image:#if lime Image #else Dynamic #end):Void
 	{
@@ -29,7 +30,8 @@ class OptimizedBitmapData extends BitmapData {
 			__isValid = true;
 			readable = true;
 
-			if(FlxG.stage.context3D != null) {
+			if (FlxG.stage.context3D != null)
+			{
 				lock();
 				getTexture(FlxG.stage.context3D);
 				getSurface();

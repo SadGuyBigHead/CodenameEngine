@@ -65,7 +65,7 @@ class FileDialog
 		Triggers when `open()` is successful. The `lime.utils.Resource` contains the file's data, and can
 		be implicitly cast to `haxe.io.Bytes`, the String is the path to the file.
 	**/
-	public var onOpenFile = new Event<(Resource, String)->Void>(); // Added by @NeeEoo
+	public var onOpenFile = new Event<(Resource, String) -> Void>(); // Added by @NeeEoo
 
 	/**
 		Triggers when `save()` is successful. The `String` is the path to the saved file.
@@ -84,7 +84,9 @@ class FileDialog
 	**/
 	public var onSelectMultiple = new Event<Array<String>->Void>();
 
-	public function new() {}
+	public function new()
+	{
+	}
 
 	/**
 		Opens a file selection dialog. If successful, either `onSelect` or `onSelectMultiple` will trigger
@@ -101,7 +103,8 @@ class FileDialog
 	**/
 	public function browse(type:FileDialogType = null, filter:String = null, defaultPath:String = null, title:String = null):Bool
 	{
-		if (type == null) type = FileDialogType.OPEN;
+		if (type == null)
+			type = FileDialogType.OPEN;
 
 		#if desktop
 		var worker = new BackgroundWorker();
@@ -112,7 +115,8 @@ class FileDialog
 			{
 				case OPEN:
 					#if linux
-					if (title == null) title = "Open File";
+					if (title == null)
+						title = "Open File";
 					#end
 
 					var path = null;
@@ -132,7 +136,8 @@ class FileDialog
 
 				case OPEN_MULTIPLE:
 					#if linux
-					if (title == null) title = "Open Files";
+					if (title == null)
+						title = "Open Files";
 					#end
 
 					var paths = null;
@@ -156,7 +161,8 @@ class FileDialog
 
 				case OPEN_DIRECTORY:
 					#if linux
-					if (title == null) title = "Open Directory";
+					if (title == null)
+						title = "Open Directory";
 					#end
 
 					var path = null;
@@ -176,7 +182,8 @@ class FileDialog
 
 				case SAVE:
 					#if linux
-					if (title == null) title = "Save File";
+					if (title == null)
+						title = "Save File";
 					#end
 
 					var path = null;
@@ -260,14 +267,16 @@ class FileDialog
 		worker.doWork.add(function(_)
 		{
 			#if linux
-			if (title == null) title = "Open File";
+			if (title == null)
+				title = "Open File";
 			#end
 
 			var path = null;
 			#if (!macro && lime_cffi)
 			#if hl
 			var bytes = NativeCFFI.lime_file_dialog_open_file(title, filter, defaultPath);
-			if (bytes != null) path = @:privateAccess String.fromUTF8(cast bytes);
+			if (bytes != null)
+				path = @:privateAccess String.fromUTF8(cast bytes);
 			#else
 			path = NativeCFFI.lime_file_dialog_open_file(title, filter, defaultPath);
 			#end
@@ -287,7 +296,9 @@ class FileDialog
 					onOpenFile.dispatch(data, path); // Added by @NeeEoo
 					return;
 				}
-				catch (e:Dynamic) {}
+				catch (e:Dynamic)
+				{
+				}
 			}
 
 			onCancel.dispatch();
@@ -331,7 +342,8 @@ class FileDialog
 		worker.doWork.add(function(_)
 		{
 			#if linux
-			if (title == null) title = "Save File";
+			if (title == null)
+				title = "Save File";
 			#end
 
 			var path = null;
@@ -357,7 +369,9 @@ class FileDialog
 					onSave.dispatch(path);
 					return;
 				}
-				catch (e:Dynamic) {}
+				catch (e:Dynamic)
+				{
+				}
 			}
 
 			onCancel.dispatch();

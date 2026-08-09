@@ -18,32 +18,43 @@ class Paths
 
 	public static var tempFramesCache:Map<String, FlxFramesCollection> = [];
 
-	public static function init() {
-		FlxG.signals.preStateSwitch.add(function() {
+	public static function init()
+	{
+		FlxG.signals.preStateSwitch.add(function()
+		{
 			tempFramesCache.clear();
 		});
 	}
 
-	public static inline function getPath(file:String, ?library:String) {
+	public static inline function getPath(file:String, ?library:String)
+	{
 		var returnedPath:String = library != null ? '$library:assets/$library/$file' : 'assets/$file';
 		#if (sys && !windows)
 		returnedPath = Path.normalize(returnedPath);
-		if (OpenFlAssets.exists(returnedPath)) return returnedPath;
+		if (OpenFlAssets.exists(returnedPath))
+			return returnedPath;
 		var fixedPath:String = library != null ? '$library:assets/$library/' : 'assets/';
 		var parts:Array<String> = returnedPath.split("/");
-		for (it=>part in parts) {
-			if (it == 0) continue;
+		for (it => part in parts)
+		{
+			if (it == 0)
+				continue;
 			var entries:Array<String> = null;
-			if (Path.extension(part) == "") entries = assetsTree.getFolders(fixedPath);
-			else entries = assetsTree.getFiles(fixedPath);
-			for (entry in entries) {
-				if (entry.toLowerCase() == part.toLowerCase()) {
+			if (Path.extension(part) == "")
+				entries = assetsTree.getFolders(fixedPath);
+			else
+				entries = assetsTree.getFiles(fixedPath);
+			for (entry in entries)
+			{
+				if (entry.toLowerCase() == part.toLowerCase())
+				{
 					fixedPath += entry + (it != parts.length - 1 ? "/" : "");
 					break;
 				}
 			}
 		}
-		if (returnedPath.toLowerCase() == fixedPath.toLowerCase()) returnedPath = fixedPath;
+		if (returnedPath.toLowerCase() == fixedPath.toLowerCase())
+			returnedPath = fixedPath;
 		#end
 		return returnedPath;
 	}
@@ -90,37 +101,52 @@ class Paths
 	inline static public function music(key:String, ?library:String, ?ext:String)
 		return getPath('music/$key.${ext != null ? ext : Flags.SOUND_EXT}', library);
 
-	inline static public function voices(song:String, ?difficulty:String, ?suffix:String = "", ?ext:String) {
-		if (difficulty == null) difficulty = Flags.DEFAULT_DIFFICULTY;
-		if (ext == null) ext = Flags.SOUND_EXT;
+	inline static public function voices(song:String, ?difficulty:String, ?suffix:String = "", ?ext:String)
+	{
+		if (difficulty == null)
+			difficulty = Flags.DEFAULT_DIFFICULTY;
+		if (ext == null)
+			ext = Flags.SOUND_EXT;
 		var diff = getPath('songs/$song/song/Voices$suffix-${difficulty}.${ext}', null);
 		return OpenFlAssets.exists(diff) ? diff : getPath('songs/$song/song/Voices$suffix.${ext}', null);
 	}
 
-	inline static public function inst(song:String, ?difficulty:String, ?suffix:String = "", ?ext:String) {
-		if (difficulty == null) difficulty = Flags.DEFAULT_DIFFICULTY;
-		if (ext == null) ext = Flags.SOUND_EXT;
+	inline static public function inst(song:String, ?difficulty:String, ?suffix:String = "", ?ext:String)
+	{
+		if (difficulty == null)
+			difficulty = Flags.DEFAULT_DIFFICULTY;
+		if (ext == null)
+			ext = Flags.SOUND_EXT;
 		var diff = getPath('songs/$song/song/Inst$suffix-${difficulty}.${ext}', null);
 		return OpenFlAssets.exists(diff) ? diff : getPath('songs/$song/song/Inst$suffix.${ext}', null);
 	}
 
-	static public function image(key:String, ?library:String, checkForAtlas:Bool = false, ?ext:String) {
-		if (ext == null) ext = Flags.IMAGE_EXT;
-		if (checkForAtlas) {
+	static public function image(key:String, ?library:String, checkForAtlas:Bool = false, ?ext:String)
+	{
+		if (ext == null)
+			ext = Flags.IMAGE_EXT;
+		if (checkForAtlas)
+		{
 			var atlasPath = getPath('images/$key/spritemap.$ext', library);
 			var multiplePath = getPath('images/$key/1.$ext', library);
-			if (atlasPath != null && OpenFlAssets.exists(atlasPath)) return atlasPath.substr(0, atlasPath.length - 14);
-			if (multiplePath != null && OpenFlAssets.exists(multiplePath)) return multiplePath.substr(0, multiplePath.length - 6);
+			if (atlasPath != null && OpenFlAssets.exists(atlasPath))
+				return atlasPath.substr(0, atlasPath.length - 14);
+			if (multiplePath != null && OpenFlAssets.exists(multiplePath))
+				return multiplePath.substr(0, multiplePath.length - 6);
 		}
 		return getPath('images/$key.$ext', library);
 	}
 
-	public static inline function script(key:String, ?library:String, isAssetsPath:Bool = false) {
+	public static inline function script(key:String, ?library:String, isAssetsPath:Bool = false)
+	{
 		var scriptPath = isAssetsPath ? key : getPath(key, library);
-		if (!OpenFlAssets.exists(scriptPath)) {
+		if (!OpenFlAssets.exists(scriptPath))
+		{
 			var p:String;
-			for(ex in Script.scriptExtensions) {
-				if (OpenFlAssets.exists(p = scriptPath + '.' + ex)) {
+			for (ex in Script.scriptExtensions)
+			{
+				if (OpenFlAssets.exists(p = scriptPath + '.' + ex))
+				{
 					scriptPath = p;
 					break;
 				}
@@ -136,7 +162,8 @@ class Paths
 		return getPath('songs/$song/charts/${variant != null ? variant + "/" : ""}$difficulty.json', null);
 	}
 
-	public static function character(character:String):String {
+	public static function character(character:String):String
+	{
 		return getPath('data/characters/$character.xml', null);
 	}
 
@@ -144,31 +171,38 @@ class Paths
 	 * Gets the name of a registered font.
 	 * @param font The font's path (if it's already passed as a font name, the same name will be returned)
 	 */
-	inline static public function getFontName(font:String) {
+	inline static public function getFontName(font:String)
+	{
 		return OpenFlAssets.exists(font, FONT) ? OpenFlAssets.getFont(font).fontName : font;
 	}
 
-	public static inline function font(key:String) {
+	public static inline function font(key:String)
+	{
 		return getPath('fonts/$key');
 	}
 
-	public static inline function obj(key:String) {
+	public static inline function obj(key:String)
+	{
 		return getPath('models/$key.obj');
 	}
 
-	public static inline function dae(key:String) {
+	public static inline function dae(key:String)
+	{
 		return getPath('models/$key.dae');
 	}
 
-	public static inline function md2(key:String) {
+	public static inline function md2(key:String)
+	{
 		return getPath('models/$key.md2');
 	}
 
-	public static inline function md5(key:String) {
+	public static inline function md5(key:String)
+	{
 		return getPath('models/$key.md5');
 	}
 
-	public static inline function awd(key:String) {
+	public static inline function awd(key:String)
+	{
 		return getPath('models/$key.awd');
 	}
 
@@ -193,9 +227,9 @@ class Paths
 	inline static public function getAsepriteAtlasAlt(key:String, ?ext:String)
 		return FlxAtlasFrames.fromAseprite('$key.${ext != null ? ext : Flags.IMAGE_EXT}', '$key.json');
 
-	static public function getAssetsRoot():String {
-		return if (ModsFolder.currentModFolder != null) '${ModsFolder.modsPath}${ModsFolder.currentModFolder}';
-			else assetsTree.rootDirectory;
+	static public function getAssetsRoot():String
+	{
+		return if (ModsFolder.currentModFolder != null) '${ModsFolder.modsPath}${ModsFolder.currentModFolder}'; else assetsTree.rootDirectory;
 	}
 
 	/**
@@ -203,8 +237,10 @@ class Paths
 	 * @param key Path to the frames
 	 * @param library (Additional) library to load the frames from.
 	 */
-	public static function getFrames(key:String, assetsPath:Bool = false, ?library:String, ?ext:String = null, ?animateSettings:FlxAnimateSettings) {
-		if (tempFramesCache.exists(key)) {
+	public static function getFrames(key:String, assetsPath:Bool = false, ?library:String, ?ext:String = null, ?animateSettings:FlxAnimateSettings)
+	{
+		if (tempFramesCache.exists(key))
+		{
 			var frames = tempFramesCache[key];
 			if (frames != null && frames.parent != null && frames.parent.bitmap != null && frames.parent.bitmap.readable)
 				return frames;
@@ -222,18 +258,19 @@ class Paths
 	 * @param library (Additional) library to load the frames from.
 	 * @return True if the images exist, false otherwise.
 	**/
-	public static function framesExists(key:String, checkAtlas:Bool = false, checkMulti:Bool = true, assetsPath:Bool = false, ?library:String) {
+	public static function framesExists(key:String, checkAtlas:Bool = false, checkMulti:Bool = true, assetsPath:Bool = false, ?library:String)
+	{
 		var path = assetsPath ? key : Paths.image(key, library, true);
 		var noExt = Path.withoutExtension(path);
-		if(checkAtlas && Assets.exists('$noExt/Animation.json'))
+		if (checkAtlas && Assets.exists('$noExt/Animation.json'))
 			return true;
-		if(checkMulti && Assets.exists('$noExt/1.png'))
+		if (checkMulti && Assets.exists('$noExt/1.png'))
 			return true;
-		if(Assets.exists('$noExt.xml'))
+		if (Assets.exists('$noExt.xml'))
 			return true;
-		if(Assets.exists('$noExt.txt'))
+		if (Assets.exists('$noExt.txt'))
 			return true;
-		if(Assets.exists('$noExt.json'))
+		if (Assets.exists('$noExt.json'))
 			return true;
 		return false;
 	}
@@ -248,11 +285,14 @@ class Paths
 	 * @param Ext Extension of the image.
 	 * @return FlxFramesCollection Frames
 	 */
-	static function loadFrames(path:String, Unique:Bool = false, Key:String = null, SkipAtlasCheck:Bool = false, SkipMultiCheck:Bool = false, ?Ext:String = null, ?animateSettings:FlxAnimateSettings):FlxFramesCollection {
+	static function loadFrames(path:String, Unique:Bool = false, Key:String = null, SkipAtlasCheck:Bool = false, SkipMultiCheck:Bool = false,
+			?Ext:String = null, ?animateSettings:FlxAnimateSettings):FlxFramesCollection
+	{
 		var noExt = Path.withoutExtension(path);
 		var ext = Ext != null ? Ext : Flags.IMAGE_EXT;
 
-		if (!SkipMultiCheck && Assets.exists('$noExt/1.${ext}')) {
+		if (!SkipMultiCheck && Assets.exists('$noExt/1.${ext}'))
+		{
 			// MULTIPLE SPRITESHEETS!!
 
 			var graphic = FlxG.bitmap.add("flixel/images/logo/default.png", false, '$noExt/mult');
@@ -263,19 +303,28 @@ class Paths
 			trace("no frames yet for multiple atlases!!");
 			var cur = 1;
 			var finalFrames = new MultiFramesCollection(graphic);
-			while(Assets.exists('$noExt/$cur.${ext}')) {
+			while (Assets.exists('$noExt/$cur.${ext}'))
+			{
 				var spr = loadFrames('$noExt/$cur.${ext}', false, null, false, true);
 				finalFrames.addFrames(spr);
 				cur++;
 			}
 			return finalFrames;
-		} else if (Assets.exists('$noExt/Animation.json')) {
+		}
+		else if (Assets.exists('$noExt/Animation.json'))
+		{
 			return Paths.getAnimateAtlasAlt(noExt, animateSettings);
-		} else if (Assets.exists('$noExt.xml')) {
+		}
+		else if (Assets.exists('$noExt.xml'))
+		{
 			return Paths.getSparrowAtlasAlt(noExt, ext);
-		} else if (Assets.exists('$noExt.txt')) {
+		}
+		else if (Assets.exists('$noExt.txt'))
+		{
 			return Paths.getPackerAtlasAlt(noExt, ext);
-		} else if (Assets.exists('$noExt.json')) {
+		}
+		else if (Assets.exists('$noExt.json'))
+		{
 			return Paths.getAsepriteAtlasAlt(noExt, ext);
 		}
 
@@ -285,49 +334,63 @@ class Paths
 		return graph.imageFrame;
 	}
 
-	public static function getFolderDirectories(key:String, addPath:Bool = false, source:AssetSource = BOTH):Array<String> {
-		if (!key.endsWith("/")) key += "/";
+	public static function getFolderDirectories(key:String, addPath:Bool = false, source:AssetSource = BOTH):Array<String>
+	{
+		if (!key.endsWith("/"))
+			key += "/";
 		var content = assetsTree.getFolders('assets/$key', source);
-		if (addPath) {
-			for(k=>e in content)
+		if (addPath)
+		{
+			for (k => e in content)
 				content[k] = '$key$e';
 		}
 		return content;
 	}
-	static public function getFolderContent(key:String, addPath:Bool = false, source:AssetSource = BOTH, noExtension:Bool = false):Array<String> {
+
+	static public function getFolderContent(key:String, addPath:Bool = false, source:AssetSource = BOTH, noExtension:Bool = false):Array<String>
+	{
 		// designed to work both on windows and web
-		if (!key.endsWith("/")) key += "/";
+		if (!key.endsWith("/"))
+			key += "/";
 		var content = assetsTree.getFiles('assets/$key', source);
-		for (k => e in content) {
-			if (noExtension) e = Path.withoutExtension(e);
+		for (k => e in content)
+		{
+			if (noExtension)
+				e = Path.withoutExtension(e);
 			content[k] = addPath ? '$key$e' : e;
 		}
 		return content;
 	}
 
 	// Used in Script.hx
-	@:noCompletion public static function getFilenameFromLibFile(path:String) {
+	@:noCompletion public static function getFilenameFromLibFile(path:String)
+	{
 		var file = new haxe.io.Path(path);
-		if(file.file.startsWith("LIB_")) {
+		if (file.file.startsWith("LIB_"))
+		{
 			return file.dir + "." + file.ext;
 		}
 		return path;
 	}
 
-	@:noCompletion public static function getLibFromLibFile(path:String) {
+	@:noCompletion public static function getLibFromLibFile(path:String)
+	{
 		var file = new haxe.io.Path(path);
-		if(file.file.startsWith("LIB_")) {
+		if (file.file.startsWith("LIB_"))
+		{
 			return file.file.substr(4);
 		}
 		return "";
 	}
 }
 
-class ScriptPathInfo {
+class ScriptPathInfo
+{
 	public var file:String;
 	public var library:AssetLibrary;
 
-	public function new(file:String, library:AssetLibrary) {
+	public function new(file:String, library:AssetLibrary)
+	{
 		this.file = file;
 		this.library = library;
 	}

@@ -9,6 +9,7 @@ class StageSpriteAnimButton extends PropertyButton
 	public var fpsStepper:UINumericStepper;
 	public var editButton:UIButton;
 	public var editIcon:FlxSprite;
+
 	@:unreflective private var __initialized:Bool = false;
 
 	public var spriteXML:Access;
@@ -19,7 +20,7 @@ class StageSpriteAnimButton extends PropertyButton
 		super("", "", parent, width, height, nameWidth, valueWidth, inputHeight);
 		animData = anim;
 		propertyText.onChange = (text) -> animData.name = text;
-		valueText.onChange = 		(text) -> animData.anim = text;
+		valueText.onChange = (text) -> animData.anim = text;
 
 		var editSize = height - 5 * 2;
 		editButton = new UIButton(deleteButton.x - deleteButton.bWidth - 5, 5, null, openAnimEdit, editSize, editSize);
@@ -35,7 +36,7 @@ class StageSpriteAnimButton extends PropertyButton
 		members.insert(members.indexOf(editButton) + 1, editIcon);
 
 		fpsStepper = new UINumericStepper(valueText.x + valueText.bWidth + 15, 5, 0, 1, 2, 0, null, Math.round(width / 4), 25);
-		fpsStepper.onChange = (text) -> 
+		fpsStepper.onChange = (text) ->
 		{
 			@:privateAccess fpsStepper.__onChange(text);
 			animData.fps = fpsStepper.value;
@@ -55,10 +56,11 @@ class StageSpriteAnimButton extends PropertyButton
 	public override function updatePos()
 	{
 		super.updatePos();
-		if (!__initialized) return;
+		if (!__initialized)
+			return;
 
-		fpsStepper.follow(this, valueText.x + valueText.bWidth, bHeight/2 - (fpsStepper.bHeight/2));
-		editButton.follow(this, deleteButton.x - deleteButton.bWidth - 5, bHeight/2 - (editButton.bHeight/2));
+		fpsStepper.follow(this, valueText.x + valueText.bWidth, bHeight / 2 - (fpsStepper.bHeight / 2));
+		editButton.follow(this, deleteButton.x - deleteButton.bWidth - 5, bHeight / 2 - (editButton.bHeight / 2));
 		editIcon.follow(editButton, editButton.bWidth / 2 - editIcon.width / 2, editButton.bHeight / 2 - editIcon.height / 2);
 	}
 
@@ -79,7 +81,8 @@ class SpriteAnimEditScreen extends UISoftcodedWindow
 	inline function translate(id:String, prefix:String = "stageSpriteAnimEditScreen.", ?args:Array<Dynamic>)
 		return TU.translate(prefix + id, args);
 
-	public function new(xml:Access, parentButton:StageSpriteAnimButton, saveCallback:Void->Void) {
+	public function new(xml:Access, parentButton:StageSpriteAnimButton, saveCallback:Void->Void)
+	{
 		this.saveCallback = saveCallback;
 		this.parentButton = parentButton;
 		this.xml = xml;
@@ -92,8 +95,10 @@ class SpriteAnimEditScreen extends UISoftcodedWindow
 		]);
 	}
 
-	override function saveData() {
+	override function saveData()
+	{
 		super.saveData();
-		if(saveCallback != null) saveCallback();
+		if (saveCallback != null)
+			saveCallback();
 	}
 }

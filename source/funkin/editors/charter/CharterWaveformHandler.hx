@@ -7,13 +7,17 @@ import funkin.backend.system.Conductor;
 import openfl.display.BitmapData;
 import openfl.display.ShaderInput;
 
-class CharterWaveformHandler extends FlxBasic {
+class CharterWaveformHandler extends FlxBasic
+{
 	public var ampsNeeded:Float = 0;
 	public var ampSqrt(get, never):Int;
-	public function get_ampSqrt():Int {
-		var sqrt:Float = Math.sqrt(Math.floor(ampsNeeded/3));
+
+	public function get_ampSqrt():Int
+	{
+		var sqrt:Float = Math.sqrt(Math.floor(ampsNeeded / 3));
 		var ampRet:Int = Math.floor(sqrt);
-		if (sqrt % 1 > 0) ampRet += 1;
+		if (sqrt % 1 > 0)
+			ampRet += 1;
 		return ampRet;
 	}
 
@@ -25,33 +29,48 @@ class CharterWaveformHandler extends FlxBasic {
 
 	public var waveformList:Array<String> = [];
 
-	public function new() {super(); exists = false;}
+	public function new()
+	{
+		super();
+		exists = false;
+	}
 
-	public function generateData(name:String, sound:FlxSound):BitmapData {
-		if (!sounds.exists(name)) sounds.set(name, sound);
+	public function generateData(name:String, sound:FlxSound):BitmapData
+	{
+		if (!sounds.exists(name))
+			sounds.set(name, sound);
 		if (!analyzers.exists(name))
 			analyzers.set(name, new AudioAnalyzer(sound));
 
 		var analyzer:AudioAnalyzer = analyzers.get(name);
 
-		var pixelsNeeded:Int = Math.floor(ampsNeeded/3);
-		if ((ampsNeeded/3) % 1 > 0) pixelsNeeded += 1;
+		var pixelsNeeded:Int = Math.floor(ampsNeeded / 3);
+		if ((ampsNeeded / 3) % 1 > 0)
+			pixelsNeeded += 1;
 
-		var waveData:BitmapData = new BitmapData(
-			ampSqrt, 1+Math.floor(pixelsNeeded/ampSqrt), true, 0xFF000000
-		);
+		var waveData:BitmapData = new BitmapData(ampSqrt, 1 + Math.floor(pixelsNeeded / ampSqrt), true, 0xFF000000);
 
 		for (y in 0...waveData.height)
-			for (x in 0...waveData.width) {
+			for (x in 0...waveData.width)
+			{
 				var amplitudes:Array<Float> = [0., 0., 0.];
-				for (color in 0...3) {
+				for (color in 0...3)
+				{
 					var gridY:Float = (y * (waveData.width * 3)) + (x * 3) + color;
 
-					var startTime:Float = Conductor.getTimeForStep(gridY/40);
-					if (startTime > sound.length) if (color == 0) break; else continue;
+					var startTime:Float = Conductor.getTimeForStep(gridY / 40);
+					if (startTime > sound.length)
+						if (color == 0)
+							break;
+						else
+							continue;
 
-					var endTime:Float = Conductor.getTimeForStep((gridY+1)/40);
-					if (endTime > sound.length) if (color == 0) break; else continue;
+					var endTime:Float = Conductor.getTimeForStep((gridY + 1) / 40);
+					if (endTime > sound.length)
+						if (color == 0)
+							break;
+						else
+							continue;
 
 					var amplitude:Float = analyzer.analyze(startTime, endTime);
 					amplitudes[color] = amplitude;
@@ -63,8 +82,10 @@ class CharterWaveformHandler extends FlxBasic {
 		return waveData;
 	}
 
-	public function generateShader(name:String, sound:FlxSound):CustomShader {
-		if (!waveDatas.exists(name)) generateData(name, sound);
+	public function generateShader(name:String, sound:FlxSound):CustomShader
+	{
+		if (!waveDatas.exists(name))
+			generateData(name, sound);
 
 		var waveData:BitmapData = waveDatas.get(name);
 
@@ -84,7 +105,8 @@ class CharterWaveformHandler extends FlxBasic {
 		return waveShader;
 	}
 
-	public function clearWaveform(name:String) {
+	public function clearWaveform(name:String)
+	{
 		waveDatas.get(name).dispose();
 		waveDatas.remove(name);
 
@@ -98,18 +120,25 @@ class CharterWaveformHandler extends FlxBasic {
 		waveformList.remove(name);
 	}
 
-	public function clearWaveforms() {
-		for (data in waveDatas) data.dispose();
-		for (shader in waveShaders) shader = null;
-		for (analyzer in analyzers) analyzer = null;
+	public function clearWaveforms()
+	{
+		for (data in waveDatas)
+			data.dispose();
+		for (shader in waveShaders)
+			shader = null;
+		for (analyzer in analyzers)
+			analyzer = null;
 
-		waveDatas.clear(); waveShaders.clear();
-		analyzers.clear(); sounds.clear();
+		waveDatas.clear();
+		waveShaders.clear();
+		analyzers.clear();
+		sounds.clear();
 
 		waveformList = [];
 	}
 
-	public override function destroy() {
+	public override function destroy()
+	{
 		clearWaveforms();
 		super.destroy();
 	}

@@ -23,7 +23,6 @@ import openfl.geom.Rectangle;
 	2. Blurring - The extracted bright areas are blurred horizontally and vertically
 	3. Combination - The blurred result is blended back with the original image
 **/
-
 @:noCustomClass
 class BloomEffect extends BitmapFilter
 {
@@ -163,14 +162,19 @@ class BloomEffect extends BitmapFilter
 		@param useLowQualityExtract Enables performance-optimized extraction with 
 									potentially more flickering.
 	**/
-	public function new(blurX:Float = 50, blurY:Float = 50, quality:Float = 8, strength:Float = 0.6, threshold:Float = 0.6, smoothness:Float = 0.1, useLowQualityExtract:Bool = true)
+	public function new(blurX:Float = 50, blurY:Float = 50, quality:Float = 8, strength:Float = 0.6, threshold:Float = 0.6, smoothness:Float = 0.1,
+			useLowQualityExtract:Bool = true)
 	{
 		super();
 
-		if (__blurShader == null) __blurShader = new BlurShader();
-		if (__combineShader == null) __combineShader = new CombineShader();
-		if (__extractShader == null) __extractShader = new ExtractShader();
-		if (__extractLowShader == null) __extractLowShader = new ExtractLowShader();
+		if (__blurShader == null)
+			__blurShader = new BlurShader();
+		if (__combineShader == null)
+			__combineShader = new CombineShader();
+		if (__extractShader == null)
+			__extractShader = new ExtractShader();
+		if (__extractLowShader == null)
+			__extractLowShader = new ExtractLowShader();
 
 		this.blurX = blurX;
 		this.blurY = blurY;

@@ -5,20 +5,24 @@ import openfl.display.BitmapData;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 
-final class BitmapUtil {
+final class BitmapUtil
+{
 	/**
 	 * Returns the most present color in a Bitmap.
 	 * @param bmap Bitmap
 	 * @return FlxColor Color that is the most present.
 	 */
-	public static function getMostPresentColor(bmap:BitmapData):FlxColor {
+	public static function getMostPresentColor(bmap:BitmapData):FlxColor
+	{
 		// map containing all the colors and the number of times they've been assigned.
 		var colorMap:Map<FlxColor, Float> = [];
 		var color:FlxColor = 0;
 		var fixedColor:FlxColor = 0;
 
-		for(y in 0...bmap.height) {
-			for(x in 0...bmap.width) {
+		for (y in 0...bmap.height)
+		{
+			for (x in 0...bmap.width)
+			{
 				color = bmap.getPixel32(x, y);
 				fixedColor = 0xFF000000 | (color & 0xFFFFFF);
 				if (!colorMap.exists(fixedColor))
@@ -29,39 +33,48 @@ final class BitmapUtil {
 
 		var mostPresentColor:FlxColor = 0;
 		var mostPresentColorCount:Float = -1;
-		for(c=>n in colorMap) {
-			if (n > mostPresentColorCount) {
+		for (c => n in colorMap)
+		{
+			if (n > mostPresentColorCount)
+			{
 				mostPresentColorCount = n;
 				mostPresentColor = c;
 			}
 		}
 		return mostPresentColor;
 	}
+
 	/**
 	 * Returns the most present saturated color in a Bitmap.
 	 * @param bmap Bitmap
 	 * @return FlxColor Color that is the most present.
 	 */
-	public static function getMostPresentSaturatedColor(bmap:BitmapData):FlxColor {
+	public static function getMostPresentSaturatedColor(bmap:BitmapData):FlxColor
+	{
 		// map containing all the colors and the number of times they've been assigned.
 		var colorMap:Map<FlxColor, Float> = [];
 		var color:FlxColor = 0;
 		var fixedColor:FlxColor = 0;
 
-		for(y in 0...bmap.height) {
-			for(x in 0...bmap.width) {
+		for (y in 0...bmap.height)
+		{
+			for (x in 0...bmap.width)
+			{
 				color = bmap.getPixel32(x, y);
 				fixedColor = 0xFF000000 | (color & 0xFFFFFF);
 				if (!colorMap.exists(fixedColor))
 					colorMap[fixedColor] = 0;
-				colorMap[fixedColor] += color.alphaFloat * 0.33 + (0.67 * (color.saturation * (2 * (color.lightness > 0.5 ? 0.5 - (color.lightness) : color.lightness))));
+				colorMap[fixedColor] += color.alphaFloat * 0.33
+					+ (0.67 * (color.saturation * (2 * (color.lightness > 0.5 ? 0.5 - (color.lightness) : color.lightness))));
 			}
 		}
 
 		var mostPresentColor:FlxColor = 0;
 		var mostPresentColorCount:Float = -1;
-		for(c=>n in colorMap) {
-			if (n > mostPresentColorCount) {
+		for (c => n in colorMap)
+		{
+			if (n > mostPresentColorCount)
+			{
 				mostPresentColorCount = n;
 				mostPresentColor = c;
 			}
@@ -73,11 +86,12 @@ final class BitmapUtil {
 	 * Returns a new bitmap without any empty transperent space on the edges
 	 * @param bitmap The bitmap to be cropped
 	 */
-	public static function crop(bitmap:BitmapData) {
+	public static function crop(bitmap:BitmapData)
+	{
 		var bitmapBounds:Rectangle = BitmapUtil.bounds(bitmap);
 
 		var croppedBitmap:BitmapData = new BitmapData(Std.int(bitmapBounds.width), Std.int(bitmapBounds.height), true, 0x00000000);
-		croppedBitmap.copyPixels(bitmap, bitmapBounds, new Point(0,0));
+		croppedBitmap.copyPixels(bitmap, bitmapBounds, new Point(0, 0));
 		return croppedBitmap;
 	}
 
@@ -86,7 +100,8 @@ final class BitmapUtil {
 	 * @param bitmap
 	 * @return
 	 */
-	public static function bounds(bitmap:BitmapData, ?limit:Rectangle = null):Rectangle {
+	public static function bounds(bitmap:BitmapData, ?limit:Rectangle = null):Rectangle
+	{
 		var hasLimit:Bool = limit != null;
 		// Searching bounds
 		var startX:Int = hasLimit ? Std.int(limit.x) : 0;
@@ -100,17 +115,24 @@ final class BitmapUtil {
 		var maxX:Int = startX;
 		var maxY:Int = startY;
 
-		for (y in startY...endY) {
-			for (x in startX...endX) {
-				if (bitmap.getPixel32(x, y) != 0x00000000) {
-					if (x < minX) minX = x;
-					if (y < minY) minY = y;
-					if (x > maxX) maxX = x;
-					if (y > maxY) maxY = y;
+		for (y in startY...endY)
+		{
+			for (x in startX...endX)
+			{
+				if (bitmap.getPixel32(x, y) != 0x00000000)
+				{
+					if (x < minX)
+						minX = x;
+					if (y < minY)
+						minY = y;
+					if (x > maxX)
+						maxX = x;
+					if (y > maxY)
+						maxY = y;
 				}
 			}
 		}
 
-		return new Rectangle(minX, minY, maxX-minX+1, maxY-minY+1);
+		return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
 	}
 }

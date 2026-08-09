@@ -1,6 +1,7 @@
 package funkin.backend.scripting.events;
 
-final class AmountEvent extends CancellableEvent {
+final class AmountEvent extends CancellableEvent
+{
 	/**
 	 * Amount
 	 */

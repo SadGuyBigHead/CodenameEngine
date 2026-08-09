@@ -32,29 +32,26 @@ final class Mac
 	}
 }
 #end
-
-
 /*
+	Cursor
 
-Cursor
-
-Description
-The arrow cursor (arrow)
-The I-beam cursor for indicating insertion points (iBeam)
-The cross-hair cursor (crosshair)
-The closed-hand cursor (closedHand)
-The open-hand cursor (openHand)
-The pointing-hand cursor (pointingHand)
-The resize-left cursor (resizeLeft)
-The resize-right cursor (resizeRight)
-The resize-left-and-right cursor (resizeLeftRight)
-The resize-up cursor (resizeUp)
-The resize-down cursor (resizeDown)
-The resize-up-and-down cursor (resizeUpDown)
-The disappearing item cursor (disappearingItem)
-The I-Beam text cursor for vertical layout (iBeamCursorForVerticalLayout).
-The not allowed cursor (operationNotAllowed).
-The drag link cursor (dragLink).
-The drag copy cursor (dragCopy).
-The contextual menu cursor (contextualMenu).
-*/
+	Description
+	The arrow cursor (arrow)
+	The I-beam cursor for indicating insertion points (iBeam)
+	The cross-hair cursor (crosshair)
+	The closed-hand cursor (closedHand)
+	The open-hand cursor (openHand)
+	The pointing-hand cursor (pointingHand)
+	The resize-left cursor (resizeLeft)
+	The resize-right cursor (resizeRight)
+	The resize-left-and-right cursor (resizeLeftRight)
+	The resize-up cursor (resizeUp)
+	The resize-down cursor (resizeDown)
+	The resize-up-and-down cursor (resizeUpDown)
+	The disappearing item cursor (disappearingItem)
+	The I-Beam text cursor for vertical layout (iBeamCursorForVerticalLayout).
+	The not allowed cursor (operationNotAllowed).
+	The drag link cursor (dragLink).
+	The drag copy cursor (dragCopy).
+	The contextual menu cursor (contextualMenu).
+ */

@@ -65,27 +65,43 @@ class NativeWindow
 		var title = Reflect.hasField(attributes, "title") ? attributes.title : "Lime Application";
 		var flags = 0;
 
-		if (!Reflect.hasField(contextAttributes, "antialiasing")) contextAttributes.antialiasing = 0;
-		if (!Reflect.hasField(contextAttributes, "background")) contextAttributes.background = 0;
-		if (!Reflect.hasField(contextAttributes, "colorDepth")) contextAttributes.colorDepth = 24;
-		if (!Reflect.hasField(contextAttributes, "depth")) contextAttributes.depth = true;
-		if (!Reflect.hasField(contextAttributes, "hardware")) contextAttributes.hardware = true;
-		if (!Reflect.hasField(contextAttributes, "stencil")) contextAttributes.stencil = true;
-		if (!Reflect.hasField(contextAttributes, "vsync")) contextAttributes.vsync = false;
+		if (!Reflect.hasField(contextAttributes, "antialiasing"))
+			contextAttributes.antialiasing = 0;
+		if (!Reflect.hasField(contextAttributes, "background"))
+			contextAttributes.background = 0;
+		if (!Reflect.hasField(contextAttributes, "colorDepth"))
+			contextAttributes.colorDepth = 24;
+		if (!Reflect.hasField(contextAttributes, "depth"))
+			contextAttributes.depth = true;
+		if (!Reflect.hasField(contextAttributes, "hardware"))
+			contextAttributes.hardware = true;
+		if (!Reflect.hasField(contextAttributes, "stencil"))
+			contextAttributes.stencil = true;
+		if (!Reflect.hasField(contextAttributes, "vsync"))
+			contextAttributes.vsync = false;
 
 		#if (cairo || (!lime_opengl && !lime_opengles))
 		contextAttributes.type = CAIRO;
 		#end
-		if (Reflect.hasField(contextAttributes, "type") && contextAttributes.type == CAIRO) contextAttributes.hardware = false;
+		if (Reflect.hasField(contextAttributes, "type") && contextAttributes.type == CAIRO)
+			contextAttributes.hardware = false;
 
-		if (Reflect.hasField(attributes, "allowHighDPI") && attributes.allowHighDPI) flags |= cast WindowFlags.WINDOW_FLAG_ALLOW_HIGHDPI;
-		if (Reflect.hasField(attributes, "alwaysOnTop") && attributes.alwaysOnTop) flags |= cast WindowFlags.WINDOW_FLAG_ALWAYS_ON_TOP;
-		if (Reflect.hasField(attributes, "borderless") && attributes.borderless) flags |= cast WindowFlags.WINDOW_FLAG_BORDERLESS;
-		if (Reflect.hasField(attributes, "fullscreen") && attributes.fullscreen) flags |= cast WindowFlags.WINDOW_FLAG_FULLSCREEN;
-		if (Reflect.hasField(attributes, "hidden") && attributes.hidden) flags |= cast WindowFlags.WINDOW_FLAG_HIDDEN;
-		if (Reflect.hasField(attributes, "maximized") && attributes.maximized) flags |= cast WindowFlags.WINDOW_FLAG_MAXIMIZED;
-		if (Reflect.hasField(attributes, "minimized") && attributes.minimized) flags |= cast WindowFlags.WINDOW_FLAG_MINIMIZED;
-		if (Reflect.hasField(attributes, "resizable") && attributes.resizable) flags |= cast WindowFlags.WINDOW_FLAG_RESIZABLE;
+		if (Reflect.hasField(attributes, "allowHighDPI") && attributes.allowHighDPI)
+			flags |= cast WindowFlags.WINDOW_FLAG_ALLOW_HIGHDPI;
+		if (Reflect.hasField(attributes, "alwaysOnTop") && attributes.alwaysOnTop)
+			flags |= cast WindowFlags.WINDOW_FLAG_ALWAYS_ON_TOP;
+		if (Reflect.hasField(attributes, "borderless") && attributes.borderless)
+			flags |= cast WindowFlags.WINDOW_FLAG_BORDERLESS;
+		if (Reflect.hasField(attributes, "fullscreen") && attributes.fullscreen)
+			flags |= cast WindowFlags.WINDOW_FLAG_FULLSCREEN;
+		if (Reflect.hasField(attributes, "hidden") && attributes.hidden)
+			flags |= cast WindowFlags.WINDOW_FLAG_HIDDEN;
+		if (Reflect.hasField(attributes, "maximized") && attributes.maximized)
+			flags |= cast WindowFlags.WINDOW_FLAG_MAXIMIZED;
+		if (Reflect.hasField(attributes, "minimized") && attributes.minimized)
+			flags |= cast WindowFlags.WINDOW_FLAG_MINIMIZED;
+		if (Reflect.hasField(attributes, "resizable") && attributes.resizable)
+			flags |= cast WindowFlags.WINDOW_FLAG_RESIZABLE;
 
 		if (contextAttributes.antialiasing >= 4)
 		{
@@ -96,11 +112,16 @@ class NativeWindow
 			flags |= cast WindowFlags.WINDOW_FLAG_HW_AA;
 		}
 
-		if (contextAttributes.colorDepth == 32) flags |= cast WindowFlags.WINDOW_FLAG_COLOR_DEPTH_32_BIT;
-		if (contextAttributes.depth) flags |= cast WindowFlags.WINDOW_FLAG_DEPTH_BUFFER;
-		if (contextAttributes.hardware) flags |= cast WindowFlags.WINDOW_FLAG_HARDWARE;
-		if (contextAttributes.stencil) flags |= cast WindowFlags.WINDOW_FLAG_STENCIL_BUFFER;
-		if (contextAttributes.vsync) flags |= cast WindowFlags.WINDOW_FLAG_VSYNC;
+		if (contextAttributes.colorDepth == 32)
+			flags |= cast WindowFlags.WINDOW_FLAG_COLOR_DEPTH_32_BIT;
+		if (contextAttributes.depth)
+			flags |= cast WindowFlags.WINDOW_FLAG_DEPTH_BUFFER;
+		if (contextAttributes.hardware)
+			flags |= cast WindowFlags.WINDOW_FLAG_HARDWARE;
+		if (contextAttributes.stencil)
+			flags |= cast WindowFlags.WINDOW_FLAG_STENCIL_BUFFER;
+		if (contextAttributes.vsync)
+			flags |= cast WindowFlags.WINDOW_FLAG_VSYNC;
 
 		var width = Reflect.hasField(attributes, "width") ? attributes.width : #if desktop 800 #else 0 #end;
 		var height = Reflect.hasField(attributes, "height") ? attributes.height : #if desktop 600 #else 0 #end;
@@ -109,7 +130,7 @@ class NativeWindow
 		handle = NativeCFFI.lime_window_create(parent.application.__backend.handle, width, height, flags, title);
 
 		#if (DARK_MODE_WINDOW && !macro)
-			funkin.backend.utils.NativeAPI.setDarkMode(title, true);
+		funkin.backend.utils.NativeAPI.setDarkMode(title, true);
 		#end
 
 		if (handle != null)

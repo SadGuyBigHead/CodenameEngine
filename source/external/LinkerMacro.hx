@@ -29,10 +29,12 @@ class LinkerMacro
 
 			printer.writeNode(includeElement, '\n');
 
-			Context.getLocalClass().get().meta.add(':buildXml', [{
-				expr: EConst(CString(printer.output.toString())),
-				pos: pos
-			}], pos);
+			Context.getLocalClass().get().meta.add(':buildXml', [
+				{
+					expr: EConst(CString(printer.output.toString())),
+					pos: pos
+				}
+			], pos);
 		}
 
 		return Context.getBuildFields();

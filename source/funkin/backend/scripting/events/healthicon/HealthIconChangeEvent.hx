@@ -2,7 +2,8 @@ package funkin.backend.scripting.events.healthicon;
 
 import flixel.util.typeLimit.OneOfTwo;
 
-final class HealthIconChangeEvent extends CancellableEvent {
+final class HealthIconChangeEvent extends CancellableEvent
+{
 	/**
 	 * Animation State
 	 */

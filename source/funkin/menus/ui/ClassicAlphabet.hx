@@ -38,9 +38,12 @@ class ClassicAlphabet extends FlxSpriteGroup
 
 	var isBold:Bool = false;
 
-	private override function set_color(c:Int):Int {
-		for(e in group.members) {
-			if (e is AlphaCharacter) {
+	private override function set_color(c:Int):Int
+	{
+		for (e in group.members)
+		{
+			if (e is AlphaCharacter)
+			{
 				var char:AlphaCharacter = cast e;
 				char.setColor(c, isBold);
 			}
@@ -49,36 +52,46 @@ class ClassicAlphabet extends FlxSpriteGroup
 	}
 
 	// TODO: fix this shit refreshing
-	public function refreshAlphabetXML(path:String) {
+	public function refreshAlphabetXML(path:String)
+	{
 		AlphaCharacter.__alphaPath = Paths.getAssetsRoot() + path;
-		try {
+		try
+		{
 			var file = Assets.getText(path);
-			if(file == null) return;
+			if (file == null)
+				return;
 			var xml = new Access(Xml.parse(file).firstElement());
 			AlphaCharacter.boldAnims = [];
 			AlphaCharacter.letterAnims = [];
 			AlphaCharacter.boldAlphabetPath = AlphaCharacter.letterAlphabetPath = 'ui/alphabet';
 
-			for(e in xml.elements) {
+			for (e in xml.elements)
+			{
 				var bold = e.name == "bold";
 				var list = bold ? AlphaCharacter.boldAnims : AlphaCharacter.letterAnims;
-				if (e.has.spritesheet) {
+				if (e.has.spritesheet)
+				{
 					if (bold)
 						AlphaCharacter.boldAlphabetPath = e.att.spritesheet;
 					else
 						AlphaCharacter.letterAlphabetPath = e.att.spritesheet;
 				}
-				for(e in e.nodes.letter) {
-					if (!e.has.char || !e.has.anim) continue;
+				for (e in e.nodes.letter)
+				{
+					if (!e.has.char || !e.has.anim)
+						continue;
 					var name = e.att.char;
 					var anim = e.att.anim;
 					list[name] = anim;
 				}
 			}
-		} catch(e) {
+		}
+		catch (e)
+		{
 			trace(e.details());
 		}
 	}
+
 	public function new(x:Float, y:Float, text:String = "", ?bold:Bool = false, typed:Bool = false)
 	{
 		super(x, y);
@@ -87,22 +100,29 @@ class ClassicAlphabet extends FlxSpriteGroup
 		isBold = bold;
 
 		var alphabetPath = Paths.xml("alphabet");
-		if (Paths.getAssetsRoot() + alphabetPath != AlphaCharacter.__alphaPath) {
+		if (Paths.getAssetsRoot() + alphabetPath != AlphaCharacter.__alphaPath)
+		{
 			refreshAlphabetXML(alphabetPath);
 		}
-		#if MOD_SUPPORT else {
+		#if MOD_SUPPORT
+		else
+		{
 			var libThing = new LimeLibrarySymbol(alphabetPath);
-			if (libThing.library is AssetLibrary) {
+			if (libThing.library is AssetLibrary)
+			{
 				var library = cast(libThing.library, AssetLibrary);
 				@:privateAccess
-				if (library.__proxy != null && library.__proxy is AssetLibrary) {
+				if (library.__proxy != null && library.__proxy is AssetLibrary)
+				{
 					@:privateAccess
 					library = cast(library.__proxy, AssetLibrary);
 				}
-				if (library is IModsAssetLibrary) {
+				if (library is IModsAssetLibrary)
+				{
 					var modLib = cast(library, IModsAssetLibrary);
 					@:privateAccess
-					if (!modLib.__isCacheValid(library.cachedBytes, libThing.symbolName)) {
+					if (!modLib.__isCacheValid(library.cachedBytes, libThing.symbolName))
+					{
 						refreshAlphabetXML(alphabetPath);
 					}
 				}
@@ -129,12 +149,13 @@ class ClassicAlphabet extends FlxSpriteGroup
 
 		var xPos:Float = 0;
 		var curRow:Int = 0;
-		for (i=>character in splitWords)
+		for (i => character in splitWords)
 		{
 			if (lastSprite != null)
 				xPos = lastSprite.x + lastSprite.width - x;
 
-			if (xPosResetted && !(xPosResetted = false)) xPos = 0;
+			if (xPosResetted && !(xPosResetted = false))
+				xPos = 0;
 
 			var letter:AlphaCharacter = new AlphaCharacter(xPos, 0);
 			letter.row = curRow;
@@ -164,7 +185,7 @@ class ClassicAlphabet extends FlxSpriteGroup
 		splitWords = _finalText.split("");
 	}
 
-	//public var personTalking:String = Flags.DEFAULT_GIRLFRIEND;
+	// public var personTalking:String = Flags.DEFAULT_GIRLFRIEND;
 
 	public function startTypedText():Void
 	{
@@ -206,9 +227,10 @@ class ClassicAlphabet extends FlxSpriteGroup
 			x = CoolUtil.fpsLerp(x, (targetY * 20) + 90, 0.16);
 		}
 
-		if (text != _finalText) {
+		if (text != _finalText)
+		{
 			_finalText = text;
-			for(e in members)
+			for (e in members)
 				e.destroy();
 			members.clear();
 			lastSprite = null;
@@ -229,17 +251,22 @@ class AlphaCharacter extends FlxSprite
 
 	public var row:Int = 0;
 
-	public function setColor(c:FlxColor, isBold:Bool) {
-		if (isBold) {
+	public function setColor(c:FlxColor, isBold:Bool)
+	{
+		if (isBold)
+		{
 			colorTransform.redMultiplier = c.redFloat;
 			colorTransform.greenMultiplier = c.greenFloat;
 			colorTransform.blueMultiplier = c.blueFloat;
-		} else {
+		}
+		else
+		{
 			colorTransform.redOffset = c.red;
 			colorTransform.greenOffset = c.green;
 			colorTransform.blueOffset = c.blue;
 		}
 	}
+
 	public function new(x:Float, y:Float)
 	{
 		super(x, y);
@@ -249,9 +276,10 @@ class AlphaCharacter extends FlxSprite
 
 	public function createBold(letter:String)
 	{
-		if(!boldAnims.exists(letter))
+		if (!boldAnims.exists(letter))
 			letter = letter.toUpperCase();
-		if (!boldAnims.exists(letter)) {
+		if (!boldAnims.exists(letter))
+		{
 			visible = false;
 			active = false;
 			scale.set();
@@ -268,7 +296,8 @@ class AlphaCharacter extends FlxSprite
 
 	public function createLetter(letter:String):Void
 	{
-		if (!letterAnims.exists(letter)) {
+		if (!letterAnims.exists(letter))
+		{
 			visible = false;
 			active = false;
 			scale.set();

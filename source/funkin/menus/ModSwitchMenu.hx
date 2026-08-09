@@ -7,14 +7,16 @@ import funkin.backend.assets.ModsFolder;
 import haxe.io.Path;
 import sys.FileSystem;
 
-class ModSwitchMenu extends MusicBeatSubstate {
+class ModSwitchMenu extends MusicBeatSubstate
+{
 	var mods:Array<String> = [];
 	var alphabets:FlxTypedGroup<Alphabet>;
 	var curSelected:Int = 0;
 
 	var subCam:FlxCamera;
 
-	public override function create() {
+	public override function create()
+	{
 		super.create();
 
 		camera = subCam = new FlxCamera();
@@ -30,15 +32,16 @@ class ModSwitchMenu extends MusicBeatSubstate {
 		FlxTween.tween(bg, {alpha: 0.5}, 0.25, {ease: FlxEase.cubeOut});
 
 		mods = ModsFolder.getModsList({
-		    descending: false,
+			descending: false,
 			mode: CLEAN,
 		});
 		mods.push(null);
 
 		alphabets = new FlxTypedGroup<Alphabet>();
-		for(mod in mods) {
+		for (mod in mods)
+		{
 			var a = new Alphabet(0, 0, mod == null ? TU.translate("mods.disableMods") : Path.withoutExtension(mod), "bold");
-			if(mod == ModsFolder.currentModFolder)
+			if (mod == ModsFolder.currentModFolder)
 				a.color = FlxColor.LIME;
 			a.isMenuItem = true;
 			a.scrollFactor.set();
@@ -48,12 +51,14 @@ class ModSwitchMenu extends MusicBeatSubstate {
 		changeSelection(0, true);
 	}
 
-	public override function update(elapsed:Float) {
+	public override function update(elapsed:Float)
+	{
 		super.update(elapsed);
 
 		changeSelection((controls.DOWN_P ? 1 : 0) + (controls.UP_P ? -1 : 0) - FlxG.mouse.wheel);
 
-		if (controls.ACCEPT) {
+		if (controls.ACCEPT)
+		{
 			ModsFolder.switchMod(mods[curSelected]);
 			close();
 		}
@@ -62,21 +67,25 @@ class ModSwitchMenu extends MusicBeatSubstate {
 			close();
 	}
 
-	public function changeSelection(change:Int, force:Bool = false) {
-		if (change == 0 && !force) return;
+	public function changeSelection(change:Int, force:Bool = false)
+	{
+		if (change == 0 && !force)
+			return;
 
-		curSelected = FlxMath.wrap(curSelected + change, 0, alphabets.length-1);
+		curSelected = FlxMath.wrap(curSelected + change, 0, alphabets.length - 1);
 
 		CoolUtil.playMenuSFX(SCROLL, 0.7);
 
-		for(k=>alphabet in alphabets.members) {
+		for (k => alphabet in alphabets.members)
+		{
 			alphabet.alpha = 0.6;
 			alphabet.targetY = k - curSelected;
 		}
 		alphabets.members[curSelected].alpha = 1;
 	}
 
-	override function destroy() {
+	override function destroy()
+	{
 		super.destroy();
 
 		if (FlxG.cameras.list.contains(subCam))

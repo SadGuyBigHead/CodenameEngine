@@ -8,7 +8,8 @@ import funkin.game.HudCamera;
 
 using StringTools;
 
-class ChartDataScreen extends UISubstateWindow {
+class ChartDataScreen extends UISubstateWindow
+{
 	public var data:ChartData;
 	public var saveButton:UIButton;
 	public var closeButton:UIButton;
@@ -19,18 +20,22 @@ class ChartDataScreen extends UISubstateWindow {
 	public var strumLineCam:HudCamera;
 	public var previewStrumLine:CharterPreviewStrumLine;
 
-	public function new(data:ChartData) {
+	public function new(data:ChartData)
+	{
 		super();
 		this.data = data;
 	}
 
-	public override function create() {
+	public override function create()
+	{
 		FlxG.sound.music.pause();
 		Charter.instance.vocals.pause();
-		for (strumLine in Charter.instance.strumLines.members) strumLine.vocals.pause();
+		for (strumLine in Charter.instance.strumLines.members)
+			strumLine.vocals.pause();
 
 		winTitle = TU.translate("chartDataScreen.title");
-		winWidth = 420; winHeight = 230; // guys look, the funny numbers!
+		winWidth = 420;
+		winHeight = 230; // guys look, the funny numbers!
 
 		super.create();
 
@@ -41,7 +46,8 @@ class ChartDataScreen extends UISubstateWindow {
 		add(title = new UIText(windowSpr.x + 20, windowSpr.y + 30 + 16, 0, TU.translate("chartDataScreen.editChartData"), 28));
 
 		var stageFileList = Stage.getList(true);
-		if (stageFileList.length == 0) stageFileList = Stage.getList(false);
+		if (stageFileList.length == 0)
+			stageFileList = Stage.getList(false);
 
 		stageTextBox = new UIAutoCompleteTextBox(title.x, title.y + title.height + 38, PlayState.SONG.stage, 200);
 		stageTextBox.suggestItems = stageFileList;
@@ -52,13 +58,16 @@ class ChartDataScreen extends UISubstateWindow {
 		add(scrollSpeedStepper);
 		addLabelOn(scrollSpeedStepper, TU.translate("chartDataScreen.scrollSpeed"));
 
-		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20 - 125, windowSpr.y + windowSpr.bHeight - 16 - 32, TU.translate("editor.saveClose"), function() {
-			saveInfo();
-			close();
-		}, 125);
+		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20 - 125, windowSpr.y + windowSpr.bHeight - 16 - 32, TU.translate("editor.saveClose"),
+			function()
+			{
+				saveInfo();
+				close();
+			}, 125);
 		add(saveButton);
 
-		closeButton = new UIButton(saveButton.x - 20, saveButton.y, TU.translate("editor.close"), function() {
+		closeButton = new UIButton(saveButton.x - 20, saveButton.y, TU.translate("editor.close"), function()
+		{
 			close();
 		}, 125);
 		add(closeButton);
@@ -75,7 +84,8 @@ class ChartDataScreen extends UISubstateWindow {
 		add(previewStrumLine);
 	}
 
-	public function saveInfo() {
+	public function saveInfo()
+	{
 		UIUtil.confirmUISelections(this);
 
 		var oldData:{stage:String, speed:Float} = {stage: PlayState.SONG.stage, speed: PlayState.SONG.scrollSpeed};
@@ -86,7 +96,8 @@ class ChartDataScreen extends UISubstateWindow {
 		Charter.undos.addToUndo(CEditChartData(oldData, {stage: stageTextBox.label.text, speed: scrollSpeedStepper.value}));
 	}
 
-	override public function update(elapsed:Float) {
+	override public function update(elapsed:Float)
+	{
 		var scrollSpeed:Float = 0.0;
 		if (scrollSpeedStepper.hovered || scrollSpeedStepper.focused)
 			scrollSpeed = scrollSpeedStepper.value;
@@ -96,7 +107,9 @@ class ChartDataScreen extends UISubstateWindow {
 
 		super.update(elapsed);
 	}
-	override public function destroy() {
+
+	override public function destroy()
+	{
 		super.destroy();
 		FlxG.cameras.remove(strumLineCam);
 	}

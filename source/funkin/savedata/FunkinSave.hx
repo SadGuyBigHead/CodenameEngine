@@ -12,7 +12,8 @@ import haxe.Unserializer;
  * The macro will automatically generate the `flush` and `load` functions.
  */
 @:build(funkin.backend.system.macros.FunkinSaveMacro.build("save", "__flush", "__load"))
-class FunkinSave {
+class FunkinSave
+{
 	@:doNotSave public static var highscores:Map<HighscoreEntry, SongScore> = [];
 
 	/**
@@ -22,17 +23,23 @@ class FunkinSave {
 	@:dox(hide) @:doNotSave private static var __eventAdded = false;
 	@:doNotSave public static var save:FlxSave;
 
-	public static function init() {
+	public static function init()
+	{
 		var path = Flags.SAVE_PATH, name = Flags.SAVE_NAME;
-		if (path == null) path = 'CodenameEngine';
-		if (name == null) name = 'save-default';
+		if (path == null)
+			path = 'CodenameEngine';
+		if (name == null)
+			name = 'save-default';
 
-		if (save == null) save = new FlxSave();
+		if (save == null)
+			save = new FlxSave();
 		save.bind(name, path);
 		load();
 
-		if (!__eventAdded) {
-			Lib.application.onExit.add(function(i:Int) {
+		if (!__eventAdded)
+		{
+			Lib.application.onExit.add(function(i:Int)
+			{
 				Logs.traceColored([
 					Logs.getPrefix("FunkinSave"),
 					Logs.logText("Saving "),
@@ -45,9 +52,11 @@ class FunkinSave {
 		}
 	}
 
-	public static function load() {
+	public static function load()
+	{
 		__load();
-		if (save.data.highscores != null) {
+		if (save.data.highscores != null)
+		{
 			var temp;
 			for (entryData in Reflect.fields(save.data.highscores))
 				if ((temp = __getHighscoreEntry(entryData)) != null && Reflect.field(save.data.highscores, entryData) != null)
@@ -55,26 +64,35 @@ class FunkinSave {
 		}
 	}
 
-	public static function flush() {
-		if (save.data.highscores == null) save.data.highscores = {};
-		for (entry => score in highscores) Reflect.setField(save.data.highscores, __formatHighscoreEntry(entry), score);
+	public static function flush()
+	{
+		if (save.data.highscores == null)
+			save.data.highscores = {};
+		for (entry => score in highscores)
+			Reflect.setField(save.data.highscores, __formatHighscoreEntry(entry), score);
 		__flush();
 	}
 
-	static function __getHighscoreEntry(data:String):HighscoreEntry {
-		try {
+	static function __getHighscoreEntry(data:String):HighscoreEntry
+	{
+		try
+		{
 			var d = Unserializer.run(data);
 			if (d.song is String)
 				return HSongEntry(d.song, d.diff, d.variation, d.changes);
 			else if (d.week is String)
 				return HWeekEntry(d.week, d.diff);
 		}
-		catch (e) {}
+		catch (e)
+		{
+		}
 		return null;
 	}
 
-	static function __formatHighscoreEntry(entry:HighscoreEntry):String {
-		switch (entry) {
+	static function __formatHighscoreEntry(entry:HighscoreEntry):String
+	{
+		switch (entry)
+		{
 			case HWeekEntry(weekName, difficulty):
 				return Serializer.run({week: weekName, diff: difficulty});
 			case HSongEntry(songName, difficulty, variation, changes):
@@ -83,7 +101,8 @@ class FunkinSave {
 					diff: difficulty,
 					changes: changes
 				};
-				if (variation != null && variation != '') d.variation = variation;
+				if (variation != null && variation != '')
+					d.variation = variation;
 				return Serializer.run(d);
 		}
 		return '';
@@ -95,14 +114,20 @@ class FunkinSave {
 	 * @param diff Song difficulty
 	 * @param changes Changes made to that song in freeplay.
 	 */
-	public static inline function getSongHighscore(name:String, diff:String, ?variation:String, ?changes:Array<HighscoreChange>) {
-		if (changes == null) changes = [];
+	public static inline function getSongHighscore(name:String, diff:String, ?variation:String, ?changes:Array<HighscoreChange>)
+	{
+		if (changes == null)
+			changes = [];
 		return safeGetHighscore(getSongEntry(name, diff, variation, changes));
 	}
 
-	public static inline function setSongHighscore(name:String, diff:String, ?variation:String, highscore:SongScore, ?changes:Array<HighscoreChange>, ?force:Bool) {
-		if (changes == null) changes = [];
-		if (safeRegisterHighscore(getSongEntry(name, diff, variation, changes), highscore, force)) {
+	public static inline function setSongHighscore(name:String, diff:String, ?variation:String, highscore:SongScore, ?changes:Array<HighscoreChange>,
+			?force:Bool)
+	{
+		if (changes == null)
+			changes = [];
+		if (safeRegisterHighscore(getSongEntry(name, diff, variation, changes), highscore, force))
+		{
 			flush();
 			return true;
 		}
@@ -115,20 +140,23 @@ class FunkinSave {
 	public static inline function getWeekHighscore(name:String, diff:String)
 		return safeGetHighscore(getWeekEntry(name, diff));
 
-	public static inline function setWeekHighscore(name:String, diff:String, highscore:SongScore, ?force:Bool) {
-		if (safeRegisterHighscore(getWeekEntry(name, diff), highscore, force)) {
+	public static inline function setWeekHighscore(name:String, diff:String, highscore:SongScore, ?force:Bool)
+	{
+		if (safeRegisterHighscore(getWeekEntry(name, diff), highscore, force))
+		{
 			flush();
 			return true;
 		}
 		return false;
 	}
 
-
 	public static inline function getWeekEntry(name, diff:String):HighscoreEntry
 		return HWeekEntry(name.toLowerCase(), diff.toLowerCase());
 
-	private static function safeGetHighscore(entry:HighscoreEntry):SongScore {
-		if (!highscores.exists(entry)) {
+	private static function safeGetHighscore(entry:HighscoreEntry):SongScore
+	{
+		if (!highscores.exists(entry))
+		{
 			return {
 				score: 0,
 				accuracy: 0,
@@ -140,9 +168,11 @@ class FunkinSave {
 		return highscores.get(entry);
 	}
 
-	private static function safeRegisterHighscore(entry:HighscoreEntry, highscore:SongScore, force = false) {
+	private static function safeRegisterHighscore(entry:HighscoreEntry, highscore:SongScore, force = false)
+	{
 		var oldHigh = safeGetHighscore(entry);
-		if (force || oldHigh.date == null || oldHigh.score < highscore.score) {
+		if (force || oldHigh.date == null || oldHigh.score < highscore.score)
+		{
 			highscores.set(entry, highscore);
 			return true;
 		}
@@ -151,17 +181,20 @@ class FunkinSave {
 	#end
 }
 
-enum HighscoreEntry {
+enum HighscoreEntry
+{
 	HWeekEntry(weekName:String, difficulty:String);
 	HSongEntry(songName:String, difficulty:String, variation:Null<String>, changes:Array<HighscoreChange>);
 }
 
-enum HighscoreChange {
+enum HighscoreChange
+{
 	CCoopMode;
 	COpponentMode;
 }
 
-typedef SongScore = {
+typedef SongScore =
+{
 	var score:Int;
 	var accuracy:Float;
 	var misses:Int;

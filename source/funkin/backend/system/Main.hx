@@ -53,11 +53,13 @@ class Main extends Sprite
 	 * The time since the game was focused last time in seconds.
 	 */
 	public static var timeSinceFocus(get, never):Float;
+
 	public static var time:Int = 0;
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
-	public static function preInit() {
+	public static function preInit()
+	{
 		funkin.backend.utils.NativeAPI.registerAsDPICompatible();
 		funkin.backend.system.CommandLineHandler.parseCommandLine(Sys.args());
 		funkin.backend.system.Main.fixWorkingDirectory();
@@ -83,23 +85,27 @@ class Main extends Sprite
 	public static var audioDisconnected:Bool = false;
 
 	public static var changeID:Int = 0;
-	public static var pathBack = #if (windows || linux)
-			"../../../../"
+	public static var pathBack =
+		#if (windows || linux)
+		"../../../../"
 		#elseif mac
-			"../../../../../../../"
+		"../../../../../../../"
 		#else
-			"../../../../"
+		"../../../../"
 		#end;
 	public static var startedFromSource:Bool = #if TEST_BUILD true #else false #end;
 
 	// DEPRECATED
-	@:dox(hide) public static function execAsync(func:Void->Void) ThreadUtil.execAsync(func);
+	@:dox(hide) public static function execAsync(func:Void->Void)
+		ThreadUtil.execAsync(func);
 
-	private static function getTimer():Int {
+	private static function getTimer():Int
+	{
 		return time = Lib.getTimer();
 	}
 
-	public static function loadGameSettings() {
+	public static function loadGameSettings()
+	{
 		WindowUtils.init();
 		SaveWarning.init();
 		MemoryUtil.init();
@@ -143,7 +149,8 @@ class Main extends Sprite
 
 		FlxG.mouse.useSystemCursor = true;
 		#if DARK_MODE_WINDOW
-		if(funkin.backend.utils.NativeAPI.hasVersion("Windows 10")) funkin.backend.utils.NativeAPI.redrawWindowHeader();
+		if (funkin.backend.utils.NativeAPI.hasVersion("Windows 10"))
+			funkin.backend.utils.NativeAPI.redrawWindowHeader();
 		#end
 
 		ModsFolder.init();
@@ -164,10 +171,11 @@ class Main extends Sprite
 		var daSndTray = Type.createInstance(game._customSoundTray = funkin.menus.ui.FunkinSoundTray, []);
 		var index:Int = game.numChildren - 1;
 
-		if(game.soundTray != null)
+		if (game.soundTray != null)
 		{
 			var newIndex:Int = game.getChildIndex(game.soundTray);
-			if(newIndex != -1) index = newIndex;
+			if (newIndex != -1)
+				index = newIndex;
 			game.removeChild(game.soundTray);
 			game.soundTray.__cleanup();
 		}
@@ -175,26 +183,30 @@ class Main extends Sprite
 		game.addChildAt(game.soundTray = daSndTray, index);
 	}
 
-	public static function initTransition() {
+	public static function initTransition()
+	{
 		var diamond:FlxGraphic = FlxGraphic.fromClass(GraphicTransTileDiamond);
 		diamond.persist = true;
 		diamond.destroyOnNoUse = false;
 
 		FlxTransitionableState.defaultTransIn = new TransitionData(FADE, 0xFF000000, 1, new FlxPoint(0, -1), {asset: diamond, width: 32, height: 32},
 			new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
-		FlxTransitionableState.defaultTransOut = new TransitionData(FADE, 0xFF000000, 0.7, new FlxPoint(0, 1),
-			{asset: diamond, width: 32, height: 32}, new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
+		FlxTransitionableState.defaultTransOut = new TransitionData(FADE, 0xFF000000, 0.7, new FlxPoint(0, 1), {asset: diamond, width: 32, height: 32},
+			new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
 	}
 
-	public static function onFocus() {
+	public static function onFocus()
+	{
 		_tickFocused = FlxG.game.ticks;
 	}
 
-	private static function onStateSwitch() {
+	private static function onStateSwitch()
+	{
 		scaleMode.resetSize();
 	}
 
-	public static function onUpdate() {
+	public static function onUpdate()
+	{
 		if (PlayerSettings.solo.controls.DEV_CONSOLE)
 			NativeAPI.allocConsole();
 
@@ -202,14 +214,16 @@ class Main extends Sprite
 			Framerate.debugMode = (Framerate.debugMode + 1) % 3;
 	}
 
-	private static function onStateSwitchPost() {
+	private static function onStateSwitchPost()
+	{
 		// manual asset clearing since base openfl one does'nt clear lime one
 		// does'nt clear bitmaps since flixel fork does it auto
 
 		@:privateAccess {
 			// clear uint8 pools
-			for(length=>pool in openfl.display3D.utils.UInt8Buff._pools) {
-				for(b in pool.clear())
+			for (length => pool in openfl.display3D.utils.UInt8Buff._pools)
+			{
+				for (b in pool.clear())
 					b.destroy();
 			}
 
@@ -220,9 +234,12 @@ class Main extends Sprite
 	}
 
 	public static var noCwdFix:Bool = false;
-	public static function fixWorkingDirectory() {
+
+	public static function fixWorkingDirectory()
+	{
 		#if windows
-		if (!noCwdFix && !sys.FileSystem.exists('manifest/default.json')) {
+		if (!noCwdFix && !sys.FileSystem.exists('manifest/default.json'))
+		{
 			Sys.setCwd(haxe.io.Path.directory(Sys.programPath()));
 		}
 		#elseif android
@@ -233,7 +250,9 @@ class Main extends Sprite
 	}
 
 	private static var _tickFocused:Float = 0;
-	public static function get_timeSinceFocus():Float {
+
+	public static function get_timeSinceFocus():Float
+	{
 		return (FlxG.game.ticks - _tickFocused) / 1000;
 	}
 }

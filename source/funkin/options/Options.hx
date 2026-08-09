@@ -21,6 +21,7 @@ class Options
 	 * SETTINGS
 	 */
 	public static var naughtyness:Bool = true;
+
 	public static var downscroll:Bool = false;
 	public static var ghostTapping:Bool = true;
 	public static var flashingMenu:Bool = true;
@@ -57,6 +58,7 @@ class Options
 	 * EDITORS SETTINGS
 	 */
 	public static var intensiveBlur:Bool = true;
+
 	public static var editorSFX:Bool = true;
 	public static var charterSwapEventSides:Bool = false;
 
@@ -73,16 +75,18 @@ class Options
 	 * QOL FEATURES
 	 */
 	public static var freeplayLastSong:String = null;
+
 	public static var freeplayLastDifficulty:String = "normal";
 	public static var freeplayLastVariation:String = null;
 	public static var contributors:Array<funkin.backend.system.github.GitHubContributor.CreditsGitHubContributor> = [];
-	public static var mainDevs:Array<Int> = [];  // IDs
+	public static var mainDevs:Array<Int> = []; // IDs
 	public static var lastUpdated:Null<Float>;
 
 	/**
 	 * CHARTER
 	 */
 	public static var charterMetronomeEnabled:Bool = false;
+
 	public static var charterShowSections:Bool = true;
 	public static var charterShowBeats:Bool = true;
 	public static var charterShowCameraHighlights:Bool = true;
@@ -90,7 +94,7 @@ class Options
 	public static var charterRainbowWaveforms:Bool = false;
 	public static var charterLowDetailWaveforms:Bool = false;
 	public static var charterAutoSaves:Bool = true;
-	public static var charterAutoSaveTime:Float = 60*5;
+	public static var charterAutoSaveTime:Float = 60 * 5;
 	public static var charterAutoSaveWarningTime:Float = 5;
 	public static var charterAutoSavesSeparateFolder:Bool = false;
 
@@ -98,6 +102,7 @@ class Options
 	 * CHARACTER EDITOR
 	 */
 	public static var stageSelected:String = null;
+
 	public static var characterHitbox:Bool = true;
 	public static var characterCamera:Bool = true;
 	public static var characterAxis:Bool = true;
@@ -108,6 +113,7 @@ class Options
 	 * PLAYER 1 CONTROLS
 	 */
 	public static var P1_NOTE_LEFT:Array<FlxKey> = [A];
+
 	public static var P1_NOTE_DOWN:Array<FlxKey> = [S];
 	public static var P1_NOTE_UP:Array<FlxKey> = [W];
 	public static var P1_NOTE_RIGHT:Array<FlxKey> = [D];
@@ -136,11 +142,11 @@ class Options
 	public static var P1_DEV_RELOAD:Array<FlxKey> = [F5];
 
 	/**
-	* PLAYER 2 CONTROLS (ALT)
-	*/
-
+	 * PLAYER 2 CONTROLS (ALT)
+	 */
 	// Notes
 	public static var P2_NOTE_LEFT:Array<FlxKey> = [LEFT];
+
 	public static var P2_NOTE_DOWN:Array<FlxKey> = [DOWN];
 	public static var P2_NOTE_UP:Array<FlxKey> = [UP];
 	public static var P2_NOTE_RIGHT:Array<FlxKey> = [RIGHT];
@@ -169,11 +175,11 @@ class Options
 	public static var P2_DEV_RELOAD:Array<FlxKey> = [];
 
 	/**
-	* SOLO GETTERS
-	*/
-
+	 * SOLO GETTERS
+	 */
 	// Notes
 	public static var SOLO_NOTE_LEFT(get, null):Array<FlxKey>;
+
 	public static var SOLO_NOTE_DOWN(get, null):Array<FlxKey>;
 	public static var SOLO_NOTE_UP(get, null):Array<FlxKey>;
 	public static var SOLO_NOTE_RIGHT(get, null):Array<FlxKey>;
@@ -201,17 +207,24 @@ class Options
 	public static var SOLO_DEV_CONSOLE(get, null):Array<FlxKey>;
 	public static var SOLO_DEV_RELOAD(get, null):Array<FlxKey>;
 
-	public static function load() {
-		var path = haxe.macro.Compiler.getDefine("SAVE_OPTIONS_PATH"), name = haxe.macro.Compiler.getDefine("SAVE_OPTIONS_NAME");
-		if (path == null) path = 'CodenameEngine';
-		if (name == null) name = 'options';
+	public static function load()
+	{
+		var path = haxe.macro.Compiler.getDefine("SAVE_OPTIONS_PATH"),
+			name = haxe.macro.Compiler.getDefine("SAVE_OPTIONS_NAME");
+		if (path == null)
+			path = 'CodenameEngine';
+		if (name == null)
+			name = 'options';
 
-		if (__save == null) __save = new FlxSave();
+		if (__save == null)
+			__save = new FlxSave();
 		__save.bind(name, path);
 		__load();
 
-		if (!__eventAdded) {
-			Lib.application.onExit.add(function(i:Int) {
+		if (!__eventAdded)
+		{
+			Lib.application.onExit.add(function(i:Int)
+			{
 				Logs.traceColored([
 					Logs.getPrefix("Options"),
 					Logs.logText("Saving "),
@@ -226,18 +239,23 @@ class Options
 		applySettings();
 	}
 
-	public static function applySettings() {
+	public static function applySettings()
+	{
 		applyKeybinds();
 		applyQuality();
 
 		FlxG.sound.defaultMusicGroup.volume = volumeMusic;
 		FlxG.autoPause = autoPause;
-		if (FlxG.updateFramerate < framerate) FlxG.drawFramerate = FlxG.updateFramerate = framerate;
-		else FlxG.updateFramerate = FlxG.drawFramerate = framerate;
+		if (FlxG.updateFramerate < framerate)
+			FlxG.drawFramerate = FlxG.updateFramerate = framerate;
+		else
+			FlxG.updateFramerate = FlxG.drawFramerate = framerate;
 	}
 
-	public static function applyQuality() {
-		switch (quality) {
+	public static function applyQuality()
+	{
+		switch (quality)
+		{
 			case 0:
 				antialiasing = false;
 				lowMemoryMode = true;
@@ -251,7 +269,8 @@ class Options
 		FlxG.game.stage.quality = (FlxG.enableAntialiasing = antialiasing) ? BEST : LOW;
 	}
 
-	public static function applyKeybinds() {
+	public static function applyKeybinds()
+	{
 		PlayerSettings.solo.setKeyboardScheme(Solo);
 		PlayerSettings.player1.setKeyboardScheme(Duo(true));
 		PlayerSettings.player2.setKeyboardScheme(Duo(false));
@@ -261,7 +280,8 @@ class Options
 		FlxG.sound.muteKeys = SOLO_VOLUME_MUTE;
 	}
 
-	public static function save() {
+	public static function save()
+	{
 		volume = FlxG.sound.volume;
 		__flush();
 	}

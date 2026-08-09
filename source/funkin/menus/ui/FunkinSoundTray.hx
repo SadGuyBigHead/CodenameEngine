@@ -36,7 +36,8 @@ class FunkinSoundTray extends FlxSoundTray
 	{
 		var event = EventManager.get(SoundTrayTextEvent).recycle(checkIfNull, reloadDefaultTextFormat, displayTxt, y);
 		script.call("reloadText", [event]);
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		super.reloadText(event.checkIfNull, event.reloadDefaultTextFormat, event.displayTxt, event.y);
 		script.call("postReloadText", [event]);
@@ -46,7 +47,8 @@ class FunkinSoundTray extends FlxSoundTray
 	{
 		var event = new CancellableEvent();
 		script.call("reloadDtf", [event]);
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		super.reloadDtf();
 		script.call("postReloadDtf");
@@ -56,7 +58,8 @@ class FunkinSoundTray extends FlxSoundTray
 	{
 		var event = new CancellableEvent();
 		script.call("regenerateBarsArray", [event]);
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		super.regenerateBarsArray();
 		script.call("postRegenerateBarsArray");
@@ -66,7 +69,8 @@ class FunkinSoundTray extends FlxSoundTray
 	{
 		var event = new CancellableEvent();
 		script.call("regenerateBars", [event]);
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		super.regenerateBars();
 		script.call("postRegenerateBars");
@@ -74,16 +78,19 @@ class FunkinSoundTray extends FlxSoundTray
 
 	public override function update(elapsed:Float)
 	{
-		if (callsUpdate) script.call("update", [elapsed]);
+		if (callsUpdate)
+			script.call("update", [elapsed]);
 		super.update(elapsed);
-		if (callsPostUpdate) script.call("postUpdate", [elapsed]);
+		if (callsPostUpdate)
+			script.call("postUpdate", [elapsed]);
 	}
 
 	public override function saveSoundPreferences()
 	{
 		var event = new CancellableEvent();
 		script.call("saveSoundPreferences", [event]);
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		super.saveSoundPreferences();
 		script.call("postSaveSoundPreferences");
@@ -93,7 +100,8 @@ class FunkinSoundTray extends FlxSoundTray
 	{
 		var event = EventManager.get(SoundTrayShowEvent).recycle(up);
 		script.call("show", [event]);
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		super.show(event.up);
 		script.call("postShow", [event]);
@@ -103,7 +111,8 @@ class FunkinSoundTray extends FlxSoundTray
 	{
 		var event = new CancellableEvent();
 		script.call("screenCenter", [event]);
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		super.screenCenter();
 		script.call("postScreenCenter");

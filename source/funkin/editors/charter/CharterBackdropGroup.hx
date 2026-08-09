@@ -6,8 +6,10 @@ import funkin.backend.system.Conductor;
 import openfl.geom.Rectangle;
 import funkin.backend.shaders.CustomShader;
 
-class FlxFastTypedGroup<T:FlxBasic> extends FlxTypedGroup<T> {
-	public function new(?maxSize:Int = 0) {
+class FlxFastTypedGroup<T:FlxBasic> extends FlxTypedGroup<T>
+{
+	public function new(?maxSize:Int = 0)
+	{
 		super(maxSize);
 	}
 
@@ -37,7 +39,8 @@ class FlxFastTypedGroup<T:FlxBasic> extends FlxTypedGroup<T> {
 	}
 }
 
-class CharterBackdropGroup extends FlxTypedGroup<CharterBackdrop> {
+class CharterBackdropGroup extends FlxTypedGroup<CharterBackdrop>
+{
 	public var strumLineGroup:CharterStrumLineGroup;
 	public var notesGroup:CharterNoteGroup;
 
@@ -47,45 +50,58 @@ class CharterBackdropGroup extends FlxTypedGroup<CharterBackdrop> {
 	// Just here so you can update display sprites all dat and above
 	public var strumlinesAmount:Int = 0;
 
-	public function new(strumLineGroup:CharterStrumLineGroup) {
+	public function new(strumLineGroup:CharterStrumLineGroup)
+	{
 		super();
 		this.strumLineGroup = strumLineGroup;
 	}
 
-	public function createGrids(amount:Int = 0) {
-		for (i in 0...amount) {
+	public function createGrids(amount:Int = 0)
+	{
+		for (i in 0...amount)
+		{
 			var grid = new CharterBackdrop();
 			grid.active = grid.visible = false;
 			add(grid);
 		}
 	}
 
-	public override function update(elapsed:Float) {
+	public override function update(elapsed:Float)
+	{
 		for (grid in members)
 			grid.active = grid.visible = false;
 
 		super.update(elapsed);
 
-		for (i => strumLine in strumLineGroup.members) {
-			if (strumLine == null) continue;
+		for (i => strumLine in strumLineGroup.members)
+		{
+			if (strumLine == null)
+				continue;
 
 			if (members[i] == null)
-				members[i] = recycle(CharterBackdrop, () -> {return new CharterBackdrop();});
+				members[i] = recycle(CharterBackdrop, () ->
+				{
+					return new CharterBackdrop();
+				});
 
 			var grid = members[i];
 			grid.cameras = this.cameras;
 			grid.strumLine = strumLine;
 
 			grid.conductorFollowerSpr.y = conductorSprY;
-			grid.bottomSeparator.y = (grid.bottomLimit.y = bottomLimitY)-2;
+			grid.bottomSeparator.y = (grid.bottomLimit.y = bottomLimitY) - 2;
 
 			grid.waveformSprite.shader = strumLine.waveformShader;
 
 			grid.notesGroup.clear();
-			notesGroup.forEach((n) -> {
-				if(n.exists && n.visible) {
-					var onStr:Bool = (n.snappedToGrid ? n.strumLineID : CoolUtil.boundInt(Std.int((n.x+n.width)/(40*strumLine.keyCount)), 0, strumLineGroup.members.length-1)) == i;
-					if(onStr) grid.notesGroup.add(n);
+			notesGroup.forEach((n) ->
+			{
+				if (n.exists && n.visible)
+				{
+					var onStr:Bool = (n.snappedToGrid ? n.strumLineID : CoolUtil.boundInt(Std.int((n.x + n.width) / (40 * strumLine.keyCount)), 0,
+						strumLineGroup.members.length - 1)) == i;
+					if (onStr)
+						grid.notesGroup.add(n);
 				}
 			});
 
@@ -95,15 +111,20 @@ class CharterBackdropGroup extends FlxTypedGroup<CharterBackdrop> {
 	}
 
 	public var draggingObj:CharterBackdrop = null;
+
 	override function draw() @:privateAccess {
 		var i:Int = 0;
 		var basic:FlxBasic = null;
 
-		for (grid in members) {
-			if (strumLineGroup.draggingObj == null) break;
-			if (grid.strumLine == null) continue;
+		for (grid in members)
+		{
+			if (strumLineGroup.draggingObj == null)
+				break;
+			if (grid.strumLine == null)
+				continue;
 
-			if (strumLineGroup.draggingObj.strumLine == grid.strumLine.strumLine) {
+			if (strumLineGroup.draggingObj.strumLine == grid.strumLine.strumLine)
+			{
 				draggingObj = grid;
 				break;
 			}
@@ -113,19 +134,22 @@ class CharterBackdropGroup extends FlxTypedGroup<CharterBackdrop> {
 		if (cameras != null)
 			FlxCamera._defaultCameras = cameras;
 
-		while (i < length) {
+		while (i < length)
+		{
 			basic = members[i++];
 			if (basic != null && basic != draggingObj && basic.exists && basic.visible)
 				basic.draw();
 		}
-		if (draggingObj != null) draggingObj.draw();
+		if (draggingObj != null)
+			draggingObj.draw();
 
 		FlxCamera._defaultCameras = oldDefaultCameras;
 	}
 }
 
 // Batches note draws (neos idea) >:D -lunar
-class NotesDrawGroup extends FlxFastTypedGroup<CharterNote> {
+class NotesDrawGroup extends FlxFastTypedGroup<CharterNote>
+{
 	public override function draw() @:privateAccess {
 		var oldDefaultCameras = FlxCamera._defaultCameras;
 		if (cameras != null)
@@ -134,23 +158,30 @@ class NotesDrawGroup extends FlxFastTypedGroup<CharterNote> {
 		var i:Int = 0;
 		var note:CharterNote = null;
 
-		while (i < length) {
+		while (i < length)
+		{
 			note = members[i++];
-			if (note != null && note.exists && note.visible) {
-				if (note.snappedToGrid) note.x = (note.strumLine != null ? note.strumLine.x : 0) + (note.id % (note.strumLine != null ? note.strumLine.keyCount : 4)) * 40;
+			if (note != null && note.exists && note.visible)
+			{
+				if (note.snappedToGrid)
+					note.x = (note.strumLine != null ? note.strumLine.x : 0) + (note.id % (note.strumLine != null ? note.strumLine.keyCount : 4)) * 40;
 				note.drawMembers();
 			}
 		}
 
-		i = 0; note = null;
-		while (i < length) {
+		i = 0;
+		note = null;
+		while (i < length)
+		{
 			note = members[i++];
 			if (note != null && note.exists && note.visible)
 				note.drawSuper();
 		}
 
-		i = 0; note = null;
-		while (i < length) {
+		i = 0;
+		note = null;
+		while (i < length)
+		{
 			note = members[i++];
 			if (note != null && note.exists && note.visible)
 				note.drawNoteTypeText();
@@ -160,7 +191,8 @@ class NotesDrawGroup extends FlxFastTypedGroup<CharterNote> {
 	}
 }
 
-class CharterBackdrop extends FlxTypedGroup<FlxBasic> {
+class CharterBackdrop extends FlxTypedGroup<FlxBasic>
+{
 	public var gridBackDrop:FlxBackdrop;
 	public var topLimit:FlxSprite;
 	public var topSeparator:FlxSprite;
@@ -176,11 +208,13 @@ class CharterBackdrop extends FlxTypedGroup<FlxBasic> {
 	public var strumLine:CharterStrumline;
 
 	public var gridShader:CustomShader = new CustomShader("engine/charterGrid");
+
 	var __lastKeyCount:Int = 4;
 
 	public var cameraHighlight:CameraHighlight;
 
-	public function new() {
+	public function new()
+	{
 		super();
 
 		gridBackDrop = new FlxBackdrop(null, Y, 0, 0);
@@ -208,7 +242,7 @@ class CharterBackdrop extends FlxTypedGroup<FlxBasic> {
 		add(beatSeparator);
 		add(notesGroup);
 
-		bottomSeparator = new FlxSprite(0,-2);
+		bottomSeparator = new FlxSprite(0, -2);
 		bottomSeparator.makeSolid(1, 1, -1);
 		bottomSeparator.alpha = 0.5;
 		bottomSeparator.scrollFactor.set(1, 1);
@@ -244,27 +278,44 @@ class CharterBackdrop extends FlxTypedGroup<FlxBasic> {
 		add(conductorFollowerSpr);
 	}
 
-	public function updateSprites() {
+	public function updateSprites()
+	{
 		var x:Float = 0; // fuck you
 		var alpha:Float = 0.9;
 		var keyCount:Int = 4;
 
-		if (strumLine != null) {
+		if (strumLine != null)
+		{
 			x = strumLine.x;
 			alpha = strumLine.strumLine.visible ? 0.9 : 0.4;
 			keyCount = strumLine.keyCount;
 			cameraHighlight.color = strumLine.highlightColor;
-		} else alpha = 0.9;
+		}
+		else
+			alpha = 0.9;
 
-		for (spr in [gridBackDrop, beatSeparator, topLimit, bottomLimit, 
-				topSeparator, bottomSeparator, conductorFollowerSpr, waveformSprite, cameraHighlight]) {
-			spr.x = x; if (spr != waveformSprite) spr.alpha = alpha;
+		for (spr in [
+			gridBackDrop,
+			beatSeparator,
+			topLimit,
+			bottomLimit,
+			topSeparator,
+			bottomSeparator,
+			conductorFollowerSpr,
+			waveformSprite,
+			cameraHighlight
+		])
+		{
+			spr.x = x;
+			if (spr != waveformSprite)
+				spr.alpha = alpha;
 			spr.cameras = this.cameras;
 		}
 
-		gridBackDrop.setGraphicSize(40*keyCount, 160);
+		gridBackDrop.setGraphicSize(40 * keyCount, 160);
 		gridBackDrop.updateHitbox();
-		if (__lastKeyCount != keyCount) gridShader.hset("segments", keyCount);
+		if (__lastKeyCount != keyCount)
+			gridShader.hset("segments", keyCount);
 		__lastKeyCount = keyCount;
 
 		topLimit.scale.set(keyCount * 40, Math.ceil(FlxG.height / cameras[0].zoom));
@@ -274,37 +325,46 @@ class CharterBackdrop extends FlxTypedGroup<FlxBasic> {
 		bottomLimit.scale.set(keyCount * 40, Math.ceil(FlxG.height / cameras[0].zoom));
 		bottomLimit.updateHitbox();
 
-		for (spr in [conductorFollowerSpr, beatSeparator, topSeparator, bottomSeparator]) {
+		for (spr in [conductorFollowerSpr, beatSeparator, topSeparator, bottomSeparator])
+		{
 			spr.scale.x = keyCount * 40;
 			spr.updateHitbox();
 		}
 
-		cameraHighlight.scale.x = (keyCount * 40)-2;
+		cameraHighlight.scale.x = (keyCount * 40) - 2;
 		cameraHighlight.x += 1;
 
 		waveformSprite.visible = waveformSprite.shader != null;
-		if (waveformSprite.shader == null) return;
+		if (waveformSprite.shader == null)
+			return;
 
-		waveformSprite.scale.set(keyCount * 40, FlxG.height * (1/cameras[0].zoom));
+		waveformSprite.scale.set(keyCount * 40, FlxG.height * (1 / cameras[0].zoom));
 		waveformSprite.updateHitbox();
 
-		waveformSprite.y = (cameras[0].scroll.y+FlxG.height/2)-(waveformSprite.height/2);
+		waveformSprite.y = (cameras[0].scroll.y + FlxG.height / 2) - (waveformSprite.height / 2);
 
-		if (waveformSprite.y < 0) {waveformSprite.scale.y += waveformSprite.y; waveformSprite.y = 0;}
-		if (waveformSprite.y + waveformSprite.height > bottomLimit.y) {
-			waveformSprite.scale.y -= (waveformSprite.y + waveformSprite.height)-(bottomLimit.y);
+		if (waveformSprite.y < 0)
+		{
+			waveformSprite.scale.y += waveformSprite.y;
+			waveformSprite.y = 0;
+		}
+		if (waveformSprite.y + waveformSprite.height > bottomLimit.y)
+		{
+			waveformSprite.scale.y -= (waveformSprite.y + waveformSprite.height) - (bottomLimit.y);
 			waveformSprite.y = (bottomLimit.y) - waveformSprite.scale.y;
 		}
 		waveformSprite.updateHitbox();
 
-		waveformSprite.shader.data.pixelOffset.value = [Math.max(conductorFollowerSpr.y - ((FlxG.height * (1/cameras[0].zoom)) * 0.5), 0)];
+		waveformSprite.shader.data.pixelOffset.value = [
+			Math.max(conductorFollowerSpr.y - ((FlxG.height * (1 / cameras[0].zoom)) * 0.5), 0)
+		];
 		waveformSprite.shader.data.textureRes.value = [waveformSprite.width, waveformSprite.height];
 		waveformSprite.shader.data.playerPosition.value = [conductorFollowerSpr.y];
 	}
 }
 
-class CharterGridSeperatorBase extends FlxSprite {
-
+class CharterGridSeperatorBase extends FlxSprite
+{
 	private static var minStep:Float = 0;
 	private static var maxStep:Float = 0;
 
@@ -327,16 +387,18 @@ class CharterGridSeperatorBase extends FlxSprite {
 	private static var measureStepTimes:Array<Float> = [];
 	private static var timeSignatureChangeGaps:Array<Float> = [];
 
-	private function recalculateBeats() {
+	private function recalculateBeats()
+	{
 		@:privateAccess
 		var currentZoom = Charter.instance.__camZoom;
 		var conductorSprY = Charter.instance.gridBackdrops.conductorSprY;
-		if (conductorSprY == lastConductorSprY && currentZoom == lastCameraZoom) return; //only update if song pos or camera zoom has changed
+		if (conductorSprY == lastConductorSprY && currentZoom == lastCameraZoom)
+			return; // only update if song pos or camera zoom has changed
 
-		var zoomOffset = ((FlxG.height * (1/currentZoom)) * 0.5);
+		var zoomOffset = ((FlxG.height * (1 / currentZoom)) * 0.5);
 
-		minStep = (conductorSprY - zoomOffset)/40;
-		maxStep = (conductorSprY + zoomOffset)/40;
+		minStep = (conductorSprY - zoomOffset) / 40;
+		maxStep = (conductorSprY + zoomOffset) / 40;
 
 		var minTime:Float = Conductor.getStepsInTime(minStep);
 		var maxTime:Float = Conductor.getStepsInTime(maxStep);
@@ -350,19 +412,28 @@ class CharterGridSeperatorBase extends FlxSprite {
 		minMeasure = minBpmChange.measureTime + (minBeat - minBpmChange.beatTime) / minBpmChange.beatsPerMeasure;
 		maxMeasure = maxBpmChange.measureTime + (maxBeat - maxBpmChange.beatTime) / maxBpmChange.beatsPerMeasure;
 
-		//cap out the beats/measures at the end of the song
+		// cap out the beats/measures at the end of the song
 		var endTime = Conductor.getStepsInTime(Charter.instance.__endStep);
 		var endBeat = Conductor.getTimeInBeats(endTime);
 		var endBpmChange = Conductor.bpmChangeMap[Conductor.getTimeInChangeIndex(endTime)];
 		var endMeasure = endBpmChange.measureTime + (endBeat - endBpmChange.beatTime) / endBpmChange.beatsPerMeasure;
 
-		if (maxBeat > endBeat) maxBeat = endBeat;
-		if (maxMeasure > endMeasure) maxMeasure = endMeasure;
-		if (minMeasure < 0) minMeasure = 0;
-		if (minBeat < 0) minBeat = 0;
+		if (maxBeat > endBeat)
+			maxBeat = endBeat;
+		if (maxMeasure > endMeasure)
+			maxMeasure = endMeasure;
+		if (minMeasure < 0)
+			minMeasure = 0;
+		if (minBeat < 0)
+			minBeat = 0;
 
-		//only calculate if needed
-		if ((minBeat != lastMinBeat) || (maxBeat != lastMaxBeat) || (minMeasure != lastMinMeasure) || (maxMeasure != lastMaxMeasure) || lastConductorSprY == Math.NEGATIVE_INFINITY) {
+		// only calculate if needed
+		if ((minBeat != lastMinBeat)
+			|| (maxBeat != lastMaxBeat)
+			|| (minMeasure != lastMinMeasure)
+			|| (maxMeasure != lastMaxMeasure)
+			|| lastConductorSprY == Math.NEGATIVE_INFINITY)
+		{
 			calculateTimeSignatureGaps();
 			calculateStepTimes();
 			lastMinBeat = minBeat;
@@ -375,68 +446,86 @@ class CharterGridSeperatorBase extends FlxSprite {
 		lastCameraZoom = currentZoom;
 	}
 
-	private inline function calculateTimeSignatureGaps() {
-		//for time signatures that start mid step
+	private inline function calculateTimeSignatureGaps()
+	{
+		// for time signatures that start mid step
 		timeSignatureChangeGaps.splice(0, timeSignatureChangeGaps.length);
-		for (i => change in Conductor.bpmChangeMap) {
-			if (change.stepTime >= minStep && change.stepTime <= maxStep) {
-				//get step while ignoring the current change
-				var index:Int = CoolUtil.boundInt(i-1, 0, Conductor.bpmChangeMap.length - 1);
+		for (i => change in Conductor.bpmChangeMap)
+		{
+			if (change.stepTime >= minStep && change.stepTime <= maxStep)
+			{
+				// get step while ignoring the current change
+				var index:Int = CoolUtil.boundInt(i - 1, 0, Conductor.bpmChangeMap.length - 1);
 				var step:Float = Conductor.getTimeWithBPMInSteps(change.songTime, index, Conductor.getTimeWithIndexInBPM(change.songTime, index));
 
-				if (Math.ceil(step) - step > 0 && (step - Math.floor(step)) > FlxMath.EPSILON) { //mid step change
+				if (Math.ceil(step) - step > 0 && (step - Math.floor(step)) > FlxMath.EPSILON)
+				{ // mid step change
 					timeSignatureChangeGaps.push(step);
 				}
 			}
 		}
 	}
 
-	private inline function calculateStepTimes() {
+	private inline function calculateStepTimes()
+	{
 		beatStepTimes.splice(0, beatStepTimes.length);
-		for (i in Math.floor(minBeat)...Math.ceil(maxBeat)) {
+		for (i in Math.floor(minBeat)...Math.ceil(maxBeat))
+		{
 			beatStepTimes.push(Conductor.getTimeInSteps(Conductor.getBeatsInTime(i)));
 		}
 		measureStepTimes.splice(0, measureStepTimes.length);
-		for (i in Math.floor(minMeasure)...Math.ceil(maxMeasure)) {
+		for (i in Math.floor(minMeasure)...Math.ceil(maxMeasure))
+		{
 			measureStepTimes.push(Conductor.getTimeInSteps(Conductor.getMeasuresInTime(i)));
 		}
 	}
 
-	override public function draw() {
-
-		//should only need to recalculate once per frame and will be shared across each instance
+	override public function draw()
+	{
+		// should only need to recalculate once per frame and will be shared across each instance
 		recalculateBeats();
 
 		drawTimeSignatureChangeGaps();
 
-		if (Options.charterShowBeats) drawBeats();
-		if (Options.charterShowSections) drawMeasures();
+		if (Options.charterShowBeats)
+			drawBeats();
+		if (Options.charterShowSections)
+			drawMeasures();
 	}
 
-	private function drawBeats(offset:Float = 0.0) {
-		for (i in beatStepTimes) {
-			y = (i*40)+offset;
+	private function drawBeats(offset:Float = 0.0)
+	{
+		for (i in beatStepTimes)
+		{
+			y = (i * 40) + offset;
 			super.draw();
 		}
 	}
-	private function drawMeasures(offset:Float = 0.0) {
-		for (i in measureStepTimes) {
-			y = (i*40)+offset;
+
+	private function drawMeasures(offset:Float = 0.0)
+	{
+		for (i in measureStepTimes)
+		{
+			y = (i * 40) + offset;
 			super.draw();
 		}
 	}
-	private function drawTimeSignatureChangeGaps() {
-		if (timeSignatureChangeGaps.length == 0) return;
+
+	private function drawTimeSignatureChangeGaps()
+	{
+		if (timeSignatureChangeGaps.length == 0)
+			return;
 		var prevColor = color;
 		var prevBlend = blend;
 
 		color = 0xFF888888;
 		blend = MULTIPLY;
 
-		for (step in timeSignatureChangeGaps) {
-			y = step*40;
+		for (step in timeSignatureChangeGaps)
+		{
+			y = step * 40;
 			var diff = Math.ceil(step) - step;
-			scale.y = diff*40;
+			scale.y = diff * 40;
 			updateHitbox();
 
 			super.draw();
@@ -447,30 +536,38 @@ class CharterGridSeperatorBase extends FlxSprite {
 	}
 }
 
-class CharterGridSeperator extends CharterGridSeperatorBase {
-	override private function drawBeats(offset:Float = 0.0) {
+class CharterGridSeperator extends CharterGridSeperatorBase
+{
+	override private function drawBeats(offset:Float = 0.0)
+	{
 		scale.y = 2;
 		updateHitbox();
 		super.drawBeats(-2);
 	}
-	override private function drawMeasures(offset:Float = 0.0) {
+
+	override private function drawMeasures(offset:Float = 0.0)
+	{
 		scale.y = 4;
 		updateHitbox();
 		super.drawMeasures(-3);
 	}
 }
 
-class CameraHighlight extends FlxSprite {
-
+class CameraHighlight extends FlxSprite
+{
 	private var grid:CharterBackdrop;
 	private var _currentCameraMovementIndex:Int = 0;
-	public function new(grid:CharterBackdrop) {
+
+	public function new(grid:CharterBackdrop)
+	{
 		this.grid = grid;
 		super();
 	}
 
-	override public function draw() {
-		if (!Options.charterShowCameraHighlights || grid.strumLine == null) return;
+	override public function draw()
+	{
+		if (!Options.charterShowCameraHighlights || grid.strumLine == null)
+			return;
 
 		@:privateAccess
 		var minStep = CharterGridSeperatorBase.minStep;
@@ -479,59 +576,79 @@ class CameraHighlight extends FlxSprite {
 		@:privateAccess
 		var strumLineID = Charter.instance.strumLines.isDragging ? Charter.instance.strumLines.__pastStrumlines.indexOf(grid.strumLine) : Charter.instance.gridBackdrops.members.indexOf(grid);
 
-		//first default camera change
-		if ((Charter.instance.cameraMovementChanges[0] == null || Charter.instance.cameraMovementChanges[0].step != 0) && strumLineID == 0) {
+		// first default camera change
+		if ((Charter.instance.cameraMovementChanges[0] == null || Charter.instance.cameraMovementChanges[0].step != 0) && strumLineID == 0)
+		{
 			var endStep = Charter.instance.cameraMovementChanges[0] != null ? Charter.instance.cameraMovementChanges[0].step : Charter.instance.__endStep;
 
-			if (endStep >= minStep) {
-				setupHighlight(0, endStep); super.draw();
-				setupLine(endStep); super.draw();
+			if (endStep >= minStep)
+			{
+				setupHighlight(0, endStep);
+				super.draw();
+				setupLine(endStep);
+				super.draw();
 			}
 		}
 
-		//update index if gone backwards
-		while(_currentCameraMovementIndex > 0) {
-			if (Charter.instance.cameraMovementChanges[_currentCameraMovementIndex] == null || Charter.instance.cameraMovementChanges[_currentCameraMovementIndex].endStep >= minStep) {
+		// update index if gone backwards
+		while (_currentCameraMovementIndex > 0)
+		{
+			if (Charter.instance.cameraMovementChanges[_currentCameraMovementIndex] == null
+				|| Charter.instance.cameraMovementChanges[_currentCameraMovementIndex].endStep >= minStep)
+			{
 				_currentCameraMovementIndex--;
-			} else {
+			}
+			else
+			{
 				break;
 			}
 		}
 
 		var seenFirstVisible = false;
-		for (i in _currentCameraMovementIndex...Charter.instance.cameraMovementChanges.length) {
+		for (i in _currentCameraMovementIndex...Charter.instance.cameraMovementChanges.length)
+		{
 			var change = Charter.instance.cameraMovementChanges[i];
-			if (change.endStep >= minStep) {
-				if (!seenFirstVisible) {
-					_currentCameraMovementIndex = i; //remember the index for the next frame, so we dont need to loop through everything every time
+			if (change.endStep >= minStep)
+			{
+				if (!seenFirstVisible)
+				{
+					_currentCameraMovementIndex = i; // remember the index for the next frame, so we dont need to loop through everything every time
 					seenFirstVisible = true;
 				}
-				if (change.strumLineID == strumLineID) {
-					setupHighlight(change.step, change.endStep); super.draw();
-					setupLine(change.step); super.draw();
-					setupLine(change.endStep); super.draw();
+				if (change.strumLineID == strumLineID)
+				{
+					setupHighlight(change.step, change.endStep);
+					super.draw();
+					setupLine(change.step);
+					super.draw();
+					setupLine(change.endStep);
+					super.draw();
 				}
 			}
-			if (change.endStep > maxStep) break;
+			if (change.endStep > maxStep)
+				break;
 		}
 	}
 
-	private inline function setupHighlight(step:Float, endStep:Float) {
+	private inline function setupHighlight(step:Float, endStep:Float)
+	{
 		y = step * 40;
 		alpha = 0.15;
-		scale.y = (endStep -step) * 40;
+		scale.y = (endStep - step) * 40;
 		updateHitbox();
 	}
 
-	private inline function setupLine(step:Float) {
-		y = (step * 40)-1;
+	private inline function setupLine(step:Float)
+	{
+		y = (step * 40) - 1;
 		alpha = 0.8;
 		scale.y = 2;
 		updateHitbox();
 	}
 }
 
-class EventBackdrop extends FlxBackdrop {
+class EventBackdrop extends FlxBackdrop
+{
 	public var eventBeatSeparator:CharterEventGridSeperator;
 
 	public var topSeparator:FlxSprite;
@@ -539,7 +656,8 @@ class EventBackdrop extends FlxBackdrop {
 
 	public var global:Bool = false;
 
-	public function new(global:Bool) {
+	public function new(global:Bool)
+	{
 		super(Paths.image('editors/charter/events-grid'), Y, 0, 0);
 		this.global = flipX = flipY = global;
 		alpha = 0.9;
@@ -551,7 +669,7 @@ class EventBackdrop extends FlxBackdrop {
 		eventBeatSeparator.scrollFactor.set(1, 1);
 		eventBeatSeparator.global = global;
 
-		bottomSeparator = new FlxSprite(0,-2);
+		bottomSeparator = new FlxSprite(0, -2);
 		bottomSeparator.makeSolid(1, 1, -1);
 		bottomSeparator.alpha = 0.5;
 		bottomSeparator.scrollFactor.set(1, 1);
@@ -564,40 +682,49 @@ class EventBackdrop extends FlxBackdrop {
 		topSeparator.scrollFactor.set(1, 1);
 		topSeparator.scale.set(20, 4);
 		topSeparator.updateHitbox();
-
 	}
 
-	public override function draw() {
+	public override function draw()
+	{
 		super.draw();
 
 		eventBeatSeparator.cameras = cameras;
-		eventBeatSeparator.xPos = global ? x : x+width;
+		eventBeatSeparator.xPos = global ? x : x + width;
 		eventBeatSeparator.draw();
 
-		topSeparator.x = global ? x : (x+width) - 20;
+		topSeparator.x = global ? x : (x + width) - 20;
 		topSeparator.cameras = this.cameras;
-		if (!Options.charterShowSections) topSeparator.draw();
+		if (!Options.charterShowSections)
+			topSeparator.draw();
 
-		bottomSeparator.x = global ? x : (x+width) - 20;
+		bottomSeparator.x = global ? x : (x + width) - 20;
 		bottomSeparator.cameras = this.cameras;
 		bottomSeparator.draw();
 	}
 }
 
-class CharterEventGridSeperator extends CharterGridSeperatorBase {
+class CharterEventGridSeperator extends CharterGridSeperatorBase
+{
 	public var xPos:Float = 0.0;
 	public var global:Bool = false;
-	override private function drawBeats(offset:Float = 0.0) {
+
+	override private function drawBeats(offset:Float = 0.0)
+	{
 		scale.set(10, 2);
 		updateHitbox();
-		x = global ? xPos : xPos-10;
+		x = global ? xPos : xPos - 10;
 		super.drawBeats(-2);
 	}
-	override private function drawMeasures(offset:Float = 0.0) {
+
+	override private function drawMeasures(offset:Float = 0.0)
+	{
 		scale.set(20, 4);
 		updateHitbox();
-		x = global ? xPos : xPos-20;
+		x = global ? xPos : xPos - 20;
 		super.drawMeasures(-3);
 	}
-	override private function drawTimeSignatureChangeGaps() {}
+
+	override private function drawTimeSignatureChangeGaps()
+	{
+	}
 }

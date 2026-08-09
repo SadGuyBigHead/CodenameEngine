@@ -12,8 +12,10 @@ private typedef Thread = Dynamic;
 import funkin.backend.system.Logs;
 #end
 
-final class ThreadUtil {
-	inline static function error(text:String) {
+final class ThreadUtil
+{
+	inline static function error(text:String)
+	{
 		#if macro
 		trace(text);
 		#else
@@ -26,23 +28,34 @@ final class ThreadUtil {
 	 * @param func Function to execute
 	 * @param autoRestart Whenever the thread should auto restart itself after crashing.
 	 */
-	public static function createSafe(func:Void->Void, autoRestart:Bool = false):Thread {
+	public static function createSafe(func:Void->Void, autoRestart:Bool = false):Thread
+	{
 		#if (target.threaded)
-		try {
-			return if (autoRestart) Thread.create(() -> {
+		try
+		{
+			return if (autoRestart) Thread.create(() ->
+			{
 				var restart = true;
-				while (restart) try {
+				while (restart)
+					try
+					{
+						func();
+						restart = false;
+					}
+					catch (e)
+						error(e.details());
+			}) else Thread.create(() ->
+			{
+				try
+				{
 					func();
-					restart = false;
 				}
-				catch (e) error(e.details());
-			})
-			else Thread.create(() -> {
-				try {func();}
-				catch (e) error(e.details());
+				catch (e)
+					error(e.details());
 			});
 		}
-		catch (e) error("Failed to safely create a thread: " + e.details());
+		catch (e)
+			error("Failed to safely create a thread: " + e.details());
 		#end
 		return null;
 	}
@@ -55,9 +68,11 @@ final class ThreadUtil {
 	static var __threadMutex:Mutex = new Mutex();
 	static var __threadUsed:Int = 0;
 
-	static function __threadExecAsync() {
+	static function __threadExecAsync()
+	{
 		var callback:Void->Void;
-		while ((callback = __pendingExecs.pop(true)) != null) {
+		while ((callback = __pendingExecs.pop(true)) != null)
+		{
 			__threadMutex.acquire();
 			__threadUsed++;
 			__threadMutex.release();
@@ -74,20 +89,26 @@ final class ThreadUtil {
 	}
 	#end
 
-	public static function execAsync(func:Void->Void) {
-		if (func == null) return;
+	public static function execAsync(func:Void->Void)
+	{
+		if (func == null)
+			return;
 
 		#if (ALLOW_MULTITHREADING && !macro)
 		__pendingExecs.add(func);
-		if (__threadUsed >= __threads.length) {
-			if (__threads.length == maxThreads) return;
+		if (__threadUsed >= __threads.length)
+		{
+			if (__threads.length == maxThreads)
+				return;
 
 			__threadMutex.acquire();
-			try {
+			try
+			{
 				var thread = Thread.create(__threadExecAsync);
 				__threads.push(thread);
 			}
-			catch (e) Logs.warn(e.details());
+			catch (e)
+				Logs.warn(e.details());
 			__threadMutex.release();
 		}
 		#else

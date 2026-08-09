@@ -4,17 +4,21 @@ import funkin.game.Character;
 import funkin.game.Stage.StageCharPos;
 import haxe.xml.Access;
 
-class StageUnknownButton extends StageElementButton {
+class StageUnknownButton extends StageElementButton
+{
 	public var lowMemory:Bool = false;
 	public var highMemory:Bool = false;
 	public var basic:FlxBasic;
+
 	var dummy:FunkinSprite; // to allow it to be saved
 
-	public function new(x:Float,y:Float, basic:FlxBasic, xml:Access) {
+	public function new(x:Float, y:Float, basic:FlxBasic, xml:Access)
+	{
 		this.basic = basic;
 		super(x, y, xml);
 
-		if (xml.x.parent != null) {
+		if (xml.x.parent != null)
+		{
 			lowMemory = xml.x.parent.nodeName == "low-memory";
 			highMemory = xml.x.parent.nodeName == "high-memory";
 		}
@@ -36,63 +40,77 @@ class StageUnknownButton extends StageElementButton {
 		dummy.extra.set(StageEditor.exID("button"), this);
 	}
 
-	public override function update(elapsed:Float) {
+	public override function update(elapsed:Float)
+	{
 		super.update(elapsed);
 	}
 
-	public override function updateInfo() {
+	public override function updateInfo()
+	{
 		super.updateInfo();
 	}
 
-	public override function getSprite():FunkinSprite {
+	public override function getSprite():FunkinSprite
+	{
 		return dummy;
 	}
 
-	public override function canRender() {
+	public override function canRender()
+	{
 		return false;
 	}
 
-	public override function onSelect() {
+	public override function onSelect()
+	{
 	}
 
-	public override function onEdit() {
+	public override function onEdit()
+	{
 		FlxG.state.openSubState(new StageUnknownEditScreen(this));
 	}
 
-	public override function onDelete() {
+	public override function onDelete()
+	{
 		basic.destroy();
 		dummy.destroy();
 		xml.x.parent.removeChild(xml.x);
 		StageEditor.instance.stageSpritesWindow.remove(this);
 	}
 
-	public override function onVisiblityToggle() {
+	public override function onVisiblityToggle()
+	{
 	}
 
-	public override function getName():String {
+	public override function getName():String
+	{
 		return xml.name;
 	}
 
-	public override function getPos():FlxPoint {
+	public override function getPos():FlxPoint
+	{
 		return FlxPoint.get(0, 0);
 	}
 
-	public override function getInfoText():String {
+	public override function getInfoText():String
+	{
 		return TU.translate("stageElement.unknown", [getName()]);
 	}
 
-	public override function updatePos() {
+	public override function updatePos()
+	{
 		super.updatePos();
 	}
 }
 
-class StageUnknownEditScreen extends UISoftcodedWindow {
+class StageUnknownEditScreen extends UISoftcodedWindow
+{
 	public var button:StageUnknownButton;
 
 	inline function translate(id:String, ?args:Array<Dynamic>)
 		return TU.translate("stageElementEditScreen." + id, args);
 
-	public function new(button:StageUnknownButton) {
+	public function new(button:StageUnknownButton)
+	{
 		this.button = button;
 		super("layouts/stage/unknownEditScreen", [
 			"stage" => StageEditor.instance.stage,
@@ -103,11 +121,13 @@ class StageUnknownEditScreen extends UISoftcodedWindow {
 		]);
 	}
 
-	public override function create() {
+	public override function create()
+	{
 		super.create();
 	}
 
-	public override function saveData() {
+	public override function saveData()
+	{
 		super.saveData();
 		button.updateInfo();
 	}

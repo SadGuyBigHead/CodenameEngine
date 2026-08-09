@@ -2,16 +2,21 @@ package;
 
 using StringTools;
 
-class ArgParser {
-	public static function parse(args:Array<String>, ?renameMap:Map<String, String> = null):ArgParser {
+class ArgParser
+{
+	public static function parse(args:Array<String>, ?renameMap:Map<String, String> = null):ArgParser
+	{
 		return new ArgParser(args, renameMap);
 	}
 
-	private function new(args:Array<String>, ?renameMap:Map<String, String>) {
-		if (renameMap == null) {
+	private function new(args:Array<String>, ?renameMap:Map<String, String>)
+	{
+		if (renameMap == null)
+		{
 			renameMap = new Map();
 		}
-		function rename(name:String) {
+		function rename(name:String)
+		{
 			return renameMap.exists(name) ? renameMap.get(name) : name;
 		}
 		this.args = args;
@@ -19,21 +24,26 @@ class ArgParser {
 		this.options = new Map();
 		final copy = args.copy();
 		var i = 0;
-		while(copy.length > 0) {
+		while (copy.length > 0)
+		{
 			var arg = copy.shift();
 			// this parses the -NAME=VALUE
-			if (arg.startsWith("-")) {
+			if (arg.startsWith("-"))
+			{
 				var key = arg.substr(1);
 				final isLongKey = key.startsWith("-");
-				if (isLongKey) {
+				if (isLongKey)
+				{
 					key = key.substr(1);
 				}
 				final split = key.split("=");
 				var longName = split.shift();
-				if(!isLongKey) {
+				if (!isLongKey)
+				{
 					// Allow -ABC to be parsed as -A -B -C
 					// Values will only work for the last one
-					while(longName.length > 1) {
+					while (longName.length > 1)
+					{
 						var name = rename(longName.charAt(0));
 						options.set(name, null);
 						longName = longName.substr(1);
@@ -60,22 +70,28 @@ class ArgParser {
 	 * otherwise they are stored as a key with an null value.
 	**/
 	public var options(default, null):Map<String, String>;
+
 	public var args(default, null):Array<String>;
 
 	public var length(get, never):Int;
-	inline function get_length():Int {
+
+	inline function get_length():Int
+	{
 		return args.length;
 	}
 
-	public function get(index:Int):String {
+	public function get(index:Int):String
+	{
 		return args[index];
 	}
 
-	public function existsOption(name:String):Bool {
+	public function existsOption(name:String):Bool
+	{
 		return options.exists(name);
 	}
 
-	public function getOption(name:String):String {
+	public function getOption(name:String):String
+	{
 		return options.get(name);
 	}
 }

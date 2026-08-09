@@ -82,17 +82,18 @@ class AudioBuffer
 	private static function __init__()
 	{
 		var p = untyped AudioBuffer.prototype;
-		untyped Object.defineProperties(p,
-			{
-				"src": {get: p.get_src, set: p.set_src}
-			});
+		untyped Object.defineProperties(p, {
+			"src": {get: p.get_src, set: p.set_src}
+		});
 	}
 	#end
 
 	/**
 		Creates a new, empty `AudioBuffer` instance.
 	**/
-	public function new() {}
+	public function new()
+	{
+	}
 
 	/**
 		Disposes of the resources used by this `AudioBuffer`, such as unloading any associated audio data.
@@ -100,18 +101,21 @@ class AudioBuffer
 	public function dispose():Void
 	{
 		#if (js && html5 && lime_howlerjs)
-		if (__srcHowl != null) __srcHowl.unload();
+		if (__srcHowl != null)
+			__srcHowl.unload();
 		__srcHowl = null;
 		#end
 		#if lime_cffi
-		if (__srcBuffer != null) {
+		if (__srcBuffer != null)
+		{
 			AL.bufferData(__srcBuffer, 0, null, 0, 0);
 			AL.deleteBuffer(__srcBuffer);
 		}
 		__srcBuffer = null;
 		#end
 		#if lime_vorbis
-		if (__srcVorbisFile != null) __srcVorbisFile.clear();
+		if (__srcVorbisFile != null)
+			__srcVorbisFile.clear();
 		__srcVorbisFile = null;
 		#end
 	}
@@ -124,7 +128,8 @@ class AudioBuffer
 	**/
 	public static function fromBase64(base64String:String):AudioBuffer
 	{
-		if (base64String == null) return null;
+		if (base64String == null)
+			return null;
 
 		#if (js && html5 && lime_howlerjs)
 		// if base64String doesn't contain codec data, add it.
@@ -176,7 +181,8 @@ class AudioBuffer
 	**/
 	public static function fromBytes(bytes:Bytes):AudioBuffer
 	{
-		if (bytes == null) return null;
+		if (bytes == null)
+			return null;
 
 		#if (js && html5 && lime_howlerjs)
 		var audioBuffer = new AudioBuffer();
@@ -186,7 +192,8 @@ class AudioBuffer
 		#elseif (lime_cffi && !macro)
 		#if lime_vorbis
 		var vorbisFile = VorbisFile.fromBytes(bytes);
-		if (vorbisFile != null) return fromVorbisFile(vorbisFile);
+		if (vorbisFile != null)
+			return fromVorbisFile(vorbisFile);
 		#end
 		#if !cs
 		var audioBuffer = new AudioBuffer();
@@ -219,7 +226,8 @@ class AudioBuffer
 	**/
 	public static function fromFile(path:String #if (js && html5 && lime_howlerjs), ?howlHtml5 = false #end):AudioBuffer
 	{
-		if (path == null) return null;
+		if (path == null)
+			return null;
 
 		#if (js && html5 && lime_howlerjs)
 		var audioBuffer = new AudioBuffer();
@@ -247,9 +255,9 @@ class AudioBuffer
 		var audioBuffer = new AudioBuffer();
 		audioBuffer.data = new UInt8Array(Bytes.alloc(0));
 
-		//audioBuffer = NativeCFFI.lime_audio_load_file(path, audioBuffer);
-		//if (audioBuffer != null) audioBuffer.initBuffer();
-		//return audioBuffer;
+		// audioBuffer = NativeCFFI.lime_audio_load_file(path, audioBuffer);
+		// if (audioBuffer != null) audioBuffer.initBuffer();
+		// return audioBuffer;
 		return NativeCFFI.lime_audio_load_file(path, audioBuffer);
 		#else
 		var data:Dynamic = NativeCFFI.lime_audio_load_file(path, null);
@@ -261,7 +269,7 @@ class AudioBuffer
 			audioBuffer.channels = data.channels;
 			audioBuffer.data = new UInt8Array(@:privateAccess new Bytes(data.data.length, data.data.b));
 			audioBuffer.sampleRate = data.sampleRate;
-			//audioBuffer.initBuffer();
+			// audioBuffer.initBuffer();
 			return audioBuffer;
 		}
 
@@ -296,7 +304,8 @@ class AudioBuffer
 		for (path in paths)
 		{
 			buffer = AudioBuffer.fromFile(path);
-			if (buffer != null) break;
+			if (buffer != null)
+				break;
 		}
 
 		return buffer;
@@ -310,10 +319,10 @@ class AudioBuffer
 		@return An `AudioBuffer` instance with the decoded audio data.
 	**/
 	#if lime_vorbis
-		
 	public static function fromVorbisFile(vorbisFile:VorbisFile):AudioBuffer
 	{
-		if (vorbisFile == null) return null;
+		if (vorbisFile == null)
+			return null;
 
 		var info = vorbisFile.info();
 
@@ -323,16 +332,19 @@ class AudioBuffer
 		audioBuffer.bitsPerSample = 16;
 
 		final pcmTotal = vorbisFile.pcmTotal(-1);
-		if (!vorbisFile.seekable() || pcmTotal < (audioBuffer.sampleRate << 2)) {
+		if (!vorbisFile.seekable() || pcmTotal < (audioBuffer.sampleRate << 2))
+		{
 			vorbisFile.rawSeek(0);
 
 			final isBigEndian = lime.system.System.endianness == lime.system.Endian.BIG_ENDIAN;
 			final bytes = Bytes.alloc(Std.int((pcmTotal.high * 4294967296. + (pcmTotal.low >> 0)) * info.channels * (audioBuffer.bitsPerSample >> 3)));
 			var total = 0, result = 0;
-			do {
+			do
+			{
 				result = vorbisFile.read(bytes, total, 0x1000, isBigEndian, 2, true);
 				total += result;
-			} while (result > 0 || result == Vorbis.HOLE);
+			}
+			while (result > 0 || result == Vorbis.HOLE);
 
 			audioBuffer.data = new UInt8Array(bytes);
 			vorbisFile.clear();

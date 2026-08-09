@@ -14,7 +14,8 @@ import lime.utils.AssetType;
  * A class that reads the `flags.ini` file, allowing to read settable Flags (customs too).
  */
 @:build(funkin.backend.system.macros.FlagMacro.build())
-class Flags {
+class Flags
+{
 	public static var overridenFlags:Map<String, Bool> = [];
 
 	// -- Codename's Addon Config --
@@ -29,7 +30,7 @@ class Flags {
 	public static var MOD_DESCRIPTION:String = "";
 	public static var MOD_AUTHOR:String = "";
 	@:lazy public static var MOD_API_VERSION:Null<Int> = null;
-	public static var MOD_DOWNLOAD_LINK:String  = "";
+	public static var MOD_DOWNLOAD_LINK:String = "";
 	public static var MOD_DEPENDENCIES:Array<String> = [];
 
 	@:noCompletion public static var MOD_ICON32:String = "";
@@ -66,6 +67,7 @@ class Flags {
 	 * Currently is set to `mp3` for web targets, and `ogg` for other targets.
 	 */
 	public static var SOUND_EXT:String = #if web "mp3" #else "ogg" #end; // we also support wav
+
 	public static var VIDEO_EXT:String = "mp4";
 	public static var IMAGE_EXT:String = "png"; // we also support jpg
 
@@ -90,11 +92,13 @@ class Flags {
 	// Translations system //
 	public static var DEFAULT_LANGUAGE:String = "en";
 	public static var DEFAULT_LANGUAGE_NAME:String = "English";
+
 	/**
 	 * **NOTICE:** This will only contain the id of the language, not the full name.
 	 * If you blacklist the default language, you will need to change DEFAULT_LANGUAGE and DEFAULT_LANGUAGE_NAME.
 	 */
 	public static var BLACKLISTED_LANGUAGES:Array<String> = [];
+
 	/**
 	 * **NOTICE:** This will only contain the id of the language, not the full name.
 	 * If this list is not empty, the languages listed will be the only ones able to be used.
@@ -121,6 +125,7 @@ class Flags {
 	 * Default background colors for songs or more without bg color
 	 */
 	public static var DEFAULT_COLOR:FlxColor = 0xFF9271FD;
+
 	public static var DEFAULT_WEEK_COLOR:FlxColor = 0xFFF9CF51;
 	public static var DEFAULT_COOP_ALLOWED:Bool = false;
 	public static var DEFAULT_OPPONENT_MODE_ALLOWED:Bool = false;
@@ -151,7 +156,7 @@ class Flags {
 
 	public static var DEFAULT_CAM_ZOOM_INTERVAL:Int = 1;
 	public static var DEFAULT_CAM_ZOOM_OFFSET:Float = 0;
-	//public static var DEFAULT_CAM_ZOOM_EVERY:BeatType = MEASURE;
+	// public static var DEFAULT_CAM_ZOOM_EVERY:BeatType = MEASURE;
 	public static var DEFAULT_CAM_ZOOM_STRENGTH:Int = 1;
 	public static var DEFAULT_CAM_ZOOM:Float = 1.05; // what zoom level it defaults to
 	public static var DEFAULT_HUD_ZOOM:Float = 1.0;
@@ -165,11 +170,11 @@ class Flags {
 	public static var DEFAULT_HUD_ZOOM_LERP:Float = 0.05;
 
 	public static var USE_LEGACY_ZOOM_FACTOR:Null<Bool> = null;
-	
+
 	// Font configuration
 	public static var DEFAULT_FONT:String = "vcr.ttf";
 	public static var DEFAULT_FONT_SIZE:Int = 16;
-	
+
 	public static var DEFAULT_ALT_ANIM_SUFFIX:String = "-alt";
 
 	// to translate these you need to convert them into ids
@@ -182,14 +187,21 @@ class Flags {
 	// Resume Cutscene -> pause.resumeCutscene
 	// Skip Cutscene -> pause.skipCutscene
 	// Restart Cutscene -> pause.restartCutscene
-	public static var DEFAULT_PAUSE_ITEMS:Array<String> = ['Resume', 'Restart Song', 'Change Controls', 'Change Options', 'Exit to menu', "Exit to charter"];
+	public static var DEFAULT_PAUSE_ITEMS:Array<String> = [
+		'Resume',
+		'Restart Song',
+		'Change Controls',
+		'Change Options',
+		'Exit to menu',
+		"Exit to charter"
+	];
 	public static var DEFAULT_CUTSCENE_PAUSE_ITEMS:Array<String> = ['Resume Cutscene', 'Skip Cutscene', 'Restart Cutscene', 'Exit to menu'];
 	public static var DEFAULT_GITAROO:Bool = true;
 	public static var GITAROO_CHANCE:Float = 0.1;
 	public static var DEFAULT_MUTE_VOCALS_ON_MISS:Bool = true;
 
 	public static var DEFAULT_MAX_HEALTH:Float = 2.0;
-	public static var DEFAULT_HEALTH:Null<Float> = null;//DEFAULT_MAX_HEALTH / 2.0;
+	public static var DEFAULT_HEALTH:Null<Float> = null; // DEFAULT_MAX_HEALTH / 2.0;
 	public static var DEFAULT_ICONBOP:Bool = true;
 	public static var BOP_ICON_SCALE:Float = 1.2;
 	public static var ICON_DEFAULT_SCALE:Float = 1;
@@ -240,6 +252,7 @@ class Flags {
 	 * Default audio paths
 	 */
 	public static var DEFAULT_MENU_MUSIC:String = "freakyMenu";
+
 	public static var DEFAULT_PAUSE_MENU_MUSIC:String = "breakfast";
 	public static var DEFAULT_GAMEOVER_MUSIC:String = "gameOver";
 
@@ -266,7 +279,7 @@ class Flags {
 	public static var DEFAULT_EDITOR_PASTE_SOUND:String = "editors/paste";
 	public static var DEFAULT_EDITOR_REDO_SOUND:String = "editors/redo";
 	public static var DEFAULT_EDITOR_SAVE_SOUND:String = "editors/save";
-	public static var DEFAULT_EDITOR_TEXTREMOVE_SOUND:String= "editors/textRemove";
+	public static var DEFAULT_EDITOR_TEXTREMOVE_SOUND:String = "editors/textRemove";
 	public static var DEFAULT_EDITOR_TEXTTYPE_SOUND:String = "editors/textType";
 	public static var DEFAULT_EDITOR_UNDO_SOUND:String = "editors/undo";
 	public static var DEFAULT_EDITOR_WINDOWAPPEAR_SOUND:String = "editors/windowAppear";
@@ -288,6 +301,7 @@ class Flags {
 	public static var DEFAULT_GLSL_VERSION:String = "120";
 	@:also(funkin.backend.utils.HttpUtil.userAgent)
 	public static var USER_AGENT:String = 'request';
+
 	// -- End of Codename's Default Flags --
 
 	/**
@@ -295,38 +309,65 @@ class Flags {
 	 */
 	@:bypass public static var customFlags:Map<String, String> = [];
 
-	public static function loadFromData(flags:Map<String, String>, data:String) {
-		if (!(data.length > 0)) return;
+	public static function loadFromData(flags:Map<String, String>, data:String)
+	{
+		if (!(data.length > 0))
+			return;
 		var res = IniUtil.parseString(data);
 
-		for (name => section in res) {
-			switch (name) {
-				case "Common": for (key => value in section) flags["MOD_" + key] = value;
-				case "Discord": for (key => value in section) flags["MOD_DISCORD_" + key] = value;
-				case "Flags": for (key => value in section) flags[key] = value;
-				case "StateRedirects.force": for (key => value in section) MOD_REDIRECT_STATES.set(key, value);
-				case "StateRedirects": for (key => value in section) if (!MOD_REDIRECT_STATES.exists(key)) MOD_REDIRECT_STATES.set(key, value);
+		for (name => section in res)
+		{
+			switch (name)
+			{
+				case "Common":
+					for (key => value in section)
+						flags["MOD_" + key] = value;
+				case "Discord":
+					for (key => value in section)
+						flags["MOD_DISCORD_" + key] = value;
+				case "Flags":
+					for (key => value in section)
+						flags[key] = value;
+				case "StateRedirects.force":
+					for (key => value in section)
+						MOD_REDIRECT_STATES.set(key, value);
+				case "StateRedirects":
+					for (key => value in section)
+						if (!MOD_REDIRECT_STATES.exists(key))
+							MOD_REDIRECT_STATES.set(key, value);
 				case "Global": // do nothing
 				default:
-					if (Std.isOfType(Reflect.field(Flags, name), haxe.ds.StringMap)) Reflect.setProperty(Flags, name, section);
-					else trace('Invalid section $name');
+					if (Std.isOfType(Reflect.field(Flags, name), haxe.ds.StringMap))
+						Reflect.setProperty(Flags, name, section);
+					else
+						trace('Invalid section $name');
 			}
 		}
 	}
 
-	private static function loadPost() {
-		if (MOD_API_VERSION == null) MOD_API_VERSION = CURRENT_API_VERSION;
-		if (WINDOW_TITLE_USE_MOD_NAME == null) WINDOW_TITLE_USE_MOD_NAME = !overridenFlags.exists('TITLE') && overridenFlags.exists('MOD_NAME');
-		if (USE_LEGACY_TIMING == null) USE_LEGACY_TIMING = MOD_API_VERSION < 2;
-		if (USE_LEGACY_ZOOM_FACTOR == null) USE_LEGACY_ZOOM_FACTOR = MOD_API_VERSION < 2;
-		if (SUSTAINS_AS_ONE_NOTE == null) SUSTAINS_AS_ONE_NOTE = MOD_API_VERSION >= 2;
-		if (USE_LEGACY_CENTER_CAM == null) USE_LEGACY_CENTER_CAM = MOD_API_VERSION < 3;
-		if (USE_LEGACY_FLXANIMATE_STAGE_MATRIX == null) USE_LEGACY_FLXANIMATE_STAGE_MATRIX = MOD_API_VERSION < 3;
+	private static function loadPost()
+	{
+		if (MOD_API_VERSION == null)
+			MOD_API_VERSION = CURRENT_API_VERSION;
+		if (WINDOW_TITLE_USE_MOD_NAME == null)
+			WINDOW_TITLE_USE_MOD_NAME = !overridenFlags.exists('TITLE') && overridenFlags.exists('MOD_NAME');
+		if (USE_LEGACY_TIMING == null)
+			USE_LEGACY_TIMING = MOD_API_VERSION < 2;
+		if (USE_LEGACY_ZOOM_FACTOR == null)
+			USE_LEGACY_ZOOM_FACTOR = MOD_API_VERSION < 2;
+		if (SUSTAINS_AS_ONE_NOTE == null)
+			SUSTAINS_AS_ONE_NOTE = MOD_API_VERSION >= 2;
+		if (USE_LEGACY_CENTER_CAM == null)
+			USE_LEGACY_CENTER_CAM = MOD_API_VERSION < 3;
+		if (USE_LEGACY_FLXANIMATE_STAGE_MATRIX == null)
+			USE_LEGACY_FLXANIMATE_STAGE_MATRIX = MOD_API_VERSION < 3;
 	}
 
-	public static function loadFromDatas(datas:Array<String>):Map<String, String> {
+	public static function loadFromDatas(datas:Array<String>):Map<String, String>
+	{
 		var flags:Map<String, String> = [];
-		for (data in datas) {
+		for (data in datas)
+		{
 			if (data != null)
 				loadFromData(flags, data);
 		}
@@ -334,16 +375,22 @@ class Flags {
 		return flags;
 	}
 
-	public static function parseFlags(flags:Map<String, String>) {
+	public static function parseFlags(flags:Map<String, String>)
+	{
 		var parsed:Bool;
-		for (name => value in flags) switch (name) {
-			case "MOD_API_VERSION":
-				var version = Std.parseInt(value) ?? CURRENT_API_VERSION;
-				if (version > MOD_API_VERSION || MOD_API_VERSION == null) MOD_API_VERSION = version;
-			default:
-				if (!(parsed = parse(name, value))) customFlags.set(name, value);
-				if (!overridenFlags.exists(name)) overridenFlags.set(name, parsed);
-		}
+		for (name => value in flags)
+			switch (name)
+			{
+				case "MOD_API_VERSION":
+					var version = Std.parseInt(value) ?? CURRENT_API_VERSION;
+					if (version > MOD_API_VERSION || MOD_API_VERSION == null)
+						MOD_API_VERSION = version;
+				default:
+					if (!(parsed = parse(name, value)))
+						customFlags.set(name, value);
+					if (!overridenFlags.exists(name))
+						overridenFlags.set(name, parsed);
+			}
 		#if MODCHARTING_FEATURES
 		Options.modchartingHoldSubdivisions = DEFAULT_MODCHART_HOLD_SUBDIVISIONS;
 		#end
@@ -352,41 +399,52 @@ class Flags {
 	/**
 	 * Loads the flags from the assets.
 	**/
-	public static function load(?libs:Array<LimeAssetLibrary> = null) {
-		if (libs == null) {
+	public static function load(?libs:Array<LimeAssetLibrary> = null)
+	{
+		if (libs == null)
+		{
 			libs = Paths.assetsTree.libraries.copy();
 			libs.reverse();
 		}
-		for(lib in libs) {
+		for (lib in libs)
+		{
 			var l = lib;
-			if (l is openfl.utils.AssetLibrary) {
+			if (l is openfl.utils.AssetLibrary)
+			{
 				@:privateAccess
 				l = cast(l, openfl.utils.AssetLibrary).__proxy;
 			}
-			if(lib is funkin.backend.assets.TranslatedAssetLibrary) {
+			if (lib is funkin.backend.assets.TranslatedAssetLibrary)
+			{
 				// skip translations since it would be useless, if you wanna modify it set the flags inside of global.hx
 				continue;
 			}
 
-			if (l is IModsAssetLibrary) {
+			if (l is IModsAssetLibrary)
+			{
 				var flagsTxt = "";
 				if (l.exists(Paths.ini("config/modpack"), AssetType.TEXT))
 					flagsTxt = l.getAsset(Paths.ini("config/modpack"), AssetType.TEXT);
-				if (cast(l, IModsAssetLibrary).modName == "assets") continue;
-				if (cast(l, IModsAssetLibrary).modName == "source") continue;
+				if (cast(l, IModsAssetLibrary).modName == "assets")
+					continue;
+				if (cast(l, IModsAssetLibrary).modName == "source")
+					continue;
 
-				if (cast(l, IModsAssetLibrary).modName == ModsFolder.currentModFolder) {
+				if (cast(l, IModsAssetLibrary).modName == ModsFolder.currentModFolder)
+				{
 					var flags:Map<String, String> = [];
 					loadFromData(flags, flagsTxt);
 					parseFlags(flags);
 				}
-				else {
+				else
+				{
 					var flags:Map<String, String> = [];
 					loadFromData(flags, flagsTxt);
 					addonFlags.set(cast(l, IModsAssetLibrary).modName.toLowerCase().replace(" ", "").trim(), flags);
 				}
 			}
-			else {
+			else
+			{
 				var flagsTxt = "";
 				if (l.exists(Paths.getPath("data/config/flags.ini"), AssetType.TEXT))
 					flagsTxt = l.getAsset(Paths.getPath("data/config/flags.ini"), AssetType.TEXT);

@@ -1,6 +1,7 @@
 package funkin.backend.assets;
 
-interface IModsAssetLibrary {
+interface IModsAssetLibrary
+{
 	public var prefix:String;
 	public var modName:String;
 	public var libName:String;

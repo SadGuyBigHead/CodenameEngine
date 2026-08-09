@@ -3,7 +3,8 @@ package funkin.editors;
 import flixel.effects.FlxFlicker;
 import flixel.math.FlxPoint;
 
-class EditorPicker extends MusicBeatSubstate {
+class EditorPicker extends MusicBeatSubstate
+{
 	public var bg:FlxSprite;
 
 	// Name is for backwards compatibility, don't use it, use id instead
@@ -39,7 +40,8 @@ class EditorPicker extends MusicBeatSubstate {
 			name: "Wiki",
 			id: "wiki",
 			state: null,
-			onClick: function() {
+			onClick: function()
+			{
 				CoolUtil.openURL(Flags.URL_WIKI);
 			}
 		}
@@ -59,7 +61,8 @@ class EditorPicker extends MusicBeatSubstate {
 
 	public var camVelocity:Float = 0;
 
-	public override function create() {
+	public override function create()
+	{
 		super.create();
 
 		camera = subCam = new FlxCamera();
@@ -74,7 +77,8 @@ class EditorPicker extends MusicBeatSubstate {
 		add(bg);
 
 		optionHeight = FlxG.height / options.length;
-		for(k=>o in options) {
+		for (k => o in options)
+		{
 			var visualName = (o.id != null) ? TU.translate("editor." + o.id + ".name") : o.name;
 			var spr = new EditorPickerOption(visualName, o.id, optionHeight);
 			spr.y = k * optionHeight;
@@ -86,12 +90,14 @@ class EditorPicker extends MusicBeatSubstate {
 		FlxG.mouse.getScreenPosition(subCam, oldMousePos);
 	}
 
-	public override function update(elapsed:Float) {
+	public override function update(elapsed:Float)
+	{
 		super.update(elapsed);
 
 		bg.alpha = CoolUtil.fpsLerp(bg.alpha, selected ? 1 : 0.5, 0.25);
 
-		if (selected) {
+		if (selected)
+		{
 			camVelocity += FlxG.width * elapsed * 2;
 			subCam.scroll.x += camVelocity * elapsed;
 			return;
@@ -99,16 +105,19 @@ class EditorPicker extends MusicBeatSubstate {
 		changeSelection(-FlxG.mouse.wheel + (controls.UP_P ? -1 : 0) + (controls.DOWN_P ? 1 : 0));
 
 		FlxG.mouse.getScreenPosition(subCam, curMousePos);
-		if (curMousePos.x != oldMousePos.x || curMousePos.y != oldMousePos.y) {
+		if (curMousePos.x != oldMousePos.x || curMousePos.y != oldMousePos.y)
+		{
 			oldMousePos.set(curMousePos.x, curMousePos.y);
 			curSelected = -1;
-			changeSelection(Std.int(curMousePos.y / optionHeight)+1);
+			changeSelection(Std.int(curMousePos.y / optionHeight) + 1);
 		}
 
-		if (controls.ACCEPT || FlxG.mouse.justReleased) {
-			if(options[curSelected].onClick != null)
+		if (controls.ACCEPT || FlxG.mouse.justReleased)
+		{
+			if (options[curSelected].onClick != null)
 				options[curSelected].onClick();
-			else if (options[curSelected].state != null) {
+			else if (options[curSelected].state != null)
+			{
 				selected = true;
 				CoolUtil.playMenuSFX(CONFIRM);
 
@@ -116,25 +125,30 @@ class EditorPicker extends MusicBeatSubstate {
 				MusicBeatState.skipTransOut = true;
 
 				if (FlxG.sound.music != null)
-					FlxG.sound.music.fadeOut(0.7, 0, function(n) {
+					FlxG.sound.music.fadeOut(0.7, 0, function(n)
+					{
 						FlxG.sound.music.stop();
 					});
 
-				sprites[curSelected].flicker(function() {
-					subCam.fade(0xFF000000, 0.25, false, function() {
+				sprites[curSelected].flicker(function()
+				{
+					subCam.fade(0xFF000000, 0.25, false, function()
+					{
 						FlxG.switchState(Type.createInstance(options[curSelected].state, []));
 					});
 				});
-			} else {
+			}
+			else
+			{
 				CoolUtil.openURL(Flags.URL_EDITOR_FALLBACK);
 			}
-
 		}
 		if (controls.BACK)
 			close();
 	}
 
-	override function destroy() {
+	override function destroy()
+	{
 		super.destroy();
 
 		oldMousePos.put();
@@ -144,25 +158,29 @@ class EditorPicker extends MusicBeatSubstate {
 			FlxG.cameras.remove(subCam);
 	}
 
-	public function changeSelection(change:Int) {
-		if (change == 0) return;
+	public function changeSelection(change:Int)
+	{
+		if (change == 0)
+			return;
 
-		curSelected = FlxMath.wrap(curSelected + change, 0, sprites.length-1);
+		curSelected = FlxMath.wrap(curSelected + change, 0, sprites.length - 1);
 
-		for(o in sprites)
+		for (o in sprites)
 			o.selected = false;
 		sprites[curSelected].selected = true;
 	}
 }
 
-typedef Editor = {
+typedef Editor =
+{
 	var name:String;
 	var id:String;
 	var state:Class<MusicBeatState>;
 	var ?onClick:Void->Void;
 }
 
-class EditorPickerOption extends FlxTypedSpriteGroup<FlxSprite> {
+class EditorPickerOption extends FlxTypedSpriteGroup<FlxSprite>
+{
 	public var iconSpr:FlxSprite;
 	public var label:Alphabet;
 
@@ -173,12 +191,14 @@ class EditorPickerOption extends FlxTypedSpriteGroup<FlxSprite> {
 	public var selectionLerp:Float = 0;
 
 	public var iconRotationCycle:Float = 0;
-	public function new(name:String, iconID:String, height:Float) {
+
+	public function new(name:String, iconID:String, height:Float)
+	{
 		super();
 
 		FlxG.mouse.visible = true;
 		iconSpr = new FlxSprite();
-		if(iconID != null)
+		if (iconID != null)
 			iconSpr.loadGraphic(Paths.image('editors/icons/$iconID'));
 		else
 			iconSpr.exists = false;
@@ -200,7 +220,8 @@ class EditorPickerOption extends FlxTypedSpriteGroup<FlxSprite> {
 		add(label);
 	}
 
-	public override function update(elapsed:Float) {
+	public override function update(elapsed:Float)
+	{
 		super.update(elapsed);
 		iconRotationCycle += elapsed;
 
@@ -217,12 +238,15 @@ class EditorPickerOption extends FlxTypedSpriteGroup<FlxSprite> {
 		selectionBG.scrollFactor.set(0, 0);
 	}
 
-	public override function destroy() {
+	public override function destroy()
+	{
 		super.destroy();
 	}
 
-	public function flicker(callback:Void->Void) {
-		FlxFlicker.flicker(label, 0.5, Options.flashingMenu ? 0.06 : 0.15, false, false, function(t) {
+	public function flicker(callback:Void->Void)
+	{
+		FlxFlicker.flicker(label, 0.5, Options.flashingMenu ? 0.06 : 0.15, false, false, function(t)
+		{
 			callback();
 		});
 	}

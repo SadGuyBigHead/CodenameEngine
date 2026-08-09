@@ -2,7 +2,8 @@ package funkin.backend.scripting;
 
 import hscript.IHScriptCustomBehaviour;
 
-class MultiThreadedScript implements IFlxDestroyable implements IHScriptCustomBehaviour {
+class MultiThreadedScript implements IFlxDestroyable implements IHScriptCustomBehaviour
+{
 	/**
 	 * Script being ran.
 	 */
@@ -20,13 +21,14 @@ class MultiThreadedScript implements IFlxDestroyable implements IHScriptCustomBe
 	 */
 	public var callEnded:Bool = true;
 
-
-
-	public function new(path:String, ?parentScript:Script) {
+	public function new(path:String, ?parentScript:Script)
+	{
 		script = Script.create(path);
 
-		if (parentScript != null) {
-			if (script is HScript && parentScript is HScript) {
+		if (parentScript != null)
+		{
+			if (script is HScript && parentScript is HScript)
+			{
 				var hscript:HScript = cast script;
 				var parentHScript:HScript = cast parentScript;
 
@@ -48,7 +50,8 @@ class MultiThreadedScript implements IFlxDestroyable implements IHScriptCustomBe
 	public function hget(name:String):Dynamic
 		return __variables.exists(name) ? Reflect.getProperty(this, name) : script.get(name);
 
-	public function hset(name:String, val:Dynamic):Dynamic {
+	public function hset(name:String, val:Dynamic):Dynamic
+	{
 		if (__variables.exists(name))
 			Reflect.setProperty(this, name, val);
 		else
@@ -56,9 +59,11 @@ class MultiThreadedScript implements IFlxDestroyable implements IHScriptCustomBe
 		return val;
 	}
 
-	public function call(func:String, args:Array<Dynamic>) {
+	public function call(func:String, args:Array<Dynamic>)
+	{
 		#if ALLOW_MULTITHREADING
-		funkin.backend.utils.ThreadUtil.execAsync(() -> {
+		funkin.backend.utils.ThreadUtil.execAsync(() ->
+		{
 			callEnded = false;
 			returnValue = script.call(func, args);
 			callEnded = true;
@@ -69,8 +74,10 @@ class MultiThreadedScript implements IFlxDestroyable implements IHScriptCustomBe
 		#end
 	}
 
-	public function destroy() {
-		if (script != null) {
+	public function destroy()
+	{
+		if (script != null)
+		{
 			script.call("destroy");
 			script.destroy();
 		}

@@ -2,12 +2,10 @@ package funkin.backend.utils;
 
 import haxe.zip.Entry;
 import haxe.zip.Reader;
-
 #if sys
 #if (!macro && sys)
 import openfl.display.BitmapData;
 #end
-
 import haxe.Exception;
 import haxe.Json;
 import haxe.crypto.Crc32;
@@ -24,7 +22,8 @@ using StringTools;
 // import ZipUtils; ZipUtils.uncompressZip(ZipUtils.openZip("E:\\Desktop\\test\\termination lua.ycemod"), "E:\\Desktop\\test\\uncompressed\\");
 // import ZipUtils; var e = ZipUtils.createZipFile("file.ycemod"); ZipUtils.writeFolderToZip(e, "./mods/Friday Night Funkin'/", "Friday Night Funkin'/"); e.flush(); e.close();
 
-final class ZipUtil {
+final class ZipUtil
+{
 	public static var bannedNames:Array<String> = [".git", ".gitignore", ".github", ".vscode", ".gitattributes", "readme.txt"];
 
 	/**
@@ -32,18 +31,23 @@ final class ZipUtil {
 	 * @param zip
 	 * @param destFolder
 	 */
-	public static function uncompressZip(zip:Reader, destFolder:String, ?prefix:String, ?prog:ZipProgress):ZipProgress {
+	public static function uncompressZip(zip:Reader, destFolder:String, ?prefix:String, ?prog:ZipProgress):ZipProgress
+	{
 		// we never know
 		FileSystem.createDirectory(destFolder);
 
 		var fields = zip.read();
 
-		try {
-			if (prefix != null) {
+		try
+		{
+			if (prefix != null)
+			{
 				var f = fields;
 				fields = new List<Entry>();
-				for(field in f) {
-					if (field.fileName.startsWith(prefix)) {
+				for (field in f)
+				{
+					if (field.fileName.startsWith(prefix))
+					{
 						fields.push(field);
 					}
 				}
@@ -52,13 +56,17 @@ final class ZipUtil {
 			if (prog == null)
 				prog = new ZipProgress();
 			prog.fileCount = fields.length;
-			for(k=>field in fields) {
+			for (k => field in fields)
+			{
 				prog.curFile = k;
 				var isFolder = field.fileName.endsWith("/") && field.fileSize == 0;
-				if (isFolder) {
+				if (isFolder)
+				{
 					FileSystem.createDirectory('${destFolder}/${field.fileName}');
-				} else {
-					var split = [for(e in field.fileName.split("/")) e.trim()];
+				}
+				else
+				{
+					var split = [for (e in field.fileName.split("/")) e.trim()];
 					split.pop();
 					FileSystem.createDirectory('${destFolder}/${split.join("/")}');
 
@@ -68,7 +76,9 @@ final class ZipUtil {
 			}
 			prog.curFile = fields.length;
 			prog.done = true;
-		} catch(e) {
+		}
+		catch (e)
+		{
 			prog.done = true;
 			prog.error = e;
 		}
@@ -76,10 +86,12 @@ final class ZipUtil {
 	}
 
 	#if (!macro && sys)
-	public static function uncompressZipAsync(zip:Reader, destFolder:String, ?prog:ZipProgress, ?prefix:String):ZipProgress {
+	public static function uncompressZipAsync(zip:Reader, destFolder:String, ?prog:ZipProgress, ?prefix:String):ZipProgress
+	{
 		if (prog == null)
 			prog = new ZipProgress();
-		Thread.create(function() {
+		Thread.create(function()
+		{
 			uncompressZip(zip, destFolder, prefix, prog);
 		});
 		return prog;
@@ -91,7 +103,8 @@ final class ZipUtil {
 	 * @param zipPath
 	 * @return Reader
 	 */
-	public static function openZip(zipPath:String):Reader {
+	public static function openZip(zipPath:String):Reader
+	{
 		return new ZipReader(File.read(zipPath));
 	}
 
@@ -99,7 +112,8 @@ final class ZipUtil {
 	 * [Description] Copy of haxe's Zip unzip function cause lime replaced it.
 	 * @param f Zip entry
 	 */
-	public static function unzip(f:Entry) {
+	public static function unzip(f:Entry)
+	{
 		if (!f.compressed)
 			return f.data;
 		var c = new haxe.zip.Uncompress(-15);
@@ -119,7 +133,8 @@ final class ZipUtil {
 	 * @param path
 	 * @return Writer
 	 */
-	public static function createZipFile(path:String):ZipWriter {
+	public static function createZipFile(path:String):ZipWriter
+	{
 		var output = File.write(path);
 		return new ZipWriter(output);
 	}
@@ -130,45 +145,63 @@ final class ZipUtil {
 		@param path Folder path
 		@param prefix (Additional) allows you to set a prefix in the zip itself.
 	**/
-	public static function writeFolderToZip(zip:ZipWriter, path:String, ?prefix:String, ?prog:ZipProgress, ?whitelist:Array<String>):ZipProgress {
-		if (prefix == null) prefix = "";
-		if (whitelist == null) whitelist = [];
-		if (prog == null) prog = new ZipProgress();
+	public static function writeFolderToZip(zip:ZipWriter, path:String, ?prefix:String, ?prog:ZipProgress, ?whitelist:Array<String>):ZipProgress
+	{
+		if (prefix == null)
+			prefix = "";
+		if (whitelist == null)
+			whitelist = [];
+		if (prog == null)
+			prog = new ZipProgress();
 
-		try {
+		try
+		{
 			var curPath:Array<String> = [path];
 			var destPath:Array<String> = [];
-			if (prefix != "") {
+			if (prefix != "")
+			{
 				prefix = prefix.replace("\\", "/");
-				while(prefix.charCodeAt(0) == "/".code) prefix = prefix.substr(1);
-				while(prefix.charCodeAt(prefix.length-1) == "/".code) prefix = prefix.substr(0, prefix.length-1);
+				while (prefix.charCodeAt(0) == "/".code)
+					prefix = prefix.substr(1);
+				while (prefix.charCodeAt(prefix.length - 1) == "/".code)
+					prefix = prefix.substr(0, prefix.length - 1);
 				destPath.push(prefix);
 			}
 
 			var files:Array<StrNameLabel> = [];
 
 			var doFolder:Void->Void = null;
-			(doFolder = function() {
+			(doFolder = function()
+			{
 				var path = curPath.join("/");
 				var zipPath = destPath.join("/");
-				for(e in FileSystem.readDirectory(path)) {
-					if (bannedNames.contains(e.toLowerCase()) && !whitelist.contains(e.toLowerCase())) continue;
-					if (FileSystem.isDirectory('$path/$e')) {
+				for (e in FileSystem.readDirectory(path))
+				{
+					if (bannedNames.contains(e.toLowerCase()) && !whitelist.contains(e.toLowerCase()))
+						continue;
+					if (FileSystem.isDirectory('$path/$e'))
+					{
 						// is directory, so loop into that function again
-						for(p in [curPath, destPath]) p.push(e);
+						for (p in [curPath, destPath])
+							p.push(e);
 						doFolder();
-						for(p in [curPath, destPath]) p.pop();
-					} else {
+						for (p in [curPath, destPath])
+							p.pop();
+					}
+					else
+					{
 						// is file, put it in the list
 						var zipPath = '$zipPath/$e';
-						while(zipPath.charCodeAt(0) == "/".code) zipPath = zipPath.substr(1);
+						while (zipPath.charCodeAt(0) == "/".code)
+							zipPath = zipPath.substr(1);
 						files.push(new StrNameLabel('$path/$e', zipPath));
 					}
 				}
 			})();
 
 			prog.fileCount = files.length;
-			for(k=>file in files) {
+			for (k => file in files)
+			{
 				prog.curFile = k;
 
 				var fileContent = File.getBytes(file.name);
@@ -186,16 +219,20 @@ final class ZipUtil {
 				zip.writeFile(entry);
 			}
 			zip.writeCDR();
-		} catch(e) {
+		}
+		catch (e)
+		{
 			prog.error = e;
 		}
 		prog.done = true;
 		return prog;
 	}
 
-	public static function writeFolderToZipAsync(zip:ZipWriter, path:String, ?prefix:String):ZipProgress {
+	public static function writeFolderToZipAsync(zip:ZipWriter, path:String, ?prefix:String):ZipProgress
+	{
 		var zipProg = new ZipProgress();
-		Thread.create(function() {
+		Thread.create(function()
+		{
 			writeFolderToZip(zip, path, prefix, zipProg);
 		});
 		return zipProg;
@@ -206,14 +243,17 @@ final class ZipUtil {
 	 * @param array
 	 * @return List<Entry>
 	 */
-	public static function arrayToList(array:Array<Entry>):List<Entry> {
+	public static function arrayToList(array:Array<Entry>):List<Entry>
+	{
 		var list = new List<Entry>();
-		for(e in array) list.push(e);
+		for (e in array)
+			list.push(e);
 		return list;
 	}
 }
 
-class ZipProgress {
+class ZipProgress
+{
 	public var error:Exception = null;
 
 	public var curFile:Int = 0;
@@ -221,48 +261,63 @@ class ZipProgress {
 	public var done:Bool = false;
 	public var percentage(get, never):Float;
 
-	private function get_percentage() {
+	private function get_percentage()
+	{
 		return fileCount <= 0 ? 0 : curFile / fileCount;
 	}
 
-	public function new() {}
+	public function new()
+	{
+	}
 }
 
-class ZipWriter extends Writer {
-	public function flush() {
+class ZipWriter extends Writer
+{
+	public function flush()
+	{
 		o.flush();
 	}
 
-	public function writeFile(entry:Entry) {
+	public function writeFile(entry:Entry)
+	{
 		writeEntryHeader(entry);
 		o.writeFullBytes(entry.data, 0, entry.data.length);
 	}
 
-	public function close() {
+	public function close()
+	{
 		o.close();
 	}
 }
 
-class StrNameLabel {
+class StrNameLabel
+{
 	public var name:String;
 	public var label:String;
 
-	public function new(name:String, label:String) {
+	public function new(name:String, label:String)
+	{
 		this.name = name;
 		this.label = label;
 	}
 }
 #end
 
-class ZipReader extends Reader {
+class ZipReader extends Reader
+{
 	public var files:List<Entry>;
 
-	public override function read() {
-		if (files != null) return files;
-		try {
+	public override function read()
+	{
+		if (files != null)
+			return files;
+		try
+		{
 			var files = super.read();
 			return this.files = files;
-		} catch(e) {
+		}
+		catch (e)
+		{
 		}
 		return new List<Entry>();
 	}
