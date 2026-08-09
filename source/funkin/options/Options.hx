@@ -48,9 +48,6 @@ class Options
 	public static var streamedVocals:Bool = false;
 	public static var quality:Int = 1;
 	public static var allowConfigWarning:Bool = true;
-	#if MODCHARTING_FEATURES
-	public static var modchartingHoldSubdivisions:Int = 4;
-	#end
 
 	public static var lastLoadedMod:String = null;
 

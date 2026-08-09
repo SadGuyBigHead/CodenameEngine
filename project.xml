@@ -57,9 +57,6 @@
 	<!-- Uncomment this to achive faster compile times, will strip extraneous and commonly unused features. -->
 	<!-- <define name="STRIPPED_COMPILE" unless="debug"/> -->
 
-	<!-- Comment this out to disable modcharting features -->
-	<define name="MODCHARTING_FEATURES" unless="STRIPPED_COMPILE" />
-
 	<!-- Comment this out to disable GitHub API integration !-->
 	<define name="GITHUB_API" unless="web || hl"/>
 
@@ -208,14 +205,6 @@
 	<icon path="art/iconOG.png" size='1024' />
 
 	<!-- _________________________________ Additional stuff _______________________________ -->
-
-	<section if="MODCHARTING_FEATURES">
-		<haxedef name="FM_ENGINE" value="CODENAME"/>
-		<haxedef name="FM_ENGINE_VERSION" value="1.0"/>
-
-		<haxelib name="funkin-modchart" />
-		<haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>
-	</section>
 
 	<section if="COMPILE_ALL_CLASSES">
 		<haxeflag name="-dce" value="no" />

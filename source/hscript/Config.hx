@@ -6,9 +6,6 @@ class Config
 	public static final ALLOWED_CUSTOM_CLASSES = [
 		#if !DOCUMENTATION
 		"flixel", "funkin",
-		#if MODCHARTING_FEATURES
-		"modchart.engine", "modchart.backend.standalone",
-		#end
 		#end
 	];
 
