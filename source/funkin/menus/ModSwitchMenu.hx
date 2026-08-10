@@ -35,7 +35,7 @@ class ModSwitchMenu extends MusicBeatSubstate
 			descending: false,
 			mode: CLEAN,
 		});
-		mods.push(null);
+		//mods.push(null);
 
 		alphabets = new FlxTypedGroup<Alphabet>();
 		for (mod in mods)

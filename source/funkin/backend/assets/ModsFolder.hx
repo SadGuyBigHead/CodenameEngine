@@ -27,16 +27,22 @@ class ModsFolder
 	 * Current mod folder. Will affect `Paths`.
 	 */
 	public static var currentModFolder:String = null;
+	
+	/**
+	 * Folder to the source fodler :)_
+	 * Katherine thinks its stupid :(
+	 */
+	public static final CORE_FOLDER:String = #if macos './../../../../../../../' #else './../../../../' #end;
 
 	/**
 	 * Path to the `mods` folder.
 	 */
-	public static var modsPath:String = "./mods/";
+	public static var modsPath:String = #if MODS_FROM_SOURCE CORE_FOLDER + "mods/" #else "./mods/" #end;
 
 	/**
 	 * Path to the `addons` folder.
 	 */
-	public static var addonsPath:String = "./addons/";
+	public static var addonsPath:String = #if MODS_FROM_SOURCE CORE_FOLDER + "addons" #else "./addons/" #end;
 
 	/**
 	 * If accessing a file as assets/data/global/LIB_mymod.hx should redirect to mymod:assets/data/global.hx
@@ -55,11 +61,12 @@ class ModsFolder
 	 */
 	public static function init()
 	{
+		Options.lastLoadedMod ??= "vsdaveandbambi";
 		if (!getModsList().contains(Options.lastLoadedMod))
 		{
 			if (Options.lastLoadedMod != null)
-				Logs.warn("Mod \"" + Options.lastLoadedMod + "\" not found in mods list, switching to base game!");
-			Options.lastLoadedMod = null;
+				Logs.warn("Mod \"" + Options.lastLoadedMod + "\" not found in mods list, switching to DAVE game!");
+			Options.lastLoadedMod = "vsdaveandbambi";
 		}
 	}
 

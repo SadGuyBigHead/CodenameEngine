@@ -49,7 +49,7 @@ class Options
 	public static var quality:Int = 1;
 	public static var allowConfigWarning:Bool = true;
 
-	public static var lastLoadedMod:String = null;
+	public static var lastLoadedMod:String = "vsdaveandbambi";
 
 	/**
 	 * EDITORS SETTINGS

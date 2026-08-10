@@ -100,7 +100,7 @@
 
 	<!-- Comment this out to disable video cutscene support, in case of compilation errors. !-->
 	<section if="cpp">
-		<define name="VIDEO_CUTSCENES" if="desktop || android" />
+		<!--<define name="VIDEO_CUTSCENES" if="desktop || android" />-->
 	</section>
 
 	<!-- Comment this out to disable commit number on FPS -->
@@ -153,6 +153,7 @@
 	<library name="assets"    preload="true"  if="PRELOAD_ALL"/>
 	<library name="assets"    preload="false" if="NO_PRELOAD_ALL" />
 
+	<define name="MODS_FROM_SOURCE" unless="DO_THE_MODS_FOLDER_THING_AND_FINISH_THE_MOD"/>
 	<section unless="TEST_BUILD">
 		<assets path="assets/"    rename="assets"/>
 		<!-- TODO: make it copy this manually, instead of using assets node, so it doesn't manually check for fonts -->
