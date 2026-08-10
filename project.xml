@@ -156,7 +156,7 @@
 	<section unless="TEST_BUILD">
 		<assets path="assets/"    rename="assets"/>
 		<!-- TODO: make it copy this manually, instead of using assets node, so it doesn't manually check for fonts -->
-		<assets path='mods' rename='mods' embed='false' />
+		<assets path='mods' rename='mods' embed='false' if="DO_THE_MODS_FOLDER_THING_AND_FINISH_THE_MOD" />
 	</section>
 
 	<!-- OpenAL config -->
