@@ -14,7 +14,12 @@ class CharterNote extends UISprite implements ICharterSelectable
 	var __animSpeed:Float = 1;
 	var __susInstaLerp:Bool = false;
 
-	private static var colors:Array<FlxColor> = [0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F];
+	private static var colors:Array<FlxColor> = [
+		FlxColor.fromRGB(244, 202, 7),
+		FlxColor.fromRGB(4, 188, 228),
+		FlxColor.fromRGB(6, 217, 66),
+		FlxColor.fromRGB(230, 47, 73)
+	];
 
 	public var sustainSpr:UISprite;
 	public var tempSusLength:Float = 0;

@@ -114,9 +114,6 @@ class Main extends Sprite
 		FunkinCache.init();
 		Paths.assetsTree = new AssetsLibraryList();
 
-		#if UPDATE_CHECKING
-		funkin.backend.system.updating.UpdateUtil.init();
-		#end
 		ShaderResizeFix.init();
 		Logs.init();
 		Paths.init();

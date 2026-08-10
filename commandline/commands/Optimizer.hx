@@ -2,12 +2,15 @@ package commands;
 
 import sys.io.File;
 
-class Optimizer {
-	public static function main(args:Array<String>) {
+class Optimizer
+{
+	public static function main(args:Array<String>)
+	{
 		final args = ArgParser.parse(args);
 		final saveOld = !args.existsOption("no-old");
 
-		if(args.length == 0) {
+		if (args.length == 0)
+		{
 			Sys.println(Main.curCommand.dDoc);
 			return;
 		}
@@ -16,15 +19,18 @@ class Optimizer {
 
 		final data = File.getContent(filename);
 		var json = null;
-		try {
+		try
+		{
 			json = haxe.Json.parse(data);
-		} catch(e:Dynamic) {
+		}
+		catch (e:Dynamic)
+		{
 			Sys.println("Error parsing JSON file.");
 			Sys.println(e);
 			return;
 		}
 
-		if(saveOld)
+		if (saveOld)
 			File.saveContent(filename + ".old", data);
 		File.saveContent(filename, haxe.Json.stringify(json));
 	}
