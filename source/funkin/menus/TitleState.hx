@@ -17,7 +17,6 @@ using StringTools;
 class TitleState extends MusicBeatState
 {
 	static var initialized:Bool = false;
-	static var hasCheckedUpdates:Bool = false;
 
 	public var curWacky:Array<String> = [];
 
@@ -158,26 +157,7 @@ class TitleState extends MusicBeatState
 
 	function goToMainMenu(force = true)
 	{
-		#if UPDATE_CHECKING
-		if (!force && !Flags.DISABLE_AUTOUPDATER)
-		{
-			funkin.backend.system.updating.UpdateUtil.waitForUpdates(false, (report) ->
-			{
-				hasCheckedUpdates = true;
-				if (FlxG.state != this)
-					return;
-
-				if (!report.newUpdate)
-					goToMainMenu(true);
-				else
-					FlxG.switchState(new funkin.backend.system.updating.UpdateAvailableScreen(report));
-			}, true);
-		}
-		else
-		#end
-		{
-			FlxG.switchState(new MainMenuState());
-		}
+		FlxG.switchState(new MainMenuState());
 	}
 
 	public function createCoolText(textArray:Array<String>)

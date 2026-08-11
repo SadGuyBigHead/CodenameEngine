@@ -59,7 +59,7 @@ class Flags
 	@:lazy public static var VERSION_MESSAGE:String = 'Codename Engine v$VERSION';
 
 	public static var REPO_NAME:String = "CodenameEngine";
-	public static var REPO_OWNER:String = "CodenameCrew";
+	public static var REPO_OWNER:String = "SadGuyBigHead";
 	public static var REPO_URL:String = 'https://github.com/$REPO_OWNER/$REPO_NAME';
 
 	/**
@@ -232,7 +232,7 @@ class Flags
 	public static var DISABLE_WARNING_SCREEN:Bool = true;
 	public static var DISABLE_TRANSITIONS:Bool = false;
 	public static var DISABLE_LANGUAGES:Bool = false;
-	public static var DISABLE_AUTOUPDATER:Bool = false;
+	public static var DISABLE_AUTOUPDATER:Bool = true;
 
 	@:also(funkin.backend.MusicBeatTransition.script)
 	public static var DEFAULT_TRANSITION_SCRIPT:String = "";
