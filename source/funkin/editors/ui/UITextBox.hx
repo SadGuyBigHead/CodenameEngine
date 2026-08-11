@@ -80,9 +80,11 @@ class UITextBox extends UISliceSprite implements IUIFocusable
 		label.follow(this, label.autoSize ? (bWidth - label.textField.width) / 2 : 4, off);
 		framesOffset = (selected ? 18 : (hovered ? 9 : 0));
 		@:privateAccess {
-			if (selected)
-			{
-				__wasFocused = true;
+			if (selected) {
+				if (!__wasFocused) {
+					FlxG.stage.window.textInputEnabled = true;
+					__wasFocused = true;
+				}
 				caretSpr.alpha = (FlxG.game.ticks % 666) >= 333 ? 1 : 0;
 
 				var curPos = switch (position)
@@ -103,11 +105,9 @@ class UITextBox extends UISliceSprite implements IUIFocusable
 				};
 				caretSpr.follow(this, 4 + curPos.x, off + curPos.y);
 				curPos.put();
-			}
-			else
-			{
-				if (__wasFocused)
-				{
+			} else {
+				if (__wasFocused) {
+					FlxG.stage.window.textInputEnabled = false;
 					__wasFocused = false;
 					if (onChange != null)
 						onChange(label.text);

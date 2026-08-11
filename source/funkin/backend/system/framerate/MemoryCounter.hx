@@ -26,21 +26,19 @@ class MemoryCounter extends Sprite
 			label.y = 0;
 			label.text = "MEM";
 			label.multiline = label.wordWrap = false;
-			label.defaultTextFormat = new TextFormat(Framerate.fontName, 12, -1);
+			label.defaultTextFormat = Framerate.textFormat;
 			label.selectable = false;
 			addChild(label);
 		}
 		memoryPeakText.alpha = 0.5;
 	}
 
-	public function reload()
-	{
+	public function reload() {
+		for(label in [memoryText, memoryPeakText]) label.defaultTextFormat = Framerate.textFormat;
 	}
 
-	public override function __enterFrame(t:Int)
-	{
-		if (alpha <= 0.05)
-			return;
+	public override function __enterFrame(t:Float) {
+		if (alpha <= 0.05) return;
 		super.__enterFrame(t);
 
 		final mem = MemoryUtil.currentMemUsage();

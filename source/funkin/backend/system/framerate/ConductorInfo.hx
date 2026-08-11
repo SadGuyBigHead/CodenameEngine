@@ -9,10 +9,8 @@ class ConductorInfo extends FramerateCategory
 		super("Conductor Info");
 	}
 
-	public override function __enterFrame(t:Int)
-	{
-		if (alpha <= 0.05)
-			return;
+	public override function __enterFrame(t:Float) {
+		if (alpha <= 0.05) return;
 
 		var buf = new StringBuf();
 		StringMacro.addLine(buf, 'Current Song Position: ${Math.floor(Conductor.songPosition * 1000) / 1000}');
