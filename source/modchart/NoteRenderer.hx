@@ -17,7 +17,6 @@ import flixel.graphics.tile.FlxDrawQuadsItem;
 import flixel.system.FlxAssets.FlxShader;
 import modchart.ArrowEffects.Effect;
 import openfl.geom.ColorTransform;
-
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
@@ -60,7 +59,6 @@ final class NoteRenderer extends flixel.FlxBasic
 	var modchart:Modchart;
 
 	// lazy
-	var holds:Vector<Array<HoldNote>>;
 	var wavyHolds:Vector<Bool>;
 	var splashes:Vector<Array<Splash>>;
 
@@ -104,7 +102,6 @@ final class NoteRenderer extends flixel.FlxBasic
 		modchart = new Modchart(game.timeline, mods, "no");
 		mods.active = modchart.active;
 
-		holds = new Vector<Array<HoldNote>>(mods.players, true, [for (i in 0...mods.players) []]);
 		wavyHolds = new Vector<Bool>(mods.players, true);
 		splashes = new Vector<Array<Splash>>(mods.players, true, [for (i in 0...mods.players) []]);
 	}
@@ -193,16 +190,7 @@ final class NoteRenderer extends flixel.FlxBasic
 		{
 			if (mods.active)
 				wavyHolds[pn] = mods.needWavyHolds(mods.playerStates[pn]);
-			for (hold in holds[pn])
-			{
-				if (mods.conductor.currentBeatTime >= hold.endBeat)
-				{
-					hold.put();
-					holds[pn].remove(hold);
-				}
-			}
 			#if debug
-			FlxG.watch.addQuick('numHolds-$pn', holds[pn].length);
 			FlxG.watch.addQuick('numSplashes-$pn', splashes[pn].length);
 			FlxG.watch.addQuick('wavyHolds-$pn', wavyHolds[pn]);
 			#end
@@ -277,49 +265,65 @@ final class NoteRenderer extends flixel.FlxBasic
 
 	function drawHolds(camera:FlxCamera, pn:Int)
 	{
-		if (!mods.active)
-			drawSimpleHolds(camera, pn);
-		else
-			drawModHolds(camera, pn);
+		//if (!mods.active)
+		//	drawSimpleHolds(camera, pn);
+		//else
+		//	drawModHolds(camera, pn);
 	}
 
 	function drawSimpleHolds(camera:FlxCamera, pn:Int)
 	{
-		for (note in holds[pn])
+		// messy ill make it better later i just want it to work right now
+		final strumLine = strumLine(pn);
+		final ng = strumLine.notes;
+
+		final oldCur = ng.__currentlyLooping;
+		ng.__currentlyLooping = true;
+
+		var i = ng.length;
+		while (i > 0)
 		{
-			final r = game.strumLines.members[pn].members[note.column];
-			final startY = note.hit ? .0 : -r.getDistance(note.note);
-			final endY = -r.getDistance(note.note);
-			var capY = endY - note.capHeight;
+			final note = ng.__loopSprite = ng.members[--i];
+			final r = game.strumLines.members[pn].members[note.noteData];
+			final startY = note.held ? .0 : note.y;
+			if (startY > playField(pn).drawDistanceMax)
+				break;
+			else if (note.sustainLength <= 0 || note.held && note.endTime > mods.conductor.songPosition)
+				continue;
+			final hold = note.hold;
+
+			final endY = r.getDistance(note, hold.endMs);
+
+			var capY = endY - hold.capHeight;
 			final bodyHeight = capY - startY;
 
 			// check if we are really gonna draw
-			if (startY > playField(pn).drawDistanceMax || note.hit && bodyHeight < .0 && endY < .0 || !note.hit && bodyHeight < .0)
+			if (hold.hit && bodyHeight < .0 && endY < .0 || !hold.hit && bodyHeight < .0)
 				continue;
 
-			final aa = note.antialiasing;
-			final drawItem = camera.startQuadBatch(note.graphic, false, false, null, aa, simpleShader);
+			final aa = hold.antialiasing;
+			final drawItem = camera.startQuadBatch(hold.graphic, false, false, null, aa, simpleShader);
 			initDrawItem(pn, drawItem);
 
-			ct.alphaMultiplier = note.note.alpha;
+			ct.alphaMultiplier = note.alpha;
 
 			// draw body
 			if (bodyHeight > .0)
 			{
 				var frame = clippedFrame;
-				if (frame == null || clippedFrame.parent != note.body.parent)
-					frame = clippedFrame = note.body.copyTo(clippedFrame);
+				if (frame == null || clippedFrame.parent != hold.body.parent)
+					frame = clippedFrame = hold.body.copyTo(clippedFrame);
 				else
-					frame.frame.copyFrom(note.body.frame);
-				frame.frame.top = -bodyHeight / note.scale; // it will make it wrap, and also have the top be clipped
+					frame.frame.copyFrom(hold.body.frame);
+				frame.frame.top = -bodyHeight / hold.scale; // it will make it wrap, and also have the top be clipped
 				frame.frame.bottom = 0;
 				// frame.uv.top = FlxMath.lerp(h.body.uv.top, h.body.uv.bottom, ratio);
 
 				frame.prepareMatrix(matrix, FlxFrameAngle.ANGLE_0, false, false);
 				matrix.translate(-frame.frame.width * .5, .0);
-				matrix.scale(note.scale, note.scale);
+				matrix.scale(hold.scale, hold.scale);
 				matrix.translate(.0, startY);
-				matrix.translate(note.note.x + note.offset.x, r.y + note.offset.y);
+				matrix.translate(note.x + hold.offset.x, r.y + hold.offset.y);
 				drawItem.addQuad(frame, matrix, ct);
 				for (_ in 0...FlxDrawQuadsItem.VERTICES_PER_QUAD)
 					pushRGBHueColor(null, 0, drawItem);
@@ -331,13 +335,13 @@ final class NoteRenderer extends flixel.FlxBasic
 				continue;
 
 			var frame = clippedFrame;
-			if (frame == null || clippedFrame.parent != note.cap.parent)
-				frame = clippedFrame = note.cap.copyTo(clippedFrame);
+			if (frame == null || clippedFrame.parent != hold.cap.parent)
+				frame = clippedFrame = hold.cap.copyTo(clippedFrame);
 			else
-				frame.frame.copyFrom(note.cap.frame);
+				frame.frame.copyFrom(hold.cap.frame);
 			if (bodyHeight < .0)
 			{
-				frame.frame.top = (note.capHeight - endY) / note.scale;
+				frame.frame.top = (hold.capHeight - endY) / hold.scale;
 				capY = .0;
 			}
 			// frame.uv.top = FlxMath.lerp(h.body.uv.top, h.body.uv.bottom, ratio);
@@ -346,9 +350,9 @@ final class NoteRenderer extends flixel.FlxBasic
 			{
 				frame.prepareMatrix(matrix, FlxFrameAngle.ANGLE_0, false, false);
 				matrix.translate(-frame.frame.width * .5, .0);
-				matrix.scale(note.scale, note.scale);
+				matrix.scale(hold.scale, hold.scale);
 				matrix.translate(.0, capY);
-				matrix.translate(note.note.x + note.offset.x, r.y + note.offset.y);
+				matrix.translate(note.x + hold.offset.x, r.y + hold.offset.y);
 				drawItem.addQuad(frame, matrix, ct);
 				for (_ in 0...FlxDrawQuadsItem.VERTICES_PER_QUAD)
 					pushRGBHueColor(null, 0, drawItem);
@@ -359,14 +363,34 @@ final class NoteRenderer extends flixel.FlxBasic
 				// nvm idk how it works
 			}
 		}
+		ng.__currentlyLooping = oldCur;
 	}
 
 	function drawModHolds(camera:FlxCamera, pn:Int)
 	{
-		for (note in holds[pn])
+		final strumLine = strumLine(pn);
+		final ng = strumLine.notes;
+
+		final oldCur = ng.__currentlyLooping;
+		ng.__currentlyLooping = true;
+
+		var i = ng.length;
+		while (i > 0)
 		{
-			final clip = note.hit;
-			final item = camera.startTrianglesBatch(note.graphic, note.antialiasing, true, null, true, shaders[pn]);
+			final note = ng.__loopSprite = ng.members[--i];
+			final hold = note.hold;
+			final clip = hold.hit;
+			final zeroOffset = !clip ? .0 : getYOffset(pn, hold.column, mods.conductor.currentBeatTime, mods.conductor.songPosition);
+			final startYOffset = clip ? zeroOffset : getYOffset(pn, hold.column, hold.startBeat, hold.startMs);
+
+			if (isTooFar(pn))
+				break;
+			else if (note.sustainLength <= 0)
+				continue;
+
+			final endYOffset = getYOffset(pn, hold.column, hold.endBeat, hold.endMs);
+
+			final item = camera.startTrianglesBatch(hold.graphic, hold.antialiasing, true, null, true, shaders[pn]);
 			item.colorMultipliers ??= [];
 			item.colorOffsets ??= [];
 			var numVertices = item.numVertices;
@@ -374,20 +398,15 @@ final class NoteRenderer extends flixel.FlxBasic
 			// item.modsShader = null;
 			// item.shader = null;
 
-			final zeroOffset = !clip ? .0 : getYOffset(pn, note.column, mods.conductor.currentBeatTime, mods.conductor.songPosition);
-
-			final startYOffset = clip ? zeroOffset : getYOffset(pn, note.column, note.startBeat, note.startMs);
-			final endYOffset = getYOffset(pn, note.column, note.endBeat, note.endMs);
-
 			if (endYOffset < startYOffset && clip)
 				continue;
 
 			final dist = endYOffset - startYOffset;
-			final bodyDist = dist - note.capHeight;
+			final bodyDist = dist - hold.capHeight;
 			final endRatio = bodyDist / dist;
 
-			final capBeat = FlxMath.lerp(clip ? mods.conductor.currentBeatTime : note.startBeat, note.endBeat, endRatio);
-			final capMs = FlxMath.lerp(clip ? mods.conductor.songPosition : note.startMs, note.endMs, endRatio);
+			final capBeat = FlxMath.lerp(clip ? mods.conductor.currentBeatTime : hold.startBeat, hold.endBeat, endRatio);
+			final capMs = FlxMath.lerp(clip ? mods.conductor.songPosition : hold.startMs, hold.endMs, endRatio);
 			final capYOffset = FlxMath.lerp(startYOffset, endYOffset, endRatio);
 			final drawBody = !clip || capYOffset > zeroOffset;
 
@@ -406,10 +425,10 @@ final class NoteRenderer extends flixel.FlxBasic
 			{
 				var startV = .0;
 				if (clip && startBeat <= mods.conductor.currentBeatTime)
-					startV = FlxMath.bound(Math.abs(capYOffset - startYOffset) / note.capHeight, 0.0, 1.0);
-				final uv = cap ? note.capUV : note.bodyUV;
-				final halfU = cap ? note.capHalfU : note.bodyHalfU;
-				final halfWidth = cap ? note.capHalfWidth : note.bodyHalfWidth;
+					startV = FlxMath.bound(Math.abs(capYOffset - startYOffset) / hold.capHeight, 0.0, 1.0);
+				final uv = cap ? hold.capUV : hold.bodyUV;
+				final halfU = cap ? hold.capHalfU : hold.bodyHalfU;
+				final halfWidth = cap ? hold.capHalfWidth : hold.bodyHalfWidth;
 
 				inline function pushVertices()
 				{
@@ -432,14 +451,14 @@ final class NoteRenderer extends flixel.FlxBasic
 					final ms2 = FlxMath.lerp(startMs, endMs, t2);
 
 					if (i == iStart)
-						getArrowEffectsPos(pn, beat, ms, note.column, false, true);
+						getArrowEffectsPos(pn, beat, ms, hold.column, false, true);
 					if (isTooFar(pn))
 						break;
 
 					final v = if (cap) //
 						FlxMath.lerp(FlxMath.lerp(uv.top, uv.bottom, startV), uv.bottom, t); //
 					else //
-						FlxMath.remapToRange(modYOffset - endYOffset, -note.bodyHeight, 0, note.bodyUV.bottom, note.bodyUV.top); //
+						FlxMath.remapToRange(modYOffset - endYOffset, -hold.bodyHeight, 0, hold.bodyUV.bottom, hold.bodyUV.top); //
 
 					modPos1.copyFrom(modPos);
 					modRot1.copyFrom(modRot);
@@ -447,7 +466,7 @@ final class NoteRenderer extends flixel.FlxBasic
 					modColor1 = modColor;
 					modGlow1 = modGlow;
 
-					getArrowEffectsPos(pn, beat2, ms2, note.column, false, true);
+					getArrowEffectsPos(pn, beat2, ms2, hold.column, false, true);
 
 					// if (isTooFar(pn))
 					//	break;
@@ -460,7 +479,7 @@ final class NoteRenderer extends flixel.FlxBasic
 					final v2 = if (cap) //
 						FlxMath.lerp(FlxMath.lerp(uv.top, uv.bottom, startV), uv.bottom, t2); //
 					else //
-						FlxMath.remapToRange(modYOffset - endYOffset, -note.bodyHeight, 0, note.bodyUV.bottom, note.bodyUV.top); //
+						FlxMath.remapToRange(modYOffset - endYOffset, -hold.bodyHeight, 0, hold.bodyUV.bottom, hold.bodyUV.top); //
 
 					pushVertices();
 					pushVertices();
@@ -539,10 +558,10 @@ final class NoteRenderer extends flixel.FlxBasic
 			// if we dont need to, just render holds with 4 segments total
 			final grain = wavyHolds[pn] ? mods.playerStates[pn].fGrain : 512;
 			if (drawBody)
-				drawPart(clip ? mods.conductor.currentBeatTime : note.startBeat, capBeat, clip ? mods.conductor.songPosition : note.startMs, capMs, bodyDist / grain,
-					false);
-			drawPart(clip ? Math.max(capBeat, mods.conductor.currentBeatTime) : capBeat, note.endBeat,
-				clip ? Math.max(capMs, mods.conductor.songPosition) : capMs, note.endMs, note.capHeight / grain, true);
+				drawPart(clip ? mods.conductor.currentBeatTime : hold.startBeat, capBeat, clip ? mods.conductor.songPosition : hold.startMs, capMs,
+					bodyDist / grain, false);
+			drawPart(clip ? Math.max(capBeat, mods.conductor.currentBeatTime) : capBeat, hold.endBeat,
+				clip ? Math.max(capMs, mods.conductor.songPosition) : capMs, hold.endMs, hold.capHeight / grain, true);
 			// FlxG.watch.addQuick("vertices", item.vertices);
 			// FlxG.watch.addQuick("verticesLen", item.vertices.length);
 			// FlxG.watch.addQuick("uvtData", item.uvtData);
@@ -556,6 +575,7 @@ final class NoteRenderer extends flixel.FlxBasic
 			// FlxG.watch.addQuick("r", item.r);
 			// FlxG.watch.addQuick("rLen", item.r.length);
 		}
+		ng.__currentlyLooping = oldCur;
 	}
 
 	function drawArrows(camera:FlxCamera, pn:Int)
@@ -586,7 +606,7 @@ final class NoteRenderer extends flixel.FlxBasic
 			//	continue;
 			// update local matrix
 			// updateLocalMatrix(receptor.origin);
-	
+
 			// apply colors
 			if (mods.active)
 			{
@@ -594,7 +614,7 @@ final class NoteRenderer extends flixel.FlxBasic
 				final ofs = modGlow * 255.;
 				note.colorTransform.setOffsets(ofs, ofs, ofs, .0);
 			}
-	
+
 			final originalX = note.x;
 			final originalY = note.y;
 			note.applyStrumPos();
@@ -647,20 +667,20 @@ final class NoteRenderer extends flixel.FlxBasic
 
 	function pushRGBHueColor<T>(rgbColor:RGBColor, hue:Float, item:FlxDrawBaseItem<T>)
 	{
-		//if (rgbColor != null && rgbColor.mix > .0)
-		//{
+		// if (rgbColor != null && rgbColor.mix > .0)
+		// {
 		//	pushColor(item.r, rgbColor.r);
 		//	pushColor(item.g, rgbColor.g);
 		//	pushColor(item.b, rgbColor.b);
 		//	item.rgbMix.push(rgbColor.mix);
-		//}
-		//else
-		//{
+		// }
+		// else
+		// {
 		//	pushColor(item.r, FlxColor.RED);
 		//	pushColor(item.g, FlxColor.GREEN);
 		//	pushColor(item.b, FlxColor.BLUE);
 		//	item.rgbMix.push(0.0);
-		//}
+		// }
 		item.hue.push(hue);
 	}
 
@@ -804,101 +824,6 @@ final class NoteRenderer extends flixel.FlxBasic
 		super.destroy();
 		mods = FlxDestroyUtil.destroy(mods);
 		modchart = FlxDestroyUtil.destroy(modchart);
-	}
-}
-
-class HoldNote implements IFlxPooled
-{
-	static final pool = new FlxPool<HoldNote>(HoldNote /*.new*/); // DAVE TODO: davealicious
-
-	public var graphic:FlxGraphic;
-	public var holdFrames:HoldFrames;
-
-	public var hit(get, never):Bool;
-
-	inline function get_hit()
-		return note.wasGoodHit;
-
-	public var startBeat:Float;
-	public var startMs:Float;
-	public var endBeat:Float;
-	public var endMs:Float;
-	public var column:Int;
-
-	public var body:FlxFrame;
-	public var bodyUV:FlxUVRect;
-	public var bodyHalfU:Float;
-	public var bodyWidth:Float;
-	public var bodyHalfWidth:Float;
-	public var bodyHeight:Float;
-
-	public var cap:FlxFrame;
-	public var capUV:FlxUVRect;
-	public var capHalfU:Float;
-	public var capWidth:Float;
-	public var capHalfWidth:Float;
-	public var capHeight:Float;
-
-	public var antialiasing:Bool;
-
-	public var note:Note;
-
-	public var scale:Float;
-
-	public var offset:FlxPoint;
-
-	public static function get(note:Note)
-	{
-		final n = pool.get();
-		n.init(note);
-		return n;
-	}
-
-	function init(note:Note)
-	{
-		this.note = note;
-		scale = note.scale.x;
-		body = note.bodyFrame;
-		bodyUV = cast body.uv;
-		cap = note.capFrame;
-		capUV = cast cap.uv;
-		graphic = body.parent;
-		startBeat = note.beatTime;
-		startMs = note.strumTime;
-		endBeat = note.beatEndTime;
-		endMs = note.endTime;
-		column = note.noteData;
-		antialiasing = note.antialiasing;
-
-		bodyHalfU = FlxMath.lerp(bodyUV.left, bodyUV.right, .5);
-
-		bodyWidth = body.sourceSize.x * note.scale.x;
-		bodyHalfWidth = bodyWidth * .5;
-		bodyHeight = body.sourceSize.y * note.scale.y;
-
-		capHalfU = FlxMath.lerp(capUV.left, capUV.right, .5);
-
-		capWidth = body.sourceSize.x * note.scale.x;
-		capHalfWidth = bodyWidth * .5;
-		capHeight = body.sourceSize.y * note.scale.y;
-
-		offset = FlxPoint.get(bodyHalfWidth, Note.swagWidth * .5);
-	}
-
-	function new()
-	{
-	}
-
-	public function put()
-	{
-		pool.put(this);
-	}
-
-	public function destroy()
-	{
-		holdFrames = null;
-		note = null;
-		offset = FlxDestroyUtil.put(offset);
 	}
 }
 
@@ -1103,92 +1028,5 @@ class ModsShader extends FlxShader
 	{
 		super();
 		bitmap.wrap = REPEAT;
-	}
-}
-
-// from later versions of flixel
-
-@:forward(put)
-abstract FlxUVRect(FlxRect) from FlxRect to flixel.util.FlxPool.IFlxPooled
-{
-	public var left(get, set):Float;
-
-	inline function get_left():Float
-	{
-		return this.x;
-	}
-
-	inline function set_left(value):Float
-	{
-		return this.x = value;
-	}
-
-	/** Top */
-	public var right(get, set):Float;
-
-	inline function get_right():Float
-	{
-		return this.width;
-	}
-
-	inline function set_right(value):Float
-	{
-		return this.width = value;
-	}
-
-	/** Right */
-	public var top(get, set):Float;
-
-	inline function get_top():Float
-	{
-		return this.y;
-	}
-
-	inline function set_top(value):Float
-	{
-		return this.y = value;
-	}
-
-	/** Bottom */
-	public var bottom(get, set):Float;
-
-	inline function get_bottom():Float
-	{
-		return this.height;
-	}
-
-	inline function set_bottom(value):Float
-	{
-		return this.height = value;
-	}
-
-	public inline function set(l, t, r, b)
-	{
-		this.set(l, t, r, b);
-	}
-
-	public inline function copyTo(uv:FlxUVRect)
-	{
-		uv.set(left, top, right, bottom);
-	}
-
-	public inline function copyFrom(uv:FlxUVRect)
-	{
-		set(uv.left, uv.top, uv.right, uv.bottom);
-	}
-
-	// public inline function toString()
-	// {
-	//	return return FlxStringUtil.getDebugString([
-	//		LabelValuePair.weak("l", left),
-	//		LabelValuePair.weak("t", top),
-	//		LabelValuePair.weak("r", right),
-	//		LabelValuePair.weak("b", bottom)
-	//	]);
-	// }
-
-	public static function get(l = 0.0, t = 0.0, r = 0.0, b = 0.0)
-	{
-		return FlxRect.get(l, t, r, b);
 	}
 }

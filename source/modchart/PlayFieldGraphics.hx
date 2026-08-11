@@ -1,7 +1,6 @@
 package modchart;
 
 import funkin.game.Note;
-import flixel.graphics.frames.FlxTileFrames;
 import flixel.math.FlxRect;
 import openfl.display.BitmapData;
 import flixel.graphics.frames.FlxFramesCollection;
@@ -9,12 +8,8 @@ import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import openfl.geom.Rectangle;
 import openfl.geom.Matrix;
-
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
-import flixel.util.FlxColor;
-import flixel.group.FlxSpriteGroup;
-
 using flixel.util.FlxColorTransformUtil;
 
 #if !modchart_debug
@@ -234,7 +229,7 @@ class HoldFrames implements IFlxDestroyable
 				final newFrame = new FlxFrame(graphic);
 				newFrame.offset.y = bodies; // store scale in a value we don't use
 				newFrame.name = frame.frame.name + "-generated"; // AI GENERATED MODS
-				newFrame.uv = FlxRect.get(frame.pos / graphic.width, 0, (frame.pos + frameRect.width) / graphic.width, frameRect.height / graphic.height);
+				newFrame.frame = FlxRect.get(frame.pos, 0, frameRect.width, frameRect.height);
 				newFrame.sourceSize.set(frameRect.width, frameRect.height);
 				frame.array[frame.direction] = newFrame;
 			}
@@ -246,7 +241,7 @@ class HoldFrames implements IFlxDestroyable
 		Rectangle.__pool.release(clipRect);
 	}
 
-	public function getHoldFrame(direction:Int, cap:Bool)
+	public inline function getHoldFrame(direction:Int, cap:Bool)
 	{
 		return cap ? holdCapFrames[direction] : holdBodyFrames[direction];
 	}

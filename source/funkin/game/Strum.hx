@@ -237,9 +237,9 @@ class Strum extends FlxSprite
 		}
 	}
 
-	public inline function getDistance(note:Note)
+	public inline function getDistance(note:Note, ?time:Float)
 	{
-		return ((note.strumTime - Conductor.songPosition) * 0.45 * getScrollSpeed(note));
+		return (((time ?? note.strumTime) - Conductor.songPosition) * 0.45 * getScrollSpeed(note));
 	}
 
 	private inline function updateNotePos(daNote:Note)

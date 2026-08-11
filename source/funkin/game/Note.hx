@@ -1,5 +1,6 @@
 package funkin.game;
 
+import modchart.PlayFieldGraphics;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.FlxGraphic;
 import flixel.math.FlxPoint;
@@ -13,21 +14,19 @@ using StringTools;
 
 @:allow(funkin.game.PlayState)
 class Note extends FlxSprite
-{
-	// dave stuff
-
-	public var holdGraphic:FlxGraphic;
-
-	public var bodyFrame:FlxFrame;
-
-	public var capFrame:FlxFrame;
-	
+{	
 	public var player(get, never):Int;
 
 	function get_player()
 	{
 		return strumLine.ID;
 	}
+
+	public var hold:HoldNote;
+
+	public var sustainLength:Float;
+
+	public var held:Bool;
 
 	// who cares
 
@@ -159,6 +158,7 @@ class Note extends FlxSprite
 		this.strumTime = noteData.time.getDefault(0);
 		this.beatTime = dave.DaveConductor.instance.getTimeInBeats(this.strumTime);
 		endTime = this.strumTime + noteData.sLen;
+		sustainLength = noteData.sLen;
 		this.beatEndTime = dave.DaveConductor.instance.getTimeInBeats(endTime);
 		this.noteData = noteData.id.getDefault(0);
 
@@ -216,6 +216,8 @@ class Note extends FlxSprite
 			PlayState.instance.splashHandler.getSplashGroup(splash);
 			PlayState.instance.gameAndCharsEvent("onPostNoteCreation", event);
 		}
+
+		hold = new HoldNote(this);
 	}
 
 	public var lastScrollSpeed:Null<Float> = null;
@@ -333,26 +335,174 @@ class Note extends FlxSprite
 	public var earlyPressWindow:Float = Flags.EARLY_HIT_WINDOW_RANGE;
 	public var latePressWindow:Float = Flags.LATE_HIT_WINDOW_RANGE;
 
-	@:noCompletion
-	override function set_clipRect(rect:FlxRect):FlxRect
-	{
-		@:bypassAccessor clipRect = rect;
-		@:privateAccess if (frame != null)
-		{
-			if (rect != null && _frame != null)
-				_frame = frame.clipTo(rect, _frame);
-			else if (_frame != null)
-				_frame = frame.copyTo(_frame);
-			dirty = true;
-		}
-
-		return rect;
-	}
-
 	public override function destroy()
 	{
 		super.destroy();
 
 		clipRect = FlxDestroyUtil.put(clipRect);
+		hold = FlxDestroyUtil.destroy(hold);
+	}
+}
+
+class HoldNote implements IFlxDestroyable
+{
+	public var graphic:FlxGraphic;
+	public var holdFrames:HoldFrames;
+
+	public var hit(get, never):Bool;
+
+	inline function get_hit()
+		return note.wasGoodHit;
+
+	public var startBeat:Float;
+	public var startMs:Float;
+	public var endBeat:Float;
+	public var endMs:Float;
+	public var column:Int;
+
+	public var body:FlxFrame;
+	public var bodyUV:FlxUVRect;
+	public var bodyHalfU:Float;
+	public var bodyWidth:Float;
+	public var bodyHalfWidth:Float;
+	public var bodyHeight:Float;
+
+	public var cap:FlxFrame;
+	public var capUV:FlxUVRect;
+	public var capHalfU:Float;
+	public var capWidth:Float;
+	public var capHalfWidth:Float;
+	public var capHeight:Float;
+
+	public var antialiasing:Bool;
+
+	public var note:Note;
+
+	public var scale:Float;
+
+	public var offset:FlxPoint;
+
+	public function new(note:Note)
+	{
+		final holdFrames = PlayState.instance.noteRenderer.graphics.getHoldFrames(note);
+		this.note = note;
+		scale = note.scale.x;
+		body = holdFrames.getHoldFrame(note.noteData, false);
+		bodyUV = cast body.uv;
+		cap = holdFrames.getHoldFrame(note.noteData, true);
+		capUV = cast cap.uv;
+		graphic = body.parent;
+		startBeat = note.beatTime;
+		startMs = note.strumTime;
+		endBeat = note.beatEndTime;
+		endMs = note.endTime;
+		column = note.noteData;
+		antialiasing = note.antialiasing;
+
+		bodyHalfU = FlxMath.lerp(bodyUV.left, bodyUV.right, .5);
+
+		bodyWidth = body.sourceSize.x * note.scale.x;
+		bodyHalfWidth = bodyWidth * .5;
+		bodyHeight = body.sourceSize.y * note.scale.y;
+
+		capHalfU = FlxMath.lerp(capUV.left, capUV.right, .5);
+
+		capWidth = body.sourceSize.x * note.scale.x;
+		capHalfWidth = bodyWidth * .5;
+		capHeight = body.sourceSize.y * note.scale.y;
+
+		offset = FlxPoint.get(bodyHalfWidth, Note.swagWidth * .5);
+	}
+
+	public function destroy()
+	{
+		holdFrames = null;
+		note = null;
+		offset = FlxDestroyUtil.put(offset);
+	}
+}
+
+@:forward(put)
+abstract FlxUVRect(FlxRect) from FlxRect to flixel.util.FlxPool.IFlxPooled
+{
+	public var left(get, set):Float;
+
+	inline function get_left():Float
+	{
+		return this.x;
+	}
+
+	inline function set_left(value):Float
+	{
+		return this.x = value;
+	}
+
+	/** Top */
+	public var right(get, set):Float;
+
+	inline function get_right():Float
+	{
+		return this.width;
+	}
+
+	inline function set_right(value):Float
+	{
+		return this.width = value;
+	}
+
+	/** Right */
+	public var top(get, set):Float;
+
+	inline function get_top():Float
+	{
+		return this.y;
+	}
+
+	inline function set_top(value):Float
+	{
+		return this.y = value;
+	}
+
+	/** Bottom */
+	public var bottom(get, set):Float;
+
+	inline function get_bottom():Float
+	{
+		return this.height;
+	}
+
+	inline function set_bottom(value):Float
+	{
+		return this.height = value;
+	}
+
+	public inline function set(l, t, r, b)
+	{
+		this.set(l, t, r, b);
+	}
+
+	public inline function copyTo(uv:FlxUVRect)
+	{
+		uv.set(left, top, right, bottom);
+	}
+
+	public inline function copyFrom(uv:FlxUVRect)
+	{
+		set(uv.left, uv.top, uv.right, uv.bottom);
+	}
+
+	// public inline function toString()
+	// {
+	//	return return FlxStringUtil.getDebugString([
+	//		LabelValuePair.weak("l", left),
+	//		LabelValuePair.weak("t", top),
+	//		LabelValuePair.weak("r", right),
+	//		LabelValuePair.weak("b", bottom)
+	//	]);
+	// }
+
+	public static function get(l = 0.0, t = 0.0, r = 0.0, b = 0.0)
+	{
+		return FlxRect.get(l, t, r, b);
 	}
 }
