@@ -11,8 +11,6 @@ final class NoteHitEvent extends CancellableEvent
 	@:dox(hide) public var deleteNote:Bool = true;
 	@:dox(hide) public var unmuteVocals:Bool = true;
 	@:dox(hide) public var enableCamZooming:Bool = true;
-	@:dox(hide) public var autoHitLastSustain:Bool = true;
-	@:dox(hide) public var clipSustain:Bool = true;
 
 	/**
 	 * Whenever a miss should be added.
@@ -183,14 +181,6 @@ final class NoteHitEvent extends CancellableEvent
 	}
 
 	/**
-	 * Prevents the sustain from being cut. Only works if the note is a sustain.
-	 */
-	public function preventSustainClip()
-	{
-		clipSustain = false;
-	}
-
-	/**
 	 * Prevents the vocals volume from being set to 1 after pressing the note.
 	 */
 	public function preventVocalsUnmute()
@@ -230,20 +220,6 @@ final class NoteHitEvent extends CancellableEvent
 	public function cancelCamZooming()
 	{
 		preventCamZooming();
-	}
-
-	/**
-	 * Prevents the sustain tail (the last one) from being automatically hit when the sustain before it is hit.
-	 */
-	public function preventLastSustainHit()
-	{
-		autoHitLastSustain = false;
-	}
-
-	@:dox(hide)
-	public function cancelLastSustainHit()
-	{
-		preventLastSustainHit();
 	}
 
 	/**

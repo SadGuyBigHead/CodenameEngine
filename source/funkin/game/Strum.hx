@@ -226,7 +226,7 @@ class Strum extends FlxSprite
 		if (copyStrumAngle && daNote.copyStrumAngle)
 		{
 			daNote.__noteAngle = getNotesAngle(daNote);
-			daNote.angle = daNote.isSustainNote ? daNote.__noteAngle : angle;
+			daNote.angle = angle;
 		}
 
 		updateNotePos(daNote);
@@ -235,6 +235,11 @@ class Strum extends FlxSprite
 			__initCachedCopyFields();
 			__applyCopyFields(daNote);
 		}
+	}
+
+	public inline function getDistance(note:Note)
+	{
+		return ((note.strumTime - Conductor.songPosition) * 0.45 * getScrollSpeed(note));
 	}
 
 	private inline function updateNotePos(daNote:Note)
@@ -250,9 +255,7 @@ class Strum extends FlxSprite
 					daNote.x = 0;
 				if (shouldY)
 				{
-					daNote.y = ((daNote.strumTime - Conductor.songPosition) * 0.45 * getScrollSpeed(daNote));
-					if (daNote.isSustainNote)
-						daNote.y += daNote.height * 0.5;
+					daNote.y = getDistance(daNote);
 				}
 			}
 			else
@@ -278,12 +281,6 @@ class Strum extends FlxSprite
 				__noteOffset.set(__lastAngleCos * distance, __lastAngleSin * distance);
 				__noteOffset.x += -daNote.origin.x + daNote.offset.x;
 				__noteOffset.y += -daNote.origin.y + daNote.offset.y;
-				if (daNote.isSustainNote)
-				{
-					final m = (daNote.height * 0.5 * (speed < 0 ? -1 : 1));
-					__noteOffset.x += __lastAngleCos * m;
-					__noteOffset.y += __lastAngleSin * m;
-				}
 				__noteOffset.x += x + __lastStrumHalfW;
 				__noteOffset.y += y + __lastStrumHalfH;
 				if (shouldX)
@@ -292,17 +289,6 @@ class Strum extends FlxSprite
 					daNote.y = __noteOffset.y;
 			}
 		}
-	}
-
-	/**
-	 * Updates a sustain note.
-	 * @param daNote The note
-	**/
-	public inline function updateSustain(daNote:Note)
-	{
-		if (!daNote.isSustainNote)
-			return;
-		daNote.updateSustain(this);
 	}
 
 	/**

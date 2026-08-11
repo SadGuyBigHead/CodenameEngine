@@ -12,11 +12,6 @@ final class SplashShowEvent extends CancellableEvent
 	public var splashName:String;
 
 	/**
-		Splash that is shown
-	**/
-	public var splash:Splash;
-
-	/**
 		Strum that the splash is shown on
 	**/
 	public var strum:Strum;

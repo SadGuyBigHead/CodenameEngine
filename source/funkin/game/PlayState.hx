@@ -1,5 +1,7 @@
 package funkin.game;
 
+import dave.timeline.Timeline;
+import modchart.NoteRenderer;
 import flixel.FlxState;
 import flixel.FlxSubState;
 import flixel.graphics.FlxGraphic;
@@ -101,6 +103,16 @@ class PlayState extends MusicBeatState
 	 * Whenever the song is started with co-op mode on.
 	 */
 	public static var coopMode:Bool = Flags.DEFAULT_COOP_MODE;
+
+	/**
+	 * Yeah
+	 */
+	public var noteRenderer:NoteRenderer;
+
+	/**
+	 * Dave's timeline
+	 */
+	public var timeline:Timeline;
 
 	/**
 	 * Script Pack of all the scripts being ran.
@@ -979,6 +991,12 @@ class PlayState extends MusicBeatState
 		splashHandler = new SplashHandler();
 		add(splashHandler);
 
+		timeline = new Timeline();
+		add(timeline);
+
+		noteRenderer = new NoteRenderer(this);
+		insert(0, noteRenderer);
+
 		scripts.set("SONG", SONG);
 		scripts.load();
 		scripts.call("create");
@@ -1087,6 +1105,8 @@ class PlayState extends MusicBeatState
 			SaveWarning.warningFunc = saveWarn;
 			SaveWarning.saveFunc = () -> Charter.saveEverything(false);
 		}
+
+		timeline.sort();
 	}
 
 	@:dox(hide) public override function createPost()
@@ -2203,25 +2223,9 @@ class PlayState extends MusicBeatState
 		if (playerID == null || directionID == null || playerID == -1)
 			return;
 
-		if (hasNote)
-		{
-			if (Flags.SUSTAINS_AS_ONE_NOTE && note.isSustainNote)
-			{
-				strumLine.deleteNote(note);
-				if (note.sustainParent.wasGoodHit)
-				{
-					note.sustainParent.wasGoodHit = false;
-					note.sustainParent.tooLate = true;
-					note = note.sustainParent;
-				}
-				else
-					return;
-			}
-		}
-
 		var event:NoteMissEvent = gameAndCharsEvent("onPlayerMiss",
 			EventManager.get(NoteMissEvent)
-				.recycle(note, -10, 1, muteVocalsOnMiss, hasNote ? ((note.isSustainNote && Flags.SUSTAINS_AS_ONE_NOTE) ? -0.1425 : -0.0475) : -0.04,
+				.recycle(note, -10, 1, muteVocalsOnMiss, hasNote ? -0.0475 : -0.04,
 					Paths.sound(FlxG.random.getObject(Flags.DEFAULT_MISS_SOUNDS)), FlxG.random.float(0.1, 0.2), !hasNote, combo > 5, "sad", true, true,
 					"miss", strumLines.members[playerID].characters, playerID, hasNote ? note.noteType : null, directionID, 0));
 		strumLine.onMiss.dispatch(event);
@@ -2335,52 +2339,46 @@ class PlayState extends MusicBeatState
 		var event:NoteHitEvent;
 		if (strumLine != null && !strumLine.cpu)
 			event = EventManager.get(NoteHitEvent)
-				.recycle(rating.breaksCombo, !note.isSustainNote, !note.isSustainNote, null, null, null, note, strumLine.characters, true, note.noteType,
+				.recycle(rating.breaksCombo, true, true, null, null, null, note, strumLine.characters, true, note.noteType,
 					note.animSuffix.getDefault(note.strumID < strumLine.members.length ? strumLine.members[note.strumID].animSuffix : strumLine.animSuffix),
-					null, null, note.strumID, rating.score, note.isSustainNote ? null : rating.accuracy, rating.health,
-					rating.name, Options.splashesEnabled && !note.isSustainNote && rating.splash, null, null, null, null, null, iconP1);
+					null, null, note.strumID, rating.score, rating.accuracy, rating.health,
+					rating.name, Options.splashesEnabled && rating.splash, null, null, null, null, null, iconP1);
 		else
 			event = EventManager.get(NoteHitEvent)
 				.recycle(rating.breaksCombo, false, false, null, null, null, note, strumLine.characters, false, note.noteType,
 					note.animSuffix.getDefault(note.strumID < strumLine.members.length ? strumLine.members[note.strumID].animSuffix : strumLine.animSuffix),
 					null, null, note.strumID, 0, null, 0, rating.name, false, null, null, null, null, true, iconP2);
-		event.deleteNote = !note.isSustainNote; // work around, to allow sustain notes to be deleted
 		event = scripts.event(strumLine != null && !strumLine.cpu ? "onPlayerHit" : "onDadHit", event);
 		strumLine.onHit.dispatch(event);
 		gameAndCharsEvent("onNoteHit", event);
 
-		note.noSustainClip = !event.clipSustain;
-
 		if (!event.cancelled)
 		{
-			if (!note.isSustainNote)
+			if (event.countScore)
+				songScore += event.score;
+			if (event.accuracy != null)
 			{
-				if (event.countScore)
-					songScore += event.score;
-				if (event.accuracy != null)
-				{
-					accuracyPressedNotes++;
-					totalAccuracyAmount += event.accuracy;
-					updateRating();
-				}
-				if (event.misses)
-				{
-					combo = 0;
-					misses++;
-				}
-				else if (event.countAsCombo)
-					combo++;
-
-				if (event.showRating || (event.showRating == null && event.player))
-				{
-					displayCombo(event);
-					displayRatingNumbers(event);
-					displayRating(event.rating, event);
-					ratingNum += 1;
-				}
-				if (event.player)
-					hits[rating.name] += 1;
+				accuracyPressedNotes++;
+				totalAccuracyAmount += event.accuracy;
+				updateRating();
 			}
+			if (event.misses)
+			{
+				combo = 0;
+				misses++;
+			}
+			else if (event.countAsCombo)
+				combo++;
+
+			if (event.showRating || (event.showRating == null && event.player))
+			{
+				displayCombo(event);
+				displayRatingNumbers(event);
+				displayRating(event.rating, event);
+				ratingNum += 1;
+			}
+			if (event.player)
+				hits[rating.name] += 1;
 
 			if (strumLine != null)
 				strumLine.addHealth(event.healthGain);
@@ -2406,19 +2404,9 @@ class PlayState extends MusicBeatState
 		}
 		if (event.enableCamZooming)
 			camZooming = true;
-		if (event.autoHitLastSustain)
-		{
-			if (note.nextSustain != null && note.nextSustain.nextSustain == null)
-			{
-				// its a tail!!
-				note.wasGoodHit = true;
-			}
-		}
 
 		if (event.deleteNote)
 			strumLine.deleteNote(note);
-		else
-			note.updateSustainClip();
 
 		gameAndCharsEvent("onPostNoteHit", event);
 	}

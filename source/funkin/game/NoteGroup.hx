@@ -43,12 +43,13 @@ class NoteGroup extends FlxTypedGroup<Note>
 	**/
 	public inline function sortNotes()
 	{
-		sort(function(i, n1, n2)
-		{
-			if (n1.strumTime == n2.strumTime)
-				return n1.isSustainNote ? 1 : -1;
-			return FlxSort.byValues(FlxSort.DESCENDING, n1.strumTime, n2.strumTime);
-		});
+		sort(__sortFunc, FlxSort.DESCENDING);
+	}
+
+	@:noCompletion
+	function __sortFunc(order:Int, a:Note, b:Note)
+	{
+		return FlxSort.byValues(order, a.strumTime, b.strumTime);
 	}
 
 	@:dox(hide) public var __forcedSongPos:Null<Float> = null;

@@ -225,6 +225,20 @@
 
 	<haxedef name="hscriptPos" /> <!-- for logging -->
 
+	<!-- sgbh modchart stuff -->
+	<haxeflag name="--macro" value="include('modchart')" />
+
+	<!-- we gotta macro it up -->
+    <haxeflag name="--macro" value="addMetadata('@:build(modchart.macro.FlxMacro.buildFlxDrawBaseItem())', 'flixel.graphics.tile.FlxDrawBaseItem')" />
+    <haxeflag name="--macro" value="addMetadata('@:build(modchart.macro.FlxMacro.buildFlxDrawItem())', 'flixel.graphics.tile.FlxDrawQuadsItem')" />
+    <haxeflag name="--macro" value="addMetadata('@:build(modchart.macro.FlxMacro.buildFlxDrawItem())', 'flixel.graphics.tile.FlxDrawTrianglesItem')" />
+	
+	<!-- attach IndexMacroUtil -->
+	<haxeflag name="--macro"
+		value="addMetadata('@:using(modchart.macro.IndexMacroUtil)', 'openfl.Vector')" />
+	<haxeflag name="--macro"
+		value="addMetadata('@:using(modchart.macro.IndexMacroUtil)', 'Array')" />
+
 	<!-- EXPERMENTAL FEATURES -->
 	<haxedef name="EXPERIMENTAL_FLXGRAPHIC_DESTROY_FIX" />
 </project>

@@ -29,6 +29,23 @@ class BPMChangeEvent
 	public var stepTime:Float;
 	public var beatTime:Float;
 	public var measureTime:Float;
+
+	/**
+	 * Current Crochet (time per beat), in milliseconds.
+	 * It should be crotchet but ehhh, now it's there for backward compatibility.
+	 */
+	public var crochet(get, never):Float;
+
+	private function get_crochet()
+		return 15000 * stepsPerBeat / bpm;
+
+	/**
+	 * Current StepCrochet (time per step), in milliseconds.
+	 */
+	public var stepCrochet(get, never):Float;
+
+	private function get_stepCrochet()
+		return 15000 / bpm;
 }
 
 final class Conductor
