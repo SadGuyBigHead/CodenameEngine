@@ -2405,8 +2405,10 @@ class PlayState extends MusicBeatState
 		if (event.enableCamZooming)
 			camZooming = true;
 
-		if (event.deleteNote)
+		if (event.deleteNote && note.sustainLength <= 0)
 			strumLine.deleteNote(note);
+		else
+			note.held = note.sustainLength > 0;
 
 		gameAndCharsEvent("onPostNoteHit", event);
 	}
