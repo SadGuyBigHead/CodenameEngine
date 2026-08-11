@@ -27,7 +27,7 @@ class FunkinSave
 	{
 		var path = Flags.SAVE_PATH, name = Flags.SAVE_NAME;
 		if (path == null)
-			path = 'CodenameEngine';
+			path = 'VsDnB';
 		if (name == null)
 			name = 'save-default';
 

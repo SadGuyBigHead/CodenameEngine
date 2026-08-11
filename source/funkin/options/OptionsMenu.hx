@@ -1,5 +1,6 @@
 package funkin.options;
 
+import funkin.menus.ui.MenuBackground;
 import haxe.xml.Access;
 import flixel.util.typeLimit.OneOfThree;
 import funkin.editors.ui.UIState;
@@ -48,7 +49,7 @@ class OptionsMenu extends TreeMenu
 		}
 	];
 
-	var bg:FlxSprite;
+	var bg:MenuBackground;
 	var debugOption:TextOption;
 
 	override function create()
@@ -59,8 +60,7 @@ class OptionsMenu extends TreeMenu
 
 		DiscordUtil.call("onMenuLoaded", ["Options Menu"]);
 
-		add(bg = new FlxSprite().loadAnimatedGraphic(Paths.image('menus/menuBGBlue')));
-		bg.antialiasing = true;
+		add(bg = new MenuBackground());
 		bg.scrollFactor.set();
 		updateBG();
 

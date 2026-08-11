@@ -1,5 +1,6 @@
 package funkin.menus.credits;
 
+import funkin.menus.ui.MenuBackground;
 import flixel.util.FlxColor;
 import funkin.backend.assets.AssetSource;
 import funkin.backend.system.github.GitHubContributor.CreditsGitHubContributor;
@@ -19,10 +20,8 @@ class CreditsMain extends TreeMenu
 
 		DiscordUtil.call("onMenuLoaded", ["Credits Menu"]);
 
-		add(bg = new FlxSprite().loadAnimatedGraphic(Paths.image('menus/menuBGBlue')));
-		bg.antialiasing = true;
+		add(bg = new MenuBackground());
 		bg.scrollFactor.set();
-		updateBG();
 
 		var first = new TreeMenuScreen('credits.name', 'credits.madePossible');
 		addMenu(first);
@@ -46,14 +45,6 @@ class CreditsMain extends TreeMenu
 
 		first.add(new TextOption('Codename Engine', 'credits.selectCodename', ' >', () -> addMenu(new CreditsCodename())));
 		first.add(new TextOption('Friday Night Funkin\'', 'credits.selectBase', ' >', () -> CoolUtil.openURL(Flags.URL_FNF_ITCH)));
-	}
-
-	public function updateBG()
-	{
-		var scaleX:Float = FlxG.width / bg.width;
-		var scaleY:Float = FlxG.height / bg.height;
-		bg.scale.x = bg.scale.y = Math.max(scaleX, scaleY) * 1.15;
-		bg.screenCenter();
 	}
 
 	// XML STUFF

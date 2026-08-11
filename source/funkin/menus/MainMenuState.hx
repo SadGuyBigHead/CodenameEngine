@@ -1,5 +1,6 @@
 package funkin.menus;
 
+import funkin.menus.ui.MenuBackground;
 import flixel.FlxState;
 import flixel.effects.FlxFlicker;
 import flixel.tweens.FlxTween;
@@ -20,8 +21,8 @@ class MainMenuState extends MusicBeatState
 
 	var optionShit:Array<String> = CoolUtil.coolTextFile(Paths.txt("config/menuItems"));
 
-	var bg:FlxSprite;
-	var magenta:FlxSprite;
+	var bg:MenuBackground;
+	var magenta:MenuBackground;
 	var camFollow:FlxObject;
 	var versionText:FunkinText;
 
@@ -37,25 +38,18 @@ class MainMenuState extends MusicBeatState
 
 		CoolUtil.playMenuSong();
 
-		bg = new FlxSprite(-80).loadAnimatedGraphic(Paths.image('menus/menuBG'));
+		bg = new MenuBackground();
+		bg.scrollFactor.set(0, 0.18);
 		add(bg);
 
-		camFollow = new FlxObject(0, 0, 1, 1);
-		add(camFollow);
-
-		magenta = new FlxSprite(-80).loadAnimatedGraphic(Paths.image('menus/menuDesat'));
+		magenta = new MenuBackground(bg.id);
+		magenta.scrollFactor.set(0, 0.18);
 		magenta.visible = false;
 		magenta.color = 0xFFfd719b;
 		add(magenta);
 
-		for (bg in [bg, magenta])
-		{
-			bg.scrollFactor.set(0, 0.18);
-			bg.scale.set(1.15, 1.15);
-			bg.updateHitbox();
-			bg.screenCenter();
-			bg.antialiasing = true;
-		}
+		camFollow = new FlxObject(0, 0, 1, 1);
+		add(camFollow);
 
 		menuItems = new FlxTypedGroup<FlxSprite>();
 		add(menuItems);
@@ -114,13 +108,6 @@ class MainMenuState extends MusicBeatState
 					persistentDraw = true;
 					openSubState(new funkin.editors.EditorPicker());
 				}
-				/*
-					if (FlxG.keys.justPressed.SEVEN)
-						FlxG.switchState(new funkin.desktop.DesktopMain());
-					if (FlxG.keys.justPressed.EIGHT) {
-						CoolUtil.safeSaveFile("chart.json", Json.stringify(funkin.backend.chart.Chart.parse("dadbattle", "hard")));
-					}
-				 */
 			}
 			if (!Options.devMode && FlxG.keys.justPressed.SEVEN)
 			{
@@ -202,7 +189,7 @@ class MainMenuState extends MusicBeatState
 				case 'freeplay':
 					FlxG.switchState(new FreeplayState());
 				case 'donate', 'credits':
-					FlxG.switchState(new CreditsMain()); // kept donate for not breaking scripts, if you don't want donate to bring you to the credits menu, thats easy softcodable  - Nex
+					FlxG.switchState(new CreditsMain());
 				case 'options':
 					FlxG.switchState(new OptionsMenu());
 			}

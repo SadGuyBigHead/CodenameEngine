@@ -1,7 +1,9 @@
 package funkin.options.keybinds;
 
+import funkin.menus.ui.MenuBackground;
 import flixel.util.FlxColor;
 import haxe.xml.Access;
+import openfl.display.BlendMode;
 
 using StringTools;
 
@@ -18,9 +20,15 @@ class KeybindsOptions extends MusicBeatSubstate
 	public var curSelected:Int = 0;
 	public var canSelect:Bool = true;
 	public var alphabets:FlxTypedGroup<KeybindSetting>;
-	public var bg:FlxSprite;
-	public var coloredBG:FlxSprite;
-	public var noteColors:Array<FlxColor> = [0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F];
+	public var bg:MenuBackground;
+	public var overlay:FlxSprite;
+	public var coloredBG:MenuBackground;
+	public var noteColors:Array<FlxColor> = [
+		FlxColor.fromRGB(244, 202, 7),
+		FlxColor.fromRGB(4, 188, 228),
+		FlxColor.fromRGB(6, 217, 66),
+		FlxColor.fromRGB(230, 47, 73)
+	];
 	public var camFollow:FlxObject = new FlxObject(0, 0, 2, 2);
 
 	public var categories:Array<ControlsCategory> = [];
@@ -155,18 +163,23 @@ class KeybindsOptions extends MusicBeatSubstate
 
 		isSubState = FlxG.state != this;
 		alphabets = new FlxTypedGroup<KeybindSetting>();
-		bg = new FlxSprite(-80).loadAnimatedGraphic(Paths.image(isSubState ? 'menus/menuTransparent' : 'menus/menuBGBlue'));
-		coloredBG = new FlxSprite(-80).loadAnimatedGraphic(Paths.image('menus/menuDesat'));
+		bg = new MenuBackground();
+		overlay = new FlxSprite().makeSolid(FlxG.width * 3, FlxG.height * 3, FlxColor.GRAY);
+		overlay.updateHitbox();
+		overlay.alpha = 0.45;
+		overlay.screenCenter();
+		add(overlay);
+		coloredBG = new MenuBackground(bg.id);
 		for (bg in [bg, coloredBG])
 		{
 			bg.scrollFactor.set();
 			bg.scale.set(1.15, 1.15);
 			bg.updateHitbox();
 			bg.screenCenter();
-			bg.antialiasing = true;
 			add(bg);
 		}
 		coloredBG.alpha = 0;
+		coloredBG.blend = BlendMode.MULTIPLY;
 
 		if (isSubState)
 		{
@@ -178,7 +191,6 @@ class KeybindsOptions extends MusicBeatSubstate
 				FlxG.cameras.add(settingCam, false);
 			}
 			cameras = [settingCam];
-			bg.alpha = 0;
 			settingCam.follow(camFollow, LOCKON, 0.125);
 		}
 		else
@@ -249,22 +261,18 @@ class KeybindsOptions extends MusicBeatSubstate
 	{
 		super.update(elapsed);
 
-		if (isSubState)
-			bg.alpha = lerp(bg.alpha, 0.1, 0.125);
-		else
+		bg.alpha = lerp(bg.alpha, 0.35, 0.05);
+		if (curSelected < 4)
 		{
-			if (curSelected < 4)
-			{
-				if (coloredBG.alpha == 0)
-					coloredBG.color = noteColors[curSelected];
-				else
-					coloredBG.color = CoolUtil.lerpColor(coloredBG.color, noteColors[curSelected], 0.0625);
-
-				coloredBG.alpha = lerp(coloredBG.alpha, 1, 0.0625);
-			}
+			if (coloredBG.alpha == 0)
+				coloredBG.color = noteColors[curSelected];
 			else
-				coloredBG.alpha = lerp(coloredBG.alpha, 0, 0.0625);
+				coloredBG.color = CoolUtil.lerpColor(coloredBG.color, noteColors[curSelected], 0.025);
+
+			coloredBG.alpha = lerp(coloredBG.alpha, 0.5, 0.05);
 		}
+		else
+			coloredBG.alpha = lerp(coloredBG.alpha, 0, 0.05);
 
 		if (canSelect)
 		{
