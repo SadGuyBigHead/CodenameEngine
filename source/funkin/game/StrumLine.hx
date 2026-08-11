@@ -161,16 +161,6 @@ class StrumLine extends FlxTypedGroup<Strum>
 					continue;
 
 				total++;
-
-				if (note.sLen > Conductor.stepCrochet * 0.75)
-				{
-					var len:Float = note.sLen;
-					while (len > 10)
-					{
-						total++;
-						len -= Math.min(len, Conductor.stepCrochet);
-					}
-				}
 			}
 
 		notes.preallocate(total);
@@ -185,21 +175,11 @@ class StrumLine extends FlxTypedGroup<Strum>
 				if (startTime != null && startTime > note.time)
 					continue;
 
-				notes.members[total - (il++) - 1] = prev = new Note(this, note, false, prev);
+				notes.members[total - (il++) - 1] = prev = new Note(this, note, prev);
 
 				if (note.sLen > Conductor.stepCrochet * 0.75)
 				{
-					var len:Float = note.sLen;
-					var curLen:Float = 0;
-					while (len > 10)
-					{
-						curLen = Math.min(len, Conductor.stepCrochet);
-						notes.members[total - (il++) - 1] = prev = new Note(this, note, true, curLen, note.sLen - len, prev);
-						len -= curLen;
-
-						if (prev != null && prev.sustainParent != null)
-							prev.sustainParent.tailCount++;
-					}
+					
 				}
 			}
 		notes.sortNotes();
@@ -226,9 +206,10 @@ class StrumLine extends FlxTypedGroup<Strum>
 
 	public override function draw()
 	{
-		super.draw();
-		notes.cameras = cameras;
-		notes.draw();
+		// dont draw cause we have custom rendering
+		//super.draw();
+		//notes.cameras = cameras;
+		//notes.draw();
 	}
 
 	/**
@@ -274,15 +255,6 @@ class StrumLine extends FlxTypedGroup<Strum>
 		if (cpu && __updateNote_event.__autoCPUHit && !daNote.avoid && !daNote.wasGoodHit && daNote.strumTime < __updateNote_songPos)
 			PlayState.instance.goodNoteHit(this, daNote);
 
-		if (daNote.wasGoodHit
-			&& daNote.isSustainNote
-			&& daNote.strumTime + daNote.sustainLength < __updateNote_songPos
-			&& !daNote.noSustainClip)
-		{
-			deleteNote(daNote);
-			return;
-		}
-
 		if (daNote.tooLate)
 		{
 			if (!cpu)
@@ -296,11 +268,6 @@ class StrumLine extends FlxTypedGroup<Strum>
 			return;
 		if (__updateNote_event.__reposNote)
 			__updateNote_event.strum.updateNotePosition(daNote);
-
-		if (daNote.isSustainNote)
-		{
-			daNote.updateSustain(__updateNote_event.strum);
-		}
 	}
 
 	var __pressed:Array<Bool> = [];
@@ -310,20 +277,13 @@ class StrumLine extends FlxTypedGroup<Strum>
 
 	function __inputProcessPressed(note:Note)
 	{
-		if (__pressed[note.strumID]
-			&& note.isSustainNote
-			&& note.strumTime < __updateNote_songPos
-			&& !note.wasGoodHit
-			&& note.sustainParent.wasGoodHit)
-		{
-			PlayState.instance.goodNoteHit(this, note);
-		}
+		// TODO: sustain hit stuff
 	}
 
 	function __inputProcessJustPressed(note:Note)
 	{
 		var strumID = note.strumID;
-		if (!__justPressed[strumID] || note.isSustainNote || note.wasGoodHit || !note.canBeHit)
+		if (!__justPressed[strumID] || note.wasGoodHit || !note.canBeHit)
 			return;
 
 		var cur = __notePerStrum[strumID];
@@ -529,8 +489,6 @@ class StrumLine extends FlxTypedGroup<Strum>
 		onNoteDelete.dispatch(event);
 		if (!event.cancelled)
 		{
-			if (note.isSustainNote && note.sustainParent != null && note.sustainParent.tailCount > 0)
-				note.sustainParent.tailCount--;
 			note.kill();
 			notes.remove(note, true);
 			note.destroy();

@@ -2,7 +2,7 @@ package funkin.game;
 
 import funkin.backend.scripting.events.splash.*;
 
-class SplashHandler extends FlxTypedGroup<Splash>
+final class SplashHandler extends FlxTypedGroup<SplashGroup>
 {
 	/**
 	 * Map containing all of the splashes group.
@@ -22,8 +22,9 @@ class SplashHandler extends FlxTypedGroup<Splash>
 	{
 		if (!grpMap.exists(name))
 		{
-			var grp = new SplashGroup(Paths.xml('splashes/$name'));
+			var grp = new SplashGroup();
 			grpMap.set(name, grp);
+			add(grp);
 		}
 		return grpMap.get(name);
 	}
@@ -36,14 +37,9 @@ class SplashHandler extends FlxTypedGroup<Splash>
 		grpMap = null;
 	}
 
-	var _firstDraw:Bool = true;
-
 	public override function draw()
 	{
-		super.draw();
-		if (_firstDraw != (_firstDraw = false))
-			for (grp in grpMap)
-				grp.draw();
+		
 	}
 
 	var __grp:SplashGroup;
@@ -52,14 +48,12 @@ class SplashHandler extends FlxTypedGroup<Splash>
 	{
 		__grp = getSplashGroup(name);
 
-		var event = EventManager.get(SplashShowEvent).recycle(name, __grp.showOnStrum(strum), strum, __grp);
+		var event = EventManager.get(SplashShowEvent).recycle(name, strum, __grp);
 		event = PlayState.instance.gameAndCharsEvent("onSplashShown", event);
 
 		if (!event.cancelled)
-			add(event.splash);
-
-		// max 8 rendered splashes
-		while (members.length > Flags.MAX_SPLASHES)
-			remove(members[0], true);
+		{
+			PlayState.instance.noteRenderer.splashAdded(__grp.splash(event));
+		}
 	}
 }

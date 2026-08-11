@@ -1,3 +1,5 @@
+package;
+
 #if !macro
 import funkin.backend.system.Main;
 import funkin.backend.assets.Paths;
@@ -25,7 +27,12 @@ import funkin.Types;
 import funkin.menus.ui.Alphabet;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
+import openfl.Vector;
+import flixel.math.FlxPoint;
+import funkin.game.Note;
 
-using StringTools;
 using funkin.backend.utils.CoolUtil;
+using StringTools;
+using util.FloatTools;
+using util.ArrayTools;
 #end
