@@ -71,6 +71,8 @@ class Script extends FlxBasic implements IFlxDestroyable
 			"FlxSpriteGroup" => flixel.group.FlxSpriteGroup,
 			"FlxTypeText" => flixel.addons.text.FlxTypeText,
 			"FlxText" => flixel.text.FlxText,
+			"FlxBitmapText" => flixel.text.FlxBitmapText,
+			"FlxBitmapFont" => flixel.graphics.frames.FlxBitmapFont,
 			"FlxTimer" => flixel.util.FlxTimer,
 			"FlxPoint" => CoolUtil.getMacroAbstractClass("flixel.math.FlxPoint"),
 			"FlxAxes" => CoolUtil.getMacroAbstractClass("flixel.util.FlxAxes"),
@@ -80,8 +82,8 @@ class Script extends FlxBasic implements IFlxDestroyable
 			"engine" => {
 				commit: Flags.COMMIT_NUMBER,
 				hash: Flags.COMMIT_HASH,
-				build: 2675, // 2675 being the last build num before it was removed
-				name: "Codename Engine"
+				build: 9999, // none but just including this because maybe needed
+				name: "Codename Engine (SGBH Fork)"
 			},
 			"ModState" => funkin.backend.scripting.ModState,
 			"ModSubState" => funkin.backend.scripting.ModSubState,
@@ -109,6 +111,7 @@ class Script extends FlxBasic implements IFlxDestroyable
 			"FlxAnimate" => animate.FlxAnimate,
 			"FunkinSprite" => funkin.backend.FunkinSprite,
 			"Alphabet" => funkin.menus.ui.Alphabet,
+			"MenuBackground" => funkin.menus.ui.MenuBackground,
 			"Flags" => funkin.backend.system.Flags,
 
 			"CoolUtil" => funkin.backend.utils.CoolUtil,
