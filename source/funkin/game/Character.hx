@@ -75,6 +75,12 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 	public var missTintColor:FlxColor = DEFAULT_MISS_TINT;
 	public var missTintMix:Float = 0.5;
 
+	/**
+	 * Set to `true` after `playSingAnimUnsafe` is called
+	 * Set to `false` after `playAnim` is called
+	 */
+	public var singing(default, null):Bool = false;
+
 	@:noCompletion var __stunnedTime:Float = 0;
 	@:noCompletion var __lockAnimThisFrame:Bool = false;
 
@@ -299,7 +305,8 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 	final __tintShader = new CharacterMissTintShader();
 	public override function draw()
 	{
-		if (lastAnimContext == MISS)
+		final missTint = lastAnimContext == MISS && singing;
+		if (missTint)
 		{
 			__storedShader = shader;
 			shader = __tintShader;
@@ -316,7 +323,7 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 
 		scripts.call("postDraw", [e]);
 
-		if (lastAnimContext == MISS)
+		if (missTint)
 		{
 			shader = __storedShader;
 			__storedShader = null;
@@ -351,6 +358,7 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 			return;
 
 		playAnim(event.animName, event.force, event.context, event.reversed, event.frame);
+		singing = true;
 	}
 
 	public override function playAnim(AnimName:String, ?Force:Bool, Context:PlayAnimContext = NONE, Reversed:Bool = false, Frame:Int = 0)
@@ -359,6 +367,7 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 		scripts.call("onPlayAnim", [event]);
 		if (event.cancelled)
 			return;
+		singing = false;
 
 		super.playAnim(event.animName, event.force, event.context, event.reverse, event.startingFrame);
 
