@@ -15,6 +15,8 @@ import funkin.backend.system.Controls;
 **/
 class StrumLine extends FlxTypedGroup<Strum>
 {
+	static final SUSTAIN_GRACE_TIME = .25 * 1000;
+
 	/**
 	 * Signal that triggers whenever a note is hit. Similar to onPlayerHit and onDadHit, except strumline specific.
 	 * To add a listener, do
@@ -79,6 +81,11 @@ class StrumLine extends FlxTypedGroup<Strum>
 	public var notes:NoteGroup;
 
 	/**
+	 * The HOLD COVERS!!!!!!!
+	 */
+	public var holdCovers:HoldCoverGroup;
+
+	/**
 	 * Whenever alt animation is enabled on this strumline.
 	 */
 	public var altAnim(get, set):Bool;
@@ -107,6 +114,43 @@ class StrumLine extends FlxTypedGroup<Strum>
 	 * Extra data that can be added to the strum line.
 	**/
 	public var extra:Map<String, Dynamic> = [];
+	
+	/**
+	 * On upscroll, the highest the note is drawn at in pixels from their receptor/playField
+	 */
+	public var drawDistanceMin:Float = -FlxG.height * .25;
+
+	/**
+	 * On upscroll, the lowest a note can is drawn at in pixels from their refecpepcepcpefpecp
+	 */
+	public var drawDistanceMax:Float = FlxG.height;
+	
+	/**
+	 * Value to control the speed of hold singing
+	 * If set to 2.0, then holds will play their animations twice as fast
+	 * If set to 0.5, then holds will play their animations twice as slow
+	 */
+	public var sustainSingSpeed:Float = (PlayState.SONG?.meta?.customValues?.sustainSingSpeed ?? 1.0).getDefaultFloat(1.0);
+
+	/**
+	 * A multiplier to the minimum length a sustain has to have left to sing
+	 * By default, this is 1.5 steps
+	 */
+	public var sustainSingMin:Float = (PlayState.SONG?.meta?.customValues?.sustainSingSpeed ?? 1.0).getDefaultFloat(1.0);
+
+	/**
+	 * A multiplier to the minimum length a sustain has to have left to sing
+	 * By default, this is 1.5 steps
+	 */
+	public var tapChordPriority:Bool = (PlayState.SONG?.meta?.customValues?.tapChordPriority ?? true);
+
+	/**
+	 * If we just stpepd to sing for a  hold
+	 */
+	public var justStepped:Bool;
+
+	var lastStep:Int;
+
 
 	private function get_ghostTapping()
 	{
@@ -140,6 +184,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 		this.opponentSide = opponentSide;
 		this.controls = controls;
 		this.notes = new NoteGroup();
+		this.holdCovers = new HoldCoverGroup();
 
 		var v = Paths.voices(PlayState.SONG.meta.name, PlayState.difficulty, vocalPrefix);
 		vocals = vocalPrefix != "" ? FlxG.sound.load(Options.streamedVocals ? Assets.getMusic(v) : v) : new FlxSound();
@@ -169,18 +214,17 @@ class StrumLine extends FlxTypedGroup<Strum>
 
 		var prev:Note = null;
 
+		if (members[0] == null)
+			throw "die die die";
+
 		if (strumLine.notes != null)
 			for (note in strumLine.notes)
 			{
 				if (startTime != null && startTime > note.time)
 					continue;
 
-				notes.members[total - (il++) - 1] = prev = new Note(this, note, prev);
-
-				if (note.sLen > Conductor.stepCrochet * 0.75)
-				{
-					
-				}
+				final n = notes.members[total - (il++) - 1] = prev = new Note(this, note, prev);
+				n.strum = members[note.id] ?? members[0];
 			}
 		notes.sortNotes();
 
@@ -190,18 +234,13 @@ class StrumLine extends FlxTypedGroup<Strum>
 				scrollSpeed = PlayState.instance.scrollSpeed;
 		if (scrollSpeed == null)
 			scrollSpeed = 1;
-
-		// TODO: Make this work by accounting zoom and scroll speed changes  - Nex
-		/*var limit = FlxG.height / 0.45;
-			notes.limit = limit / scrollSpeed;
-				OR
-			notes.limit = Flags.DEFAULT_NOTE_MS_LIMIT / scrollSpeed; */
 	}
 
 	public override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 		notes.update(elapsed);
+		holdCovers.update(elapsed);
 	}
 
 	public override function draw()
@@ -242,14 +281,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 		if (__updateNote_event.cancelled)
 			return;
 
-		if (daNote.held && daNote.endTime > __updateNote_songPos)
-		{
-			deleteNote(daNote);
-			daNote.held = false;
-			return;
-		}
-
-		if (__updateNote_event.__updateHitWindow)
+		if (__updateNote_event.__updateHitWindow && !daNote.wasGoodHit)
 		{
 			var hitWindow = Flags.USE_LEGACY_TIMING ? PlayState.instance.hitWindow : PlayState.instance.ratingManager.lastHitWindow;
 			daNote.canBeHit = (daNote.strumTime > __updateNote_songPos - (hitWindow * daNote.latePressWindow)
@@ -264,9 +296,12 @@ class StrumLine extends FlxTypedGroup<Strum>
 
 		if (daNote.tooLate)
 		{
-			if (!cpu)
+			if (!cpu && !daNote.wasMissed)
+			{
+				daNote.wasMissed = true;
 				PlayState.instance.noteMiss(this, daNote);
-			else
+			}
+			else if (!daNote.held && daNote.strum.getDistance(daNote, daNote.endTime) < drawDistanceMin)
 				deleteNote(daNote);
 			return;
 		}
@@ -281,10 +316,37 @@ class StrumLine extends FlxTypedGroup<Strum>
 	var __justPressed:Array<Bool> = [];
 	var __justReleased:Array<Bool> = [];
 	var __notePerStrum:Array<Note> = [];
+	var __heldTime:Array<Float> = [];
 
-	function __inputProcessPressed(note:Note)
+	function __inputProcessHolds(note:Note):Bool
 	{
-		// TODO: sustain hit stuff
+		var strumID = note.strumID;
+		if (cpu || __pressed[strumID])
+		{
+			__heldTime[strumID] = __updateNote_songPos;
+		}
+		else if (__updateNote_songPos - __heldTime[strumID] > SUSTAIN_GRACE_TIME)
+		{
+			final event = PlayState.instance.sustainMiss(this, note);
+			if (event.cancelled)
+				return false;
+			trace("it waslet go so we LET GO");
+			return true;
+		}
+		note.updateScoreProgress(__updateNote_songPos);
+		final endDist = note.endTime - __updateNote_songPos;
+		final event = PlayState.instance.sustainHit(this, note);
+		if (!event.strumGlowCancelled)
+		{
+			// makes it feel kinda nicer like a transition sorta
+			if (endDist > note.strum.confirmLength * .5)
+				note.strum.press(__updateNote_songPos);
+		}
+		
+		if (!event.held)
+			return true;
+		
+		return endDist < 0;
 	}
 
 	function __inputProcessJustPressed(note:Note)
@@ -318,14 +380,24 @@ class StrumLine extends FlxTypedGroup<Strum>
 
 	/**
 	 * Updates the input for the strumline, and handles the input.
-	 * @param id The ID of the strum
+	 * @param id The ID of the STURMLINE NOT THE STRUM WE LOVE YUOU CODENAAAAAAAAAAAAAME
 	**/
 	public function updateInput(id:Int = 0)
 	{
+		justStepped = false;
+		final holdSingStep = Math.floor(Conductor.curStepFloat * sustainSingSpeed);
+		if (lastStep != holdSingStep)
+		{
+			justStepped = true;
+			lastStep = holdSingStep;
+		}
 		updateNotes();
 
 		if (cpu)
+		{
+			updateHeldNotes();
 			return;
+		}
 
 		final membersLength = members.length;
 
@@ -379,14 +451,28 @@ class StrumLine extends FlxTypedGroup<Strum>
 			for (c in characters)
 				if (c.lastAnimContext != DANCE)
 					c.__lockAnimThisFrame = true;
-
-			notes.forEachAlive(__inputProcessPressed);
 		}
+
+		updateHeldNotes();
 
 		for (i => s in members)
 			s.updatePlayerInput(__pressed[i], __justPressed[i], __justReleased[i]);
 
 		PlayState.instance.gameAndCharsEvent("onPostInputUpdate", event);
+	}
+
+	function updateHeldNotes()
+	{
+		for (i => note in notes.held)
+		{
+			final complete = __inputProcessHolds(note);
+			if (complete)
+			{
+				notes.held.splice(i, 1);
+				deleteNote(note);
+				holdCovers.members[note.strumID]?.cancel();
+			}
+		}
 	}
 
 	/**
@@ -461,6 +547,9 @@ class StrumLine extends FlxTypedGroup<Strum>
 			babyArrow.animation.addByPrefix('static', 'arrow${event.animPrefix.toUpperCase()}');
 			babyArrow.animation.addByPrefix('pressed', '${event.animPrefix} press', 24, false);
 			babyArrow.animation.addByPrefix('confirm', '${event.animPrefix} confirm', 24, false);
+
+			final confirm = babyArrow.animation.getByName("confirm");
+			babyArrow.confirmLength = confirm.numFrames * (1/confirm.frameRate) * 1000;
 		}
 
 		babyArrow.cpu = cpu;
@@ -477,6 +566,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 		babyArrow.playAnim('static');
 
 		insert(i, babyArrow);
+		holdCovers.insert(i, new HoldCover(i));
 
 		if (PlayState.instance != null)
 			PlayState.instance.gameAndCharsEvent("onPostStrumCreation", event);
@@ -500,6 +590,12 @@ class StrumLine extends FlxTypedGroup<Strum>
 			notes.remove(note, true);
 			note.destroy();
 		}
+	}
+
+	public function holdNote(note:Note)
+	{
+		note.held = true;
+		notes.held.push(note);
 	}
 
 	public static inline function calculateStartingXPos(hudXRatio:Float, scale:Float, spacing:Float, keyCount:Int)

@@ -1,22 +1,19 @@
 package funkin.backend.scripting.events.note;
 
 import funkin.game.Character;
+import funkin.game.HealthIcon;
 import funkin.game.Note;
 
-final class NoteMissEvent extends CancellableEvent
+final class SustainMissEvent extends CancellableEvent
 {
 	@:dox(hide) public var animCancelled:Bool = false;
-	@:dox(hide) public var stunned:Bool = true;
 	@:dox(hide) public var resetCombo:Bool = true;
 	@:dox(hide) public var playMissSound:Bool = true;
-
 	/**
 	 * Note that has been missed
 	 */
 	public var note:Note;
 
-	public var score:Int;
-	public var misses:Int;
 	public var muteVocals:Bool;
 
 	/**
@@ -27,7 +24,6 @@ final class NoteMissEvent extends CancellableEvent
 	public var missSound:String;
 	public var missVolume:Float;
 
-	public var ghostMiss:Bool;
 	public var gfSad:Bool;
 	public var gfSadAnim:String;
 	public var forceGfAnim:Bool;
@@ -67,10 +63,14 @@ final class NoteMissEvent extends CancellableEvent
 	 */
 	public var direction:Int;
 
-	/**
-	 * Accuracy gained from pressing this note. From 0 to 1. null means no accuracy is gained.
-	 */
-	public var accuracy:Null<Float>;
+	private inline function get_character()
+		return characters[0];
+
+	private function set_character(char:Character)
+	{
+		characters = [char];
+		return char;
+	}
 
 	/**
 	 * Prevents the miss sound from played.
@@ -86,14 +86,6 @@ final class NoteMissEvent extends CancellableEvent
 	public function preventResetCombo()
 	{
 		resetCombo = false;
-	}
-
-	/**
-	 * Prevents the default sing animation from being played.
-	 */
-	public function preventStunned()
-	{
-		stunned = false;
 	}
 
 	/**
@@ -118,14 +110,5 @@ final class NoteMissEvent extends CancellableEvent
 	public function preventVocalsMute()
 	{
 		muteVocals = false;
-	}
-
-	private inline function get_character()
-		return characters[0];
-
-	private function set_character(char:Character)
-	{
-		characters = [char];
-		return char;
 	}
 }

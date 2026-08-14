@@ -376,7 +376,7 @@ class PlayState extends MusicBeatState
 	/**
 	 * The player's current score.
 	 */
-	public var songScore:Int = 0;
+	public var songScore:Float = 0;
 
 	/**
 	 * The player's amount of misses.
@@ -1063,7 +1063,7 @@ class PlayState extends MusicBeatState
 			add(icon);
 		}
 
-		scoreTxt = new FunkinText(healthBarBG.x + 50, healthBarBG.y + 30, Std.int(healthBarBG.width - 100), TEXT_GAME_SCORE.format([songScore]), 16);
+		scoreTxt = new FunkinText(healthBarBG.x + 50, healthBarBG.y + 30, Std.int(healthBarBG.width - 100), TEXT_GAME_SCORE.format([Std.int(songScore)]), 16);
 		missesTxt = new FunkinText(healthBarBG.x + 50, healthBarBG.y + 30, Std.int(healthBarBG.width - 100), TEXT_GAME_MISSES.format([misses]), 16);
 		accuracyTxt = new FunkinText(healthBarBG.x + 50, healthBarBG.y + 30, Std.int(healthBarBG.width - 100), TEXT_GAME_ACCURACY.format(["-%", "(N/A)"]), 16);
 		accuracyTxt.addFormat(accFormat, 0, 1);
@@ -1632,7 +1632,7 @@ class PlayState extends MusicBeatState
 
 	dynamic function updateRatingStuff()
 	{
-		scoreTxt.text = TEXT_GAME_SCORE.format([songScore]);
+		scoreTxt.text = TEXT_GAME_SCORE.format([Std.int(songScore)]);
 		missesTxt.text = (comboBreaks ? TEXT_GAME_COMBOBREAKS : TEXT_GAME_MISSES).format([misses]);
 
 		if (curRating == null)
@@ -2115,7 +2115,7 @@ class PlayState extends MusicBeatState
 		{
 			#if !switch
 			FunkinSave.setSongHighscore(SONG.meta.name, difficulty, variation, {
-				score: songScore,
+				score: Std.int(songScore),
 				misses: misses,
 				accuracy: accuracy,
 				hits: hits,
@@ -2144,7 +2144,7 @@ class PlayState extends MusicBeatState
 	{
 		if (isStoryMode)
 		{
-			campaignScore += songScore;
+			campaignScore += Std.int(songScore);
 			campaignMisses += misses;
 			campaignAccuracyTotal += accuracy;
 			campaignAccuracyCount++;
@@ -2225,9 +2225,9 @@ class PlayState extends MusicBeatState
 
 		var event:NoteMissEvent = gameAndCharsEvent("onPlayerMiss",
 			EventManager.get(NoteMissEvent)
-				.recycle(note, -10, 1, muteVocalsOnMiss, hasNote ? -0.0475 : -0.04,
-					Paths.sound(FlxG.random.getObject(Flags.DEFAULT_MISS_SOUNDS)), FlxG.random.float(0.1, 0.2), !hasNote, combo > 5, "sad", true, true,
-					"miss", strumLines.members[playerID].characters, playerID, hasNote ? note.noteType : null, directionID, 0));
+				.recycle(note, -10, 1, muteVocalsOnMiss, hasNote ? -0.0475 : -0.04, Paths.sound(FlxG.random.getObject(Flags.DEFAULT_MISS_SOUNDS)),
+					FlxG.random.float(0.1, 0.2), !hasNote, combo > 5, "sad", true, true, "miss", strumLines.members[playerID].characters, playerID,
+					hasNote ? note.noteType : null, directionID, 0));
 		strumLine.onMiss.dispatch(event);
 		if (event.cancelled)
 		{
@@ -2275,9 +2275,6 @@ class PlayState extends MusicBeatState
 				char.playSingAnim(directionID, event.animSuffix, MISS, event.forceAnim);
 			}
 		}
-
-		if (event.deleteNote && strumLine != null && hasNote)
-			strumLine.deleteNote(note);
 
 		gameAndCharsEvent("onPostPlayerMiss", event);
 	}
@@ -2341,8 +2338,8 @@ class PlayState extends MusicBeatState
 			event = EventManager.get(NoteHitEvent)
 				.recycle(rating.breaksCombo, true, true, null, null, null, note, strumLine.characters, true, note.noteType,
 					note.animSuffix.getDefault(note.strumID < strumLine.members.length ? strumLine.members[note.strumID].animSuffix : strumLine.animSuffix),
-					null, null, note.strumID, rating.score, rating.accuracy, rating.health,
-					rating.name, Options.splashesEnabled && rating.splash, null, null, null, null, null, iconP1);
+					null, null, note.strumID, rating.score, rating.accuracy, rating.health, rating.name, Options.splashesEnabled && rating.splash, null, null,
+					null, null, null, iconP1);
 		else
 			event = EventManager.get(NoteHitEvent)
 				.recycle(rating.breaksCombo, false, false, null, null, null, note, strumLine.characters, false, note.noteType,
@@ -2388,12 +2385,12 @@ class PlayState extends MusicBeatState
 					if (char != null)
 						char.playSingAnim(event.direction, event.animSuffix, SING, event.forceAnim);
 
-			if (event.note.__strum != null)
+			if (event.note.strum != null)
 			{
 				if (!event.strumGlowCancelled)
-					event.note.__strum.press(event.note.strumTime);
+					event.note.strum.press(event.note.strumTime);
 				if (event.showSplash)
-					splashHandler.showSplash(event.note.splash, event.note.__strum);
+					splashHandler.showSplash(event.note.splash, event.note.strum);
 			}
 		}
 
@@ -2405,12 +2402,15 @@ class PlayState extends MusicBeatState
 		if (event.enableCamZooming)
 			camZooming = true;
 
-		if (event.deleteNote && note.sustainLength <= 0)
+		final hold:Bool = note.sustainLength > 0;
+		if (event.deleteNote && !hold)
 			strumLine.deleteNote(note);
-		else
-			note.held = note.sustainLength > 0;
+		else if (hold)
+			strumLine.holdNote(note); // start HOLDING..
 
 		gameAndCharsEvent("onPostNoteHit", event);
+		if (!event.cancelled)
+			strumLine?.holdCovers.noteHit(note);
 	}
 
 	public function displayRating(myRating:String, ?evt:NoteHitEvent):Void
@@ -2572,6 +2572,95 @@ class PlayState extends MusicBeatState
 				event.position.put();
 			}
 		}
+	}
+
+	/**
+	 * Called every frame a sustain is being hit
+	 * Its a callback this doesnt actually do anything other than let this guy get cancelled
+	 * No but like i should move all hit logic to this laool 😇
+	 * @param strumLine 
+	 * @param note 
+	 */
+	public function sustainHit(strumLine:StrumLine, note:Note)
+	{
+		if (note == null || !note.held)
+			return null;
+
+		var event:SustainHitEvent = EventManager.get(SustainHitEvent)
+			.recycle(true, note, strumLine.characters, !strumLine.cpu, note.noteType,
+				note.animSuffix.getDefault(note.strumID < strumLine.members.length ? strumLine.members[note.strumID].animSuffix : strumLine.animSuffix),
+				note.noteData, 10, .001, true, strumLine.cpu ? iconP2 : iconP1);
+		event = scripts.event(strumLine != null && !strumLine.cpu ? "onPlayerSustainHit" : "onDadSustainHit", event);
+		gameAndCharsEvent("onSustainHit", event);
+
+		if (!event.cancelled)
+		{
+			if (event.countScore)
+				songScore += note.deltaScoreProgress * note.holdScore;
+
+			// if (strumLine != null)
+			//	strumLine.addHealth(event.healthGain);
+
+			final distance = note.strumTime + note.sustainLength - Conductor.songPosition;
+			if (distance - Conductor.stepCrochet > .0 && !event.animCancelled && (!strumLine.tapChordPriority || strumLine.justStepped))
+				for (char in event.characters)
+					if (char != null)
+					{
+						final loop = strumLine.justStepped
+							&& (distance * strumLine.sustainSingSpeed) > (Conductor.stepCrochet * 1.5 * strumLine.sustainSingMin);
+						char.playSingAnim(event.direction, event.animSuffix, SING, event.forceAnim);
+						if (loop)
+							char.animation.curAnim.curFrame = 0;
+					}
+		}
+
+		gameAndCharsEvent("onPostSustainHit", event);
+		return event;
+	}
+
+	/**
+	 * This KID was let go
+	 * @param strumLine 
+	 * @param note 
+	 */
+	public function sustainMiss(strumLine:StrumLine, note:Note)
+	{
+		if (note == null || !note.held)
+			return null;
+
+		var event:SustainMissEvent = EventManager.get(SustainMissEvent).recycle(note, muteVocalsOnMiss, -0.0475, Paths.sound(FlxG.random.getObject(Flags.DEFAULT_MISS_SOUNDS)),
+					FlxG.random.float(0.1, 0.2), combo > 5, "sad", true, true, "miss", strumLine.characters, strumLine.ID,
+					note.noteType, note.strumID);
+		event = scripts.event(strumLine != null && !strumLine.cpu ? "onPlayerSustainMiss" : "onDadSustainMiss", event);
+		gameAndCharsEvent("onSustainMiss", event);
+
+		if (!event.cancelled)
+		{
+			if (gf != null && event.gfSad && gf.hasAnimation(event.gfSadAnim))
+				gf.playAnim(event.gfSadAnim, event.forceGfAnim, MISS);
+
+			//songScore += (1 - note.);
+			if (event.resetCombo)
+				combo = 0;
+			
+			if (event.playMissSound)
+				FlxG.sound.play(event.missSound, event.missVolume);
+
+			if (event.muteVocals)
+			{
+				vocals.volume = 0;
+				strumLine.vocals.volume = 0;
+			}
+
+			if (!event.animCancelled)
+			{
+				for (char in event.characters)
+					char?.playSingAnim(note.strumID, event.animSuffix, MISS, event.forceAnim);
+			}
+		}
+
+		gameAndCharsEvent("onPostSustainMiss", event);
+		return event;
 	}
 
 	public inline function deleteNote(note:Note)

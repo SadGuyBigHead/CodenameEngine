@@ -28,6 +28,12 @@ class HitWindowData
 				map.set("good", 90.0);
 				map.set("bad", 135.4);
 				map.set("shit", 180.0);
+			// volauem 2
+			case FNF_VSDAVE:
+				map.set("sick", 23.0);
+				map.set("good", 90.0);
+				map.set("bad", 130.0);
+				map.set("shit", 150.0);
 			// Default, taken from Etterna
 			case _:
 				map.set("sick", 37.8);
@@ -64,6 +70,7 @@ enum abstract WindowPreset(Int) from Int to Int
 	var CNE_CLASSIC = 1;
 	var FNF_CLASSIC = 2;
 	var FNF_VSLICE = 3;
+	var FNF_VSDAVE = 4;
 
 	public function toString():String
 	{
@@ -72,6 +79,7 @@ enum abstract WindowPreset(Int) from Int to Int
 			case CNE_CLASSIC: "Codename (Classic)";
 			case FNF_CLASSIC: "Funkin' (Week 7)";
 			case FNF_VSLICE: "Funkin' (V-Slice)";
+			case FNF_VSDAVE: "Vs. Dave and Bambi";
 			case _: "Default";
 		}
 	}

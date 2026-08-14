@@ -27,6 +27,7 @@ import haxe.io.Path;
 import haxe.xml.Access;
 import openfl.geom.ColorTransform;
 import animate.FlxAnimateFrames;
+import flixel.system.FlxAssets.FlxShader;
 
 using StringTools;
 
@@ -35,6 +36,8 @@ using StringTools;
 @:allow(funkin.game.PlayState)
 class Character extends FunkinSprite implements IBeatReceiver implements IOffsetCompatible implements IPrePostDraw
 {
+	static final DEFAULT_MISS_TINT = 0xFF5d2bc2;
+
 	public var isPlayer:Bool = false;
 	public var curCharacter:String = Flags.DEFAULT_CHARACTER;
 	public var sprite:String = Flags.DEFAULT_CHARACTER;
@@ -68,6 +71,9 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 
 	public var idleSuffix:String = "";
 	public var stunned(default, set):Bool = false;
+
+	public var missTintColor:FlxColor = DEFAULT_MISS_TINT;
+	public var missTintMix:Float = 0.5;
 
 	@:noCompletion var __stunnedTime:Float = 0;
 	@:noCompletion var __lockAnimThisFrame:Bool = false;
@@ -175,6 +181,7 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 		if (event.cancelled)
 			return;
 
+		// shouting at me for some reason
 		if (isDanceLeftDanceRight)
 			playAnim(((danced = !danced) ? 'danceLeft' : 'danceRight') + idleSuffix, DANCE);
 		else
@@ -288,8 +295,18 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 
 	public var ghostDraw:Bool = false;
 
+	var __storedShader:FlxShader;
+	final __tintShader = new CharacterMissTintShader();
 	public override function draw()
 	{
+		if (lastAnimContext == MISS)
+		{
+			__storedShader = shader;
+			shader = __tintShader;
+			__tintShader.tintColor = missTintColor;
+			__tintShader.tintMix = missTintMix;
+		}
+		
 		var e = EventManager.get(DrawEvent).recycle();
 		scripts.call("draw", [e]);
 
@@ -298,6 +315,12 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 		postDraw();
 
 		scripts.call("postDraw", [e]);
+
+		if (lastAnimContext == MISS)
+		{
+			shader = __storedShader;
+			__storedShader = null;
+		}
 	}
 
 	public var singAnims = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
@@ -450,6 +473,10 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 			icon = xml.x.get("icon");
 		if (xml.x.exists("color"))
 			iconColor = FlxColor.fromString(xml.x.get("color"));
+		if (xml.x.exists("missColor"))
+			missTintColor = FlxColor.fromString(xml.x.get("missColor")) ?? DEFAULT_MISS_TINT;
+		if (xml.x.exists("missTintMix"))
+			missTintMix = Std.parseFloat(xml.x.get("missTintMix")).getDefaultFloat(.5);
 		if (xml.x.exists("scale"))
 		{
 			var scale:Float = Std.parseFloat(xml.x.get("scale")).getDefaultFloat(1);

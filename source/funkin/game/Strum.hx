@@ -47,6 +47,8 @@ class Strum extends FlxSprite
 
 	public var lastDrawCameras(default, null):Array<FlxCamera> = [];
 
+	public var confirmLength:Float;
+
 	// Copy fields
 	public var copyStrumCamera:Bool = true;
 	public var copyStrumScrollX:Bool = true;
@@ -181,18 +183,7 @@ class Strum extends FlxSprite
 
 	public override function draw()
 	{
-		if (cameras.length == 1)
-		{
-			if (lastDrawCameras.length != 1 || lastDrawCameras[0] != cameras[0])
-			{
-				lastDrawCameras = [cameras[0]];
-			}
-		}
-		else
-		{
-			lastDrawCameras = cameras.copy();
-		}
-		super.draw();
+		
 	}
 
 	@:noCompletion public static inline final PIX180:Float = 565.4866776461628; // 180 * Math.PI
@@ -216,7 +207,7 @@ class Strum extends FlxSprite
 		if (!daNote.exists)
 			return;
 
-		daNote.__strum = this;
+		daNote.strum = this;
 		if (copyStrumCamera)
 			daNote.__strumCameras = lastDrawCameras;
 		if (copyStrumScrollX)
@@ -235,6 +226,7 @@ class Strum extends FlxSprite
 			__initCachedCopyFields();
 			__applyCopyFields(daNote);
 		}
+		daNote.__hasStrumPos = true;
 	}
 
 	public inline function getDistance(note:Note, ?time:Float)
@@ -249,45 +241,7 @@ class Strum extends FlxSprite
 
 		if (shouldX || shouldY)
 		{
-			if (daNote.strumRelativePos)
-			{
-				if (shouldX)
-					daNote.x = 0;
-				if (shouldY)
-				{
-					daNote.y = getDistance(daNote);
-				}
-			}
-			else
-			{
-				if (width != __lastStrumW || height != __lastStrumH)
-				{
-					__lastStrumW = width;
-					__lastStrumH = height;
-					__lastStrumHalfW = width * 0.5;
-					__lastStrumHalfH = height * 0.5;
-				}
-
-				if (daNote.__noteAngle != __lastNoteAngle)
-				{
-					__lastNoteAngle = daNote.__noteAngle;
-					final result = FlxMath.fastSinCos((__lastNoteAngle + 90) * FlxAngle.TO_RAD);
-					__lastAngleCos = result.cos;
-					__lastAngleSin = result.sin;
-				}
-
-				final speed = getScrollSpeed(daNote);
-				final distance = (daNote.strumTime - Conductor.songPosition) * 0.45 * speed;
-				__noteOffset.set(__lastAngleCos * distance, __lastAngleSin * distance);
-				__noteOffset.x += -daNote.origin.x + daNote.offset.x;
-				__noteOffset.y += -daNote.origin.y + daNote.offset.y;
-				__noteOffset.x += x + __lastStrumHalfW;
-				__noteOffset.y += y + __lastStrumHalfH;
-				if (shouldX)
-					daNote.x = __noteOffset.x;
-				if (shouldY)
-					daNote.y = __noteOffset.y;
-			}
+			
 		}
 	}
 

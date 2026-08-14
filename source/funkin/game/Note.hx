@@ -28,6 +28,8 @@ class Note extends FlxSprite
 
 	public var held:Bool;
 
+	public var holdScore:Float = 450;
+
 	// who cares
 
 	public var extra:Map<String, Dynamic> = [];
@@ -40,6 +42,10 @@ class Note extends FlxSprite
 
 	public var mustPress(get, never):Bool;
 	public var strumLine(default, set):StrumLine;
+
+	public var deltaScoreProgress:Float;
+
+	var lastProgress:Float;
 
 	private function set_strumLine(strLine:StrumLine)
 	{
@@ -62,6 +68,7 @@ class Note extends FlxSprite
 	public var canBeHit:Bool = false;
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
+	public var wasMissed:Bool = false;
 
 	/**
 	 * Whenever that note should be avoided by Botplay.
@@ -102,10 +109,14 @@ class Note extends FlxSprite
 	public var updateFlipY:Bool = true;
 
 	public var noteType(get, never):String;
+	
+	public var strum:Strum;
 
-	@:dox(hide) public var __strumCameras:Array<FlxCamera> = null;
-	@:dox(hide) public var __strum:Strum = null;
-	@:dox(hide) public var __noteAngle:Float = 0;
+	@:dox(hide) @:allow(funkin.game.Strum) @:noCompletion private var __strumCameras:Array<FlxCamera> = null;
+	@:dox(hide) @:allow(funkin.game.Strum) @:noCompletion private var __noteAngle:Float = 0;
+	@:dox(hide) @:allow(funkin.game.Strum) @:noCompletion private var __hasStrumPos:Bool = false;
+
+	@:dox(hide) @:noCompletion var __distance:Float;
 
 	private function get_noteType()
 	{
@@ -220,24 +231,6 @@ class Note extends FlxSprite
 		hold = new HoldNote(this);
 	}
 
-	public var lastScrollSpeed:Null<Float> = null;
-	public var gapFix:SingleOrFloat = 0;
-	public var useAntialiasingFix(get, set):Bool;
-
-	inline function set_useAntialiasingFix(v:Bool)
-	{
-		if (v != useAntialiasingFix)
-		{
-			gapFix = v ? 1 : 0;
-		}
-		return v;
-	}
-
-	inline function get_useAntialiasingFix()
-	{
-		return gapFix > 0;
-	}
-
 	/**
 	 * Whenever the position of the note should be relative to the strum position or not.
 	 * For example, if this is true, a note at the position 0; 0 will be on the strum, instead of at the top left of the screen.
@@ -254,25 +247,7 @@ class Note extends FlxSprite
 
 	override function draw()
 	{
-		@:privateAccess var oldDefaultCameras = FlxCamera._defaultCameras;
-		@:privateAccess if (__strumCameras != null)
-			FlxCamera._defaultCameras = __strumCameras;
-
-		if (__strum != null && strumRelativePos)
-		{
-			final originalX = x;
-			final originalY = y;
-			applyStrumPos();
-			super.draw();
-			x = originalX;
-			y = originalY;
-		}
-		else
-		{
-			super.draw();
-		}
-
-		@:privateAccess FlxCamera._defaultCameras = oldDefaultCameras;
+		
 	}
 
 	function applyStrumPos()
@@ -285,16 +260,23 @@ class Note extends FlxSprite
 			__lastAngleCos = result.cos;
 		}
 
-		if (__strum.width != __lastStrumW || __strum.height != __lastStrumH)
+		if (strum.width != __lastStrumW || strum.height != __lastStrumH)
 		{
-			__lastStrumW = __strum.width;
-			__lastStrumH = __strum.height;
-			__lastStrumHalfW = __strum.width * 0.5;
-			__lastStrumHalfH = __strum.height * 0.5;
+			__lastStrumW = strum.width;
+			__lastStrumH = strum.height;
+			__lastStrumHalfW = strum.width * 0.5;
+			__lastStrumHalfH = strum.height * 0.5;
 		}
 
-		x = -origin.x + offset.x + (y * __lastAngleCos) + __strum.x + __lastStrumHalfW;
-		y = -origin.y + offset.y + (y * __lastAngleSin) + __strum.y + __lastStrumHalfH;
+		x = -origin.x + offset.x + (__distance * __lastAngleCos) + strum.x + __lastStrumHalfW;
+		y = -origin.y + offset.y + (__distance * __lastAngleSin) + strum.y + __lastStrumHalfH;
+	}
+
+	public function updateScoreProgress(time:Float)
+	{
+		final progress = ((time - strumTime) / sustainLength).clamp(0, 1);
+		final deltaProgress = progress - lastProgress;
+		lastProgress = progress;
 	}
 
 	var __lastDownscrollCam:Bool = false;
@@ -308,9 +290,9 @@ class Note extends FlxSprite
 		else
 			__lastX = x;
 
-		if (downscrollCam && __strum != null && __strum.updateNotesPosX && updateNotesPosX)
+		if (downscrollCam && strum != null && strum.updateNotesPosX && updateNotesPosX)
 		{
-			x = -x + 2 * (__strum.x - origin.x + offset.x) + __strum.width;
+			x = -x + 2 * (strum.x - origin.x + offset.x) + strum.width;
 		}
 		final isOnScreen = super.isOnScreen(camera);
 		return isOnScreen;
@@ -380,12 +362,24 @@ class HoldNote implements IFlxDestroyable
 
 	public var scale:Float;
 
-	public var offset:FlxPoint;
+	public var offset:FlxPoint = FlxPoint.get();
 
 	public function new(note:Note)
 	{
-		final holdFrames = PlayState.instance.noteRenderer.graphics.getHoldFrames(note);
+		init(note);
+	}
+
+	public function init(note:Note)
+	{
 		this.note = note;
+
+		// cause i want to do note pooling later
+		if (note.sustainLength <= 0)
+		{
+			clear();
+			return;
+		}
+		final holdFrames = PlayState.instance.noteRenderer.graphics.getHoldFrames(note);
 		scale = note.scale.x;
 		body = holdFrames.getHoldFrame(note.noteData, false);
 		bodyUV = cast body.uv;
@@ -411,7 +405,15 @@ class HoldNote implements IFlxDestroyable
 		capHalfWidth = bodyWidth * .5;
 		capHeight = body.sourceSize.y * note.scale.y;
 
-		offset = FlxPoint.get(bodyHalfWidth, Note.swagWidth * .5);
+		offset.set(Note.swagWidth * .5, Note.swagWidth * .5);
+	}
+
+	function clear()
+	{
+		body = null;
+		bodyUV = null;
+		cap = null;
+		capUV = null;
 	}
 
 	public function destroy()

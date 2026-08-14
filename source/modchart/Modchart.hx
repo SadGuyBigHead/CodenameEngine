@@ -11,6 +11,7 @@ import llua.LuaL;
 import llua.State;
 import llua.Convert;
 import llua.Lua;
+import llua.LuaCallback;
 #end
 import haxe.Constraints.Function;
 import openfl.geom.Vector3D;
@@ -22,6 +23,8 @@ import flixel.system.debug.log.LogStyle;
 #end
 import flixel.tweens.FlxEase.EaseFunction;
 import dave.timeline.*;
+
+using util.LuaUtil;
 
 #if !openfl_debug
 @:fileXml('tags="haxe,release"')
@@ -78,7 +81,8 @@ final class Modchart extends FlxBasic
 		this.parent = parent;
 
 		// PlayState.instance?.callOnHScript("onModchart", [this]);
-		if (modchartPath != null && openfl.Assets.exists(modchartPath))
+		//if (modchartPath != null && openfl.Assets.exists(modchartPath))
+		if (false)
 		{
 			#if LUA_ALLOWED
 			lua = LuaUtil.get();
@@ -130,7 +134,7 @@ final class Modchart extends FlxBasic
 			lua.set("__mods", mods);
 			lua.set("players", parent.players);
 
-			_backend #if debug = #else ??= #end openfl.Assets.getText("mods/modchart/mod-backend.lua");
+			_backend #if debug = #else ??= #end openfl.Assets.getText("assets/data/modchart/mod-backend.lua");
 			if (_backend == null)
 				throw "Mods backend not found.";
 			// trace(_backend);
@@ -157,8 +161,6 @@ final class Modchart extends FlxBasic
 			}
 			while (next < _plugins.plugins.length + 1);
 			lua.set("__ran", true);
-
-			psychlua.ReflectionFunctions.implementToLua(lua); // we could do cool things maybe
 			#else
 			// todo: cry
 			#end
@@ -761,7 +763,7 @@ class ModchartPlugins
 
 	public function new()
 	{
-		final p = "mods/modchart/Plugins/PLUGINLIST.txt";
+		final p = "assets/data/modchart/Plugins/PLUGINLIST.txt";
 		if (openfl.Assets.exists(p))
 		{
 			final list = [
@@ -771,7 +773,7 @@ class ModchartPlugins
 			for (plugin in list)
 			{
 				trace('Loading plugin', '$plugin');
-				final path = "mods/modchart/Plugins/" + plugin + ".xml";
+				final path = "assets/data/modchart/Plugins/" + plugin + ".xml";
 				if (openfl.Assets.exists(path))
 				{
 					final xml:Access = new Access(((openfl.Assets.getText(path)) : FlxXmlAsset).getXml().firstElement());

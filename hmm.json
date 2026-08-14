@@ -65,7 +65,7 @@
     {
       "name": "lime",
       "type": "haxelib",
-	  "version": "8.1.2"
+      "version": "8.1.2"
     },
     {
       "name": "markdown",
@@ -82,6 +82,12 @@
       "type": "git",
       "ref": "0eaf6da141f7311c227e692bab11d674f03bc388",
       "url": "https://github.com/CodenameCrew/cne-openfl"
+    },
+    {
+      "name": "linc_luajit",
+      "type": "git",
+      "ref": "508f81352e7687f35231ea7475219c51fff5210c",
+      "url": "https://github.com/mayo78/linc_luajit"
     }
   ]
 }

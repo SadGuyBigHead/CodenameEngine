@@ -6,6 +6,8 @@
 		file="VsDnB" packageName="com.sadguybighead.vsdaveandbambi"
 		package="com.sadguybighead.vsdaveandbambi"
 		version="1.0.0" company="Sad Guy Big Head" />
+		
+	<haxedef name="LINC_LUA_RELATIVE_DYNAMIC_LIB"/>
 
 	<!--
 		CHANGE THE SAVE PATH & NAME FOR YOUR MOD HERE!
@@ -108,6 +110,9 @@
 
 	<!-- Disable a optimization, to allow reflection to use more functions -->
 	<define name="FLX_NO_GENERIC" />
+	
+	<!-- yea -->
+	<define name="LUA_ALLOWED" if="cpp" />
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
@@ -131,6 +136,8 @@
 	<haxelib name="hxdiscord_rpc" if="DISCORD_RPC"/>
 	<haxelib name="markdown" />
 	<haxelib name="hxcpp-debug-server" if="TEST_BUILD debug" />
+	
+	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 
 	<!-- _____________________________ Path Settings ____________________________ -->
 

@@ -2442,7 +2442,7 @@ class Charter extends UIState
 		var bookmarks:Array<ChartBookmark> = [];
 		try
 		{
-			if (PlayState.SONG.bookmarks != null)
+			if (PlayState.SONG?.bookmarks != null)
 				bookmarks = PlayState.SONG.bookmarks;
 		}
 		catch (e)

@@ -10,6 +10,7 @@ import funkin.game.StrumLine;
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
+@:access(funkin.game.StrumLine.startingPos)
 class PlayField
 {
 	public var player:Int;
@@ -18,9 +19,6 @@ class PlayField
 	public var rot = Vector3D.get();
 	public var skew = FlxPoint.get();
 	public var zoom = Vector3D.get(1.0, 1.0, 1.0, 1.0); // "w" is used as total zoom
-
-	public var drawDistanceMin:Float = -FlxG.height * .25;
-	public var drawDistanceMax:Float = FlxG.height;
 
 	public var fov:Float = 90.;
 
@@ -35,26 +33,13 @@ class PlayField
 		return PlayState.instance.strumLines.members[player];
 	}
 
-	public function new(player:Int)
+	public function new(player:Int, mods:ArrowEffects)
 	{
 		this.player = player;
-		pos.set(getBaseReceptorX(1.5, player), 300);
-	}
-
-	function getBaseReceptorX(direction:Float, player:Int):Float
-	{
-		var x:Float = (FlxG.width / 2) - Note.swagWidth - 54 + Note.swagWidth * direction;
-		switch (player % 2)
-		{
-			case 0:
-				x -= FlxG.width / 2 - Note.swagWidth * 2 - 100;
-			case 1:
-				x += FlxG.width / 2 - Note.swagWidth * 2 - 100;
-		}
-		x -= 56;
-		// x += NoteSprite.GRAPHIC_SIZE * .5;
-
-		return x;
+		final size = ArrowEffects.ARROW_SIZE * (strumLine.data.strumScale ?? 1.0) * (strumLine.data.strumSpacing ?? 1.0);
+		final lanes = strumLine.data.keyCount ?? 4;
+		final ofsY = (ArrowEffects.ARROW_SIZE * .5) - (ArrowEffects.ARROW_SIZE * (strumLine.data.strumScale ?? 1.0) * .5);
+		pos.set(strumLine.startingPos.x + (size * lanes * .5), strumLine.startingPos.y + mods.position.reverseOffset + ofsY);
 	}
 
 	public function updateMatrix()
