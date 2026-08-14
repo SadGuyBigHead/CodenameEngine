@@ -2677,7 +2677,7 @@ final class ModSplinePoint implements IFlxPooled
 {
 	public static var ZERO = new ModSplinePoint();
 
-	static var pool = new FlxPool<ModSplinePoint>(ModSplinePoint /*.new*/); // DAVE TODO: davealicious
+	static var pool = new FlxPool<ModSplinePoint>(ModSplinePoint.new);
 
 	public var percentage:Float;
 	public var beat:Float;

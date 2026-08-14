@@ -1,7 +1,7 @@
 package funkin.options.type;
 
 import flixel.graphics.FlxGraphic;
-import funkin.backend.shaders.CustomShader;
+import funkin.backend.shaders.FunkinShader;
 
 /**
  * Option type that has a portrait.
@@ -27,7 +27,7 @@ class PortraitOption extends TextOption
 			portrait = new FlxSprite();
 			portrait.antialiasing = true;
 			if (usePortrait)
-				portrait.shader = new CustomShader('engine/circleProfilePicture');
+				portrait.shader = FunkinShader.fromFile('engine/circleProfilePicture');
 			add(portrait);
 		}
 		portrait.loadGraphic(graphic);

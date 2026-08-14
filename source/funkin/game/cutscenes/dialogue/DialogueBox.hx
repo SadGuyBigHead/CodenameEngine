@@ -86,13 +86,12 @@ class DialogueBox extends FunkinSprite
 				text.borderStyle = switch (textNode.att.borderStyle.trim().toLowerCase())
 				{
 					case "none": NONE;
-					case "shadow": SHADOW;
+					case "shadow": SHADOW_XY(Std.parseFloat(textNode.getAtt("shadowOffsetX")).getDefaultFloat(1),
+							Std.parseFloat(textNode.getAtt("shadowOffsetY")).getDefaultFloat(1));
 					case "outline_fast": OUTLINE_FAST;
 					default: OUTLINE;
 				}
 				text.borderQuality = Std.parseFloat(textNode.getAtt("borderQuality")).getDefaultFloat(1);
-				text.shadowOffset.x = Std.parseFloat(textNode.getAtt("shadowOffsetX")).getDefaultFloat(1);
-				text.shadowOffset.y = Std.parseFloat(textNode.getAtt("shadowOffsetY")).getDefaultFloat(1);
 				text.borderSize = Std.parseFloat(textNode.getAtt("borderSize")).getDefaultFloat(1);
 				text.borderColor = textNode.getAtt("borderColor").getColorFromDynamic().getDefault(0xFFFFFFFF);
 			}

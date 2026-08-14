@@ -293,6 +293,7 @@ class MusicBeatSubstate extends FlxSubState implements IBeatCancellableReceiver
 		stateScripts = FlxDestroyUtil.destroy(stateScripts);
 	}
 
+	@:haxe.warning("-WDeprecated")
 	public override function switchTo(nextState:FlxState)
 	{
 		var e = event("onStateSwitch", EventManager.get(StateEvent).recycle(nextState));

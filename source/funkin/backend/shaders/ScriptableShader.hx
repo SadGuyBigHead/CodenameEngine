@@ -22,6 +22,7 @@ class ScriptableShader extends FlxBasic implements IHScriptCustomBehaviour
 
 	var fields:Map<String, FieldInfo> = [];
 
+	@:haxe.warning("-WDeprecated")
 	public function new(shader:FunkinShader, ?scriptName:String, ?parentScriptPack:ScriptPack)
 	{
 		super();

@@ -182,7 +182,7 @@
 	<haxedef name="USE_ADAPTED_ASSETS" if="USE_ADAPTED_ASSETS"/>
 
 	<!-- Backward Compatibilities -->
-	<!--<haxedef name="FLX_HEALTH" />-->
+	<haxedef name="FLX_NO_HEALTH" />
 
 	<haxedef name="FLX_NO_FOCUS_LOST_SCREEN"/>
 	<haxedef name="FLX_NO_DEBUG" unless="debug"/>

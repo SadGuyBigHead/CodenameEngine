@@ -36,6 +36,7 @@ class Script extends FlxBasic implements IFlxDestroyable
 	 */
 	private static var _defaultVariablesTemplate:Map<String, Dynamic> = null;
 
+	@:haxe.warning("-WDeprecated")
 	private static function buildDefaultVariables():Map<String, Dynamic>
 	{
 		return [

@@ -155,6 +155,7 @@ class MainMenuState extends MusicBeatState
 			});
 	}
 
+	@:haxe.warning("-WDeprecated")
 	public override function switchTo(nextState:FlxState):Bool
 	{
 		try

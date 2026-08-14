@@ -77,6 +77,11 @@ class HealthIcon extends FunkinSprite
 	public var extraOffsets:FlxPoint = FlxPoint.get();
 
 	/**
+	 * Theeee heaaaalth of uusssssssssssss
+	 */
+	public var health:Float;
+
+	/**
 	 * Helper for HScript who can't make maps
 	 *
 	 * THIS IS DEPRECATED AND WILL BE REMOVED IN THE FUTURE

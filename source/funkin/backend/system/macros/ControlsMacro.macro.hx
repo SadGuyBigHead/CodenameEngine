@@ -367,7 +367,7 @@ class ControlsMacro
 				params: [],
 				expr: macro
 				{
-					return @:privateAccess $i{internalName}._checked = val;
+					return @:privateAccess $i{internalName}.triggered = val;
 				},
 				args: [{name: "val", type: macro :Bool}]
 			}),

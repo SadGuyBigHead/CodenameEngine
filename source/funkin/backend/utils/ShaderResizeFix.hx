@@ -28,7 +28,7 @@ final class ShaderResizeFix
 		for (cam in FlxG.cameras.list)
 		{
 			@:privateAccess
-			if (cam != null && (cam._filters != null && cam._filters.length > 0))
+			if (cam != null && (cam.filters != null && cam.filters.length > 0))
 				fixSpriteShaderSize(cam.flashSprite);
 		}
 	}

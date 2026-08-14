@@ -350,6 +350,7 @@ class MusicBeatState extends FlxState implements IBeatCancellableReceiver
 		event("postDraw", e);
 	}
 
+	@:haxe.warning("-WDeprecated")
 	public override function switchTo(nextState:FlxState)
 	{
 		var e = event("onStateSwitch", EventManager.get(StateEvent).recycle(nextState));
