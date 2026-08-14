@@ -99,7 +99,7 @@ final class NoteRenderer extends flixel.FlxBasic
 		mods = new ArrowEffects(new NotePositionMetrics(), game.strumLines.length);
 
 		// final luaPath = ''
-		modchart = new Modchart(game.timeline, mods, "no");
+		modchart = new Modchart(game.timeline, mods, "songs/" + PlayState.SONG.meta.name + "/modchart.lua");
 		mods.active = modchart.active;
 
 		wavyHolds = new Vector<Bool>(mods.players, true);
@@ -203,6 +203,8 @@ final class NoteRenderer extends flixel.FlxBasic
 
 		for (pn => strumLine in game.strumLines.members)
 		{
+			if (!strumLine.visible)
+				continue;
 			for (camera in strumLine.cameras)
 			{
 				if (!camera.exists)
@@ -218,6 +220,7 @@ final class NoteRenderer extends flixel.FlxBasic
 			playField(pn).updateMatrix();
 		drawReceptors(camera, pn);
 		drawHolds(camera, pn);
+		drawHoldCovers(camera, pn);
 		drawArrows(camera, pn);
 		drawSplashes(camera, pn);
 	}
@@ -225,12 +228,12 @@ final class NoteRenderer extends flixel.FlxBasic
 	// if the last calculated mod y offset is on screen
 	inline function isTooClose(pn:Int):Bool
 	{
-		return modYOffset < playField(pn).drawDistanceMin;
+		return modYOffset < strumLine(pn).drawDistanceMin;
 	}
 
 	inline function isTooFar(pn:Int):Bool
 	{
-		return modYOffset > playField(pn).drawDistanceMax;
+		return modYOffset > strumLine(pn).drawDistanceMax;
 	}
 
 	inline function isOnScreen(pn:Int):Bool
@@ -265,10 +268,10 @@ final class NoteRenderer extends flixel.FlxBasic
 
 	function drawHolds(camera:FlxCamera, pn:Int)
 	{
-		//if (!mods.active)
-		//	drawSimpleHolds(camera, pn);
-		//else
-		//	drawModHolds(camera, pn);
+		if (!mods.active)
+			drawSimpleHolds(camera, pn);
+		else
+			drawModHolds(camera, pn);
 	}
 
 	function drawSimpleHolds(camera:FlxCamera, pn:Int)
@@ -280,19 +283,25 @@ final class NoteRenderer extends flixel.FlxBasic
 		final oldCur = ng.__currentlyLooping;
 		ng.__currentlyLooping = true;
 
-		var i = ng.length;
-		while (i > 0)
+		var i = ng.length - 1;
+		while (i >= 0)
 		{
-			final note = ng.__loopSprite = ng.members[--i];
-			final r = game.strumLines.members[pn].members[note.noteData];
-			final startY = note.held ? .0 : note.y;
-			if (startY > playField(pn).drawDistanceMax)
+			final note = ng.__loopSprite = ng.members[i--];
+			if (!note?.exists)
+				continue;
+			// since holds are drawn first we always update these values no matter what
+			note.__distance = note.strum.getDistance(note);
+			final dark = getMissDark(note);
+			note.colorTransform.setOffsets(dark, dark, dark, 0);
+
+			if (note.__distance > strumLine.drawDistanceMax)
 				break;
-			else if (note.sustainLength <= 0 || note.held && note.endTime > mods.conductor.songPosition)
+			else if (note.sustainLength <= 0 || note.held && mods.conductor.songPosition > note.endTime)
 				continue;
 			final hold = note.hold;
 
-			final endY = r.getDistance(note, hold.endMs);
+			final startY = (note.held ? .0 : note.__distance);
+			final endY = note.strum.getDistance(note, hold.endMs);
 
 			var capY = endY - hold.capHeight;
 			final bodyHeight = capY - startY;
@@ -300,12 +309,14 @@ final class NoteRenderer extends flixel.FlxBasic
 			// check if we are really gonna draw
 			if (hold.hit && bodyHeight < .0 && endY < .0 || !hold.hit && bodyHeight < .0)
 				continue;
+			
+			final originalX = note.x;
+			final originalY = note.y;
+			note.applyStrumPos();
 
 			final aa = hold.antialiasing;
-			final drawItem = camera.startQuadBatch(hold.graphic, false, false, null, aa, simpleShader);
+			final drawItem = camera.startQuadBatch(hold.graphic, note.colorTransform.hasRGBMultipliers(), note.colorTransform.hasRGBAOffsets(), null, aa, simpleShader);
 			initDrawItem(pn, drawItem);
-
-			ct.alphaMultiplier = note.alpha;
 
 			// draw body
 			if (bodyHeight > .0)
@@ -322,46 +333,42 @@ final class NoteRenderer extends flixel.FlxBasic
 				frame.prepareMatrix(matrix, FlxFrameAngle.ANGLE_0, false, false);
 				matrix.translate(-frame.frame.width * .5, .0);
 				matrix.scale(hold.scale, hold.scale);
-				matrix.translate(.0, startY);
-				matrix.translate(note.x + hold.offset.x, r.y + hold.offset.y);
-				drawItem.addQuad(frame, matrix, ct);
+				matrix.translate(note.x + hold.offset.x, startY + note.strum.y + hold.offset.y);
+				drawItem.addQuad(frame, matrix, note.colorTransform);
 				for (_ in 0...FlxDrawQuadsItem.VERTICES_PER_QUAD)
 					pushRGBHueColor(null, 0, drawItem);
 			}
 
 			// draw cap
 			// but dont if cap is offscreen
-			if (endY > playField(pn).drawDistanceMax)
-				continue;
+			if (endY <= strumLine.drawDistanceMax)
+			{
+				var frame = clippedFrame;
+				if (frame == null || clippedFrame.parent != hold.cap.parent)
+					frame = clippedFrame = hold.cap.copyTo(clippedFrame);
+				else
+					frame.frame.copyFrom(hold.cap.frame);
+				if (bodyHeight < .0)
+				{
+					frame.frame.top = (hold.capHeight - endY) / hold.scale;
+					capY = .0;
+				}
+				// frame.uv.top = FlxMath.lerp(h.body.uv.top, h.body.uv.bottom, ratio);
+	
+				if (frame.frame.height > .0)
+				{
+					frame.prepareMatrix(matrix, FlxFrameAngle.ANGLE_0, false, false);
+					matrix.translate(-frame.frame.width * .5, .0);
+					matrix.scale(hold.scale, hold.scale);
+					matrix.translate(note.x + hold.offset.x, capY + note.strum.y + hold.offset.y);
+					drawItem.addQuad(frame, matrix, note.colorTransform);
+					for (_ in 0...FlxDrawQuadsItem.VERTICES_PER_QUAD)
+						pushRGBHueColor(null, 0, drawItem);
+				}
+			}
 
-			var frame = clippedFrame;
-			if (frame == null || clippedFrame.parent != hold.cap.parent)
-				frame = clippedFrame = hold.cap.copyTo(clippedFrame);
-			else
-				frame.frame.copyFrom(hold.cap.frame);
-			if (bodyHeight < .0)
-			{
-				frame.frame.top = (hold.capHeight - endY) / hold.scale;
-				capY = .0;
-			}
-			// frame.uv.top = FlxMath.lerp(h.body.uv.top, h.body.uv.bottom, ratio);
-
-			if (frame.frame.height > .0)
-			{
-				frame.prepareMatrix(matrix, FlxFrameAngle.ANGLE_0, false, false);
-				matrix.translate(-frame.frame.width * .5, .0);
-				matrix.scale(hold.scale, hold.scale);
-				matrix.translate(.0, capY);
-				matrix.translate(note.x + hold.offset.x, r.y + hold.offset.y);
-				drawItem.addQuad(frame, matrix, ct);
-				for (_ in 0...FlxDrawQuadsItem.VERTICES_PER_QUAD)
-					pushRGBHueColor(null, 0, drawItem);
-			}
-			else
-			{
-				// cancel draw item
-				// nvm idk how it works
-			}
+			note.x = originalX;
+			note.y = originalY;
 		}
 		ng.__currentlyLooping = oldCur;
 	}
@@ -374,10 +381,12 @@ final class NoteRenderer extends flixel.FlxBasic
 		final oldCur = ng.__currentlyLooping;
 		ng.__currentlyLooping = true;
 
-		var i = ng.length;
-		while (i > 0)
+		var i = ng.length - 1;
+		while (i >= 0)
 		{
-			final note = ng.__loopSprite = ng.members[--i];
+			final note = ng.__loopSprite = ng.members[i--];
+			if (!note?.exists)
+				continue;
 			final hold = note.hold;
 			final clip = hold.hit;
 			final zeroOffset = !clip ? .0 : getYOffset(pn, hold.column, mods.conductor.currentBeatTime, mods.conductor.songPosition);
@@ -586,15 +595,17 @@ final class NoteRenderer extends flixel.FlxBasic
 		final oldCur = ng.__currentlyLooping;
 		ng.__currentlyLooping = true;
 
-		var i = ng.length;
-		while (i > 0)
+		var i = ng.length - 1;
+		while (i >= 0)
 		{
-			final note = ng.__loopSprite = ng.members[--i];
+			final note = ng.__loopSprite = ng.members[i--];
+			if (!note?.exists || note.held)
+				continue;
 			// update mod positions (or not)
 			if (mods.active)
 				getArrowEffectsPos(pn, note.beatTime, note.strumTime, note.noteData, false, false);
 			else
-				modYOffset = note.y; // with relative pos the y is just the distance
+				modYOffset = note.__distance; // with relative pos the y is just the distance
 
 			// better draw distance based on pixel distance rather than song distance
 			if (isTooClose(pn))
@@ -608,12 +619,14 @@ final class NoteRenderer extends flixel.FlxBasic
 			// updateLocalMatrix(receptor.origin);
 
 			// apply colors
+			// todo: fancy dark animation
+			var ofs:Float = getMissDark(note);
 			if (mods.active)
 			{
 				note.colorTransform.setMultipliers(1 - modColor.redFloat, 1 - modColor.greenFloat, 1 - modColor.blueFloat, modColor.alphaFloat);
-				final ofs = modGlow * 255.;
-				note.colorTransform.setOffsets(ofs, ofs, ofs, .0);
+				ofs += modGlow * 255.;
 			}
+			note.colorTransform.setOffsets(ofs, ofs, ofs, .0);
 
 			final originalX = note.x;
 			final originalY = note.y;
@@ -665,6 +678,15 @@ final class NoteRenderer extends flixel.FlxBasic
 		}
 	}
 
+	function getMissDark(note:Note):Float
+	{
+		if (!note.tooLate)
+			return 0;
+		final hitWindow:Float = Flags.USE_LEGACY_TIMING ? PlayState.instance.hitWindow : PlayState.instance.ratingManager.lastHitWindow;
+		final dark:Float = FlxMath.remapToRange(note.strumTime - mods.conductor.songPosition, -hitWindow, -hitWindow - 100, 0, -100);
+		return dark.clamp(-100, 0);
+	}
+
 	function pushRGBHueColor<T>(rgbColor:RGBColor, hue:Float, item:FlxDrawBaseItem<T>)
 	{
 		// if (rgbColor != null && rgbColor.mix > .0)
@@ -689,9 +711,17 @@ final class NoteRenderer extends flixel.FlxBasic
 		for (splash in splashes[pn])
 		{
 			// update mod positions
-			getArrowEffectsPos(pn, mods.conductor.currentBeatTime, mods.conductor.songPosition, splash.strum.ID, true, false);
-			if (!isOnScreen(pn))
-				continue;
+			if (mods.active)
+			{
+				getArrowEffectsPos(pn, mods.conductor.currentBeatTime, mods.conductor.songPosition, splash.strum.ID, true, false);
+				if (!isOnScreen(pn))
+					continue;
+			}
+			else
+			{
+				splash.setPosition(splash.strum.x, splash.strum.y);
+			}
+
 			// its invisible
 			// if (modDark == .0)
 			//	continue;
@@ -702,6 +732,38 @@ final class NoteRenderer extends flixel.FlxBasic
 			// receptor.colorTransform.alphaMultiplier = modDark;
 
 			drawSprite(camera, pn, splash, null, SPLASH_HUES[splash.strum.ID]);
+		}
+	}
+
+	function drawHoldCovers(camera:FlxCamera, pn:Int)
+	{
+		final strumLine = strumLine(pn);
+		for (cover in strumLine.holdCovers.members)
+		{
+			if (!cover.visible)
+				continue;
+			// update mod positions
+			if (mods.active)
+			{
+				getArrowEffectsPos(pn, mods.conductor.currentBeatTime, mods.conductor.songPosition, cover.ID, true, false);
+				if (!isOnScreen(pn))
+					continue;
+			}
+			else
+			{
+				cover.setPosition(strumLine.members[cover.ID].x, strumLine.members[cover.ID].y);
+			}
+
+			// its invisible
+			// if (modDark == .0)
+			//	continue;
+			// update local matrix
+			// updateLocalMatrix(receptor.origin);
+
+			// apply darkness
+			// receptor.colorTransform.alphaMultiplier = modDark;
+
+			drawSprite(camera, pn, cover);
 		}
 	}
 
@@ -854,6 +916,7 @@ class SimpleShader extends FlxShader
 			_g = g;
 			_b = b;
 			_rgb_mix = rgb_mix;
+			_hue = hue;
 		}
 	')
 	@:glFragmentSource('
@@ -879,7 +942,7 @@ class SimpleShader extends FlxShader
 			vec4 new_color = color;
 			//new_color.rgb = mix(color.rgb, min(color.r * _r + color.g * _g + color.b * _b, vec3(color.a)), _rgb_mix);
 			//new_color.a = color.a;
-			gl_FragColor = new_color; // vec4(hueShift(new_color.rgb, _hue), new_color.a);
+			gl_FragColor = vec4(hueShift(new_color.rgb, _hue), new_color.a);
 		}')
 	public function new()
 	{

@@ -1,5 +1,6 @@
 package funkin.menus;
 
+import funkin.menus.ui.MenuBackground;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import funkin.backend.chart.Chart;
@@ -87,7 +88,7 @@ class FreeplayState extends MusicBeatState
 	/**
 	 * Background.
 	 */
-	public var bg:FlxSprite;
+	public var bg:MenuBackground;
 
 	/**
 	 * Whenever the player can navigate and select
@@ -141,12 +142,9 @@ class FreeplayState extends MusicBeatState
 
 		super.create();
 
-		// LOAD CHARACTERS
-
-		bg = new FlxSprite(0, 0).loadAnimatedGraphic(Paths.image('menus/menuDesat'));
+		bg = new MenuBackground();
 		if (songs.length > 0)
 			bg.color = songs[0].color;
-		bg.antialiasing = true;
 		add(bg);
 
 		grpSongs = new FlxTypedGroup<Alphabet>();

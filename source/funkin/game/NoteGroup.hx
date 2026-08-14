@@ -12,12 +12,11 @@ class NoteGroup extends FlxTypedGroup<Note>
 	var __loopSprite:Note;
 	var i:Int = 0;
 	var __currentlyLooping:Bool = false;
-	var __time:Float = -1.0;
 
 	/**
-	 * How many milliseconds it should show a note before it should be hit
-	**/
-	public var limit:Float = Flags.DEFAULT_NOTE_MS_LIMIT;
+	 * Lazy?? lazy?????? but its ok cause i want to pool things so we won't need this
+	 */
+	public var held:Array<Note> = new Array<Note>();
 
 	/**
 	 * Preallocates the members array with nulls, but if theres anything in the array already it clears it
@@ -52,22 +51,21 @@ class NoteGroup extends FlxTypedGroup<Note>
 		return FlxSort.byValues(order, a.strumTime, b.strumTime);
 	}
 
-	@:dox(hide) public var __forcedSongPos:Null<Float> = null;
-
-	@:dox(hide) private inline function __getSongPos()
-		return __forcedSongPos == null ? Conductor.songPosition : __forcedSongPos;
+	inline function loopSpriteTooFar():Bool
+	{
+		return __loopSprite.strum.getDistance(__loopSprite) > __loopSprite.strumLine.drawDistanceMax;
+	}
 
 	public override function update(elapsed:Float)
 	{
 		i = length - 1;
 		__loopSprite = null;
-		__time = __getSongPos() + limit;
 		while (i >= 0)
 		{
 			__loopSprite = members[i--];
 			if (__loopSprite == null || !__loopSprite.exists || !__loopSprite.active)
 				continue;
-			if (__loopSprite.strumTime > __time)
+			if (loopSpriteTooFar())
 				break;
 			__loopSprite.update(elapsed);
 		}
@@ -83,13 +81,12 @@ class NoteGroup extends FlxTypedGroup<Note>
 
 		i = length - 1;
 		__loopSprite = null;
-		__time = __getSongPos() + limit;
 		while (i >= 0)
 		{
 			__loopSprite = members[i--];
 			if (__loopSprite == null || !__loopSprite.exists || !__loopSprite.visible)
 				continue;
-			if (__loopSprite.strumTime > __time)
+			if (loopSpriteTooFar())
 				break;
 			__loopSprite.draw();
 		}
@@ -110,7 +107,6 @@ class NoteGroup extends FlxTypedGroup<Note>
 	{
 		i = length - 1;
 		__loopSprite = null;
-		__time = __getSongPos() + limit;
 
 		var oldCur = __currentlyLooping;
 		__currentlyLooping = true;
@@ -120,7 +116,7 @@ class NoteGroup extends FlxTypedGroup<Note>
 			__loopSprite = members[i--];
 			if (__loopSprite == null || !__loopSprite.exists)
 				continue;
-			if (__loopSprite.strumTime > __time)
+			if (loopSpriteTooFar())
 				break;
 			noteFunc(__loopSprite);
 		}

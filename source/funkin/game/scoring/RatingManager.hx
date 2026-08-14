@@ -17,9 +17,17 @@ class RatingManager
 	public var ratingData:Array<Rating> = [];
 	public var lastHitWindow:Float = -1;
 
+	public var vsliceSlope:Bool = true;
+
+	static inline final MAX_SCORE:Int = 500;
+	static inline final MIN_SCORE:Int = 5;
+	static inline final SCORING_OFFSET:Float = 54.99;
+	static inline final SCORING_SLOPE:Float = 0.080;
+	static inline final PERFECT_THRESHOLD:Float = 15.0;
+
 	public function new(?preset:WindowPreset):Void
 	{
-		var usedPreset = preset != null ? preset : WindowPreset.DEFAULT;
+		var usedPreset = preset != null ? preset : WindowPreset.FNF_VSDAVE;
 		hitWindows = HitWindowData.getWindows(usedPreset);
 		initDefaultData(hitWindows);
 	}
@@ -34,10 +42,21 @@ class RatingManager
 		{
 			if (rating.hittable && rating.window > -1 && time <= rating.window)
 			{
+				if (vsliceSlope)
+					rating.score = vsliceScore(time);
 				return rating;
 			}
 		}
 		return ratingData.last();
+	}
+
+	function vsliceScore(time:Float)
+	{
+		if (time <= PERFECT_THRESHOLD)
+			return MAX_SCORE;
+
+		var factor:Float = 1.0 - (1.0 / (1.0 + Math.exp(-SCORING_SLOPE * (time - SCORING_OFFSET))));
+		return Math.floor(MAX_SCORE * factor + MIN_SCORE);
 	}
 
 	/**
@@ -57,14 +76,15 @@ class RatingManager
 			window: getWindow("sick"),
 			accuracy: 1,
 			score: 300,
-			splash: true
+			splash: true,
+			health: 1.5 / 100 * 2,
 		});
 		addRating({
 			name: "good",
 			window: getWindow("good"),
 			accuracy: 0.75,
 			score: 200,
-			health: 0.015
+			health: 0.75 / 100 * 2
 		});
 		addRating({
 			name: "bad",
@@ -78,7 +98,7 @@ class RatingManager
 			window: getWindow("shit"),
 			accuracy: 0.25,
 			score: 50,
-			health: -0.05,
+			health: -1.0 / 100 * 2,
 			breaksCombo: Flags.SHITS_BREAK_COMBO
 		});
 	}

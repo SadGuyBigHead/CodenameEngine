@@ -27,7 +27,7 @@ class ModsFolder
 	 * Current mod folder. Will affect `Paths`.
 	 */
 	public static var currentModFolder:String = null;
-	
+
 	/**
 	 * Folder to the source fodler :)_
 	 * Katherine thinks its stupid :(
@@ -42,7 +42,7 @@ class ModsFolder
 	/**
 	 * Path to the `addons` folder.
 	 */
-	public static var addonsPath:String = #if MODS_FROM_SOURCE CORE_FOLDER + "addons" #else "./addons/" #end;
+	public static var addonsPath:String = #if MODS_FROM_SOURCE CORE_FOLDER + "addons/" #else "./addons/" #end;
 
 	/**
 	 * If accessing a file as assets/data/global/LIB_mymod.hx should redirect to mymod:assets/data/global.hx

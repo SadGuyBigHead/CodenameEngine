@@ -6,7 +6,6 @@ import funkin.game.Note;
 final class NoteMissEvent extends CancellableEvent
 {
 	@:dox(hide) public var animCancelled:Bool = false;
-	@:dox(hide) public var deleteNote:Bool = true;
 	@:dox(hide) public var stunned:Bool = true;
 	@:dox(hide) public var resetCombo:Bool = true;
 	@:dox(hide) public var playMissSound:Bool = true;
@@ -81,24 +80,12 @@ final class NoteMissEvent extends CancellableEvent
 		playMissSound = false;
 	}
 
-	@:dox(hide)
-	public function cancelMissSound()
-	{
-		preventMissSound();
-	}
-
 	/**
 	 * Prevents the combo from being reset.
 	 */
 	public function preventResetCombo()
 	{
 		resetCombo = false;
-	}
-
-	@:dox(hide)
-	public function cancelResetCombo()
-	{
-		preventResetCombo();
 	}
 
 	/**
@@ -109,38 +96,12 @@ final class NoteMissEvent extends CancellableEvent
 		stunned = false;
 	}
 
-	@:dox(hide)
-	public function cancelStunned()
-	{
-		preventStunned();
-	}
-
 	/**
 	 * Prevents the default sing animation from being played.
 	 */
 	public function preventAnim()
 	{
 		animCancelled = true;
-	}
-
-	@:dox(hide)
-	public function cancelAnim()
-	{
-		preventAnim();
-	}
-
-	/**
-	 * Prevents the note from being deleted.
-	 */
-	public function preventDeletion()
-	{
-		deleteNote = false;
-	}
-
-	@:dox(hide)
-	public function cancelDeletion()
-	{
-		preventDeletion();
 	}
 
 	/**
@@ -151,24 +112,12 @@ final class NoteMissEvent extends CancellableEvent
 		muteVocals = true;
 	}
 
-	@:dox(hide)
-	public function cancelVocalsUnmute()
-	{
-		preventVocalsUnmute();
-	}
-
 	/**
 	 * Prevents the vocals volume from being muted in case its a parameter of `onPlayerMiss`
 	 */
 	public function preventVocalsMute()
 	{
 		muteVocals = false;
-	}
-
-	@:dox(hide)
-	public function cancelVocalsMute()
-	{
-		preventVocalsMute();
 	}
 
 	private inline function get_character()

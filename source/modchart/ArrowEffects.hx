@@ -52,7 +52,7 @@ final class ArrowEffects extends FlxBasic
 		super();
 		this.position = position;
 		this.players = players;
-		playerStates = new Vector<PlayerState>(players, true, [for (i in 0...players) new PlayerState(i, new PlayField(i))]);
+		playerStates = new Vector<PlayerState>(players, true, [for (i in 0...players) new PlayerState(i, new PlayField(i, this))]);
 		effectData = new Vector<PerPlayerData>(players, true, [for (i in 0...players) new PerPlayerData(i)]);
 
 		// trace('with lpayers', players, playerStates);

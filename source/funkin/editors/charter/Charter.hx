@@ -1,7 +1,6 @@
 package funkin.editors.charter;
 
-// ! FUCK YOU CHUF (your biggest fan -lunar) <3
-// import flixel.FlxLayer;
+import funkin.menus.ui.MenuBackground;
 import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxPoint;
 import flixel.sound.FlxSound;
@@ -45,7 +44,7 @@ class Charter extends UIState
 	private static inline function get_instance()
 		return FlxG.state is Charter ? cast FlxG.state : null;
 
-	public var charterBG:FunkinSprite;
+	public var charterBG:MenuBackground;
 	public var charterBookmarksGroup:FlxTypedGroup<FlxSprite> = new FlxTypedGroup<FlxSprite>();
 	public var uiGroup:FlxTypedGroup<FlxSprite> = new FlxTypedGroup<FlxSprite>();
 
@@ -431,9 +430,6 @@ class Charter extends UIState
 						onSelect: _playback_metronome,
 						icon: Options.charterMetronomeEnabled ? 1 : 0
 					},
-					/*{
-						label: translate("playback.visualMetronome")
-					},*/
 				]
 			}
 		];
@@ -449,10 +445,9 @@ class Charter extends UIState
 		for (camera in FlxG.cameras.list)
 			camera.antialiasing = false;
 
-		charterBG = new FunkinSprite(0, 0, Paths.image('menus/menuDesat'));
+		charterBG = new MenuBackground();
 		charterBG.color = 0xFF181818;
 		charterBG.cameras = [charterCamera];
-		charterBG.screenCenter();
 		charterBG.scrollFactor.set();
 		add(charterBG);
 
@@ -2447,7 +2442,7 @@ class Charter extends UIState
 		var bookmarks:Array<ChartBookmark> = [];
 		try
 		{
-			if (PlayState.SONG.bookmarks != null)
+			if (PlayState.SONG?.bookmarks != null)
 				bookmarks = PlayState.SONG.bookmarks;
 		}
 		catch (e)
