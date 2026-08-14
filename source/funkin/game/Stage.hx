@@ -480,7 +480,7 @@ class Stage extends FlxBasic implements IBeatReceiver
 			var extension = Path.extension(path);
 			if (extensions.contains(extension))
 			{
-				list.pushOnce("test");
+				// list.pushOnce("test");
 				list.pushOnce(Path.withoutExtension(path));
 			}
 		}
