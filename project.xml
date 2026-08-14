@@ -153,14 +153,6 @@
 	<app main="funkin.backend.system.Main" preloader="flixel.system.FlxPreloader"/>
 	<source name="source"/>
 
-	<section if="MODCHARTING_FEATURES">
-		<haxedef name="FM_ENGINE" value="CODENAME"/>
-		<haxedef name="FM_ENGINE_VERSION" value="1.0"/>
-
-		<haxelib name="funkin-modchart" />
-		<haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>
-	</section>
-
 	<!-- ____________________________ Assets Settings ___________________________ -->
 
 	<define name="PRELOAD_ALL" unless="web" />
@@ -214,20 +206,6 @@
 	</section>
 
 	<haxeflag name="--macro" value="funkin.backend.system.macros.BuildInfo.printBuildInfo()"/>
-
-	<!-- sgbh modchart stuff -->
-	<haxeflag name="--macro" value="include('modchart')" />
-
-	<!-- we gotta macro it up -->
-    <haxeflag name="--macro" value="addMetadata('@:build(modchart.macro.FlxMacro.buildFlxDrawBaseItem())', 'flixel.graphics.tile.FlxDrawBaseItem')" />
-    <haxeflag name="--macro" value="addMetadata('@:build(modchart.macro.FlxMacro.buildFlxDrawItem())', 'flixel.graphics.tile.FlxDrawQuadsItem')" />
-    <haxeflag name="--macro" value="addMetadata('@:build(modchart.macro.FlxMacro.buildFlxDrawItem())', 'flixel.graphics.tile.FlxDrawTrianglesItem')" />
-	
-	<!-- attach IndexMacroUtil -->
-	<haxeflag name="--macro"
-		value="addMetadata('@:using(modchart.macro.IndexMacroUtil)', 'openfl.Vector')" />
-	<haxeflag name="--macro"
-		value="addMetadata('@:using(modchart.macro.IndexMacroUtil)', 'Array')" />
 
 	<!-- sgbh modchart stuff -->
 	<haxeflag name="--macro" value="include('modchart')" />
