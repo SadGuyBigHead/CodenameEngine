@@ -3,27 +3,29 @@
     {
       "name": "away3d",
       "type": "git",
+
       "ref": "fdd2231",
       "url": "https://github.com/CodenameCrew/away3d"
     },
     {
       "name": "flixel",
       "type": "git",
-      "ref": "cne",
+
+      "ref": "0f9ceafc",
       "url": "https://github.com/SadGuyBigHead/cne-flixel"
     },
     {
       "name": "flixel-addons",
       "type": "git",
 
-      "ref": "dev",
+      "ref": "b6c8e5b",
       "url": "https://github.com/CodenameCrew/cne-flixel-addons"
     },
     {
       "name": "flixel-animate",
       "type": "git",
 
-      "ref": "main",
+      "ref": "d1e7758",
       "url": "https://github.com/CodenameCrew/cne-flixel-animate/"
     },
     {
@@ -36,14 +38,14 @@
       "name": "hscript-improved",
       "type": "git",
 
-      "ref": "codename-dev",
+      "ref": "cacd663",
       "url": "https://github.com/CodenameCrew/hscript-improved"
     },
     {
       "name": "hxcpp",
       "type": "git",
 
-      "ref": "719f377e",
+      "ref": "4ee2367",
       "url": "https://github.com/CodenameCrew/cne-hxcpp"
     },
     {
@@ -81,7 +83,7 @@
       "name": "lime",
       "type": "git",
 
-      "ref": "cne",
+      "ref": "85fbaddc",
       "url": "https://github.com/CodenameCrew/cne-lime"
     },
     {
@@ -100,7 +102,7 @@
       "name": "openfl",
       "type": "git",
 
-      "ref": "cne",
+      "ref": "b1b5cc72",
       "url": "https://github.com/CodenameCrew/cne-openfl"
     }
   ]
