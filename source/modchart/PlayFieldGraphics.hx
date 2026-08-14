@@ -10,6 +10,7 @@ import openfl.geom.Rectangle;
 import openfl.geom.Matrix;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
+
 using flixel.util.FlxColorTransformUtil;
 
 #if !modchart_debug

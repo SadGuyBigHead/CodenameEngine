@@ -37,13 +37,17 @@ class FramerateCounter extends Sprite
 		}
 	}
 
-	public function reload() {
-		for (label in [fpsNum, fpsLabel]) label.defaultTextFormat = new TextFormat(Framerate.fontName, label == fpsNum ? 18 : 12, -1);
+	public function reload()
+	{
+		for (label in [fpsNum, fpsLabel])
+			label.defaultTextFormat = new TextFormat(Framerate.fontName, label == fpsNum ? 18 : 12, -1);
 		lastUpdateTime = 0;
 	}
 
-	public override function __enterFrame(t:Float) {
-		if (alpha <= 0.05) return;
+	public override function __enterFrame(t:Float)
+	{
+		if (alpha <= 0.05)
+			return;
 
 		super.__enterFrame(t);
 

@@ -83,7 +83,7 @@ final class SustainHitEvent extends CancellableEvent
 	{
 		preventAnim();
 	}
-	
+
 	public function forceEnd()
 	{
 		held = false;

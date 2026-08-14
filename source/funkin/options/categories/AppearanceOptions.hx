@@ -1,18 +1,19 @@
 package funkin.options.categories;
 
-class AppearanceOptions extends TreeMenuScreen {
+class AppearanceOptions extends TreeMenuScreen
+{
 	// use for changing the text
 	var framerateOption:NumOption;
 	var maxFrameRate:Int = 240;
-	public function new() {
+
+	public function new()
+	{
 		super('optionsTree.appearance-name', 'optionsTree.appearance-desc', 'AppearanceOptions.');
 
-		add(framerateOption = new NumOption(getNameID('framerate'), getDescID('framerate'),
-			30, maxFrameRate + 1, 1,
-			'framerate', __changeFPS
-		));
+		add(framerateOption = new NumOption(getNameID('framerate'), getDescID('framerate'), 30, maxFrameRate + 1, 1, 'framerate', __changeFPS));
 		// fixes framerate dropping to 30 (minimum) when framerate is 0 (unlimited)
-		if (framerateOption.currentValue == 0) {
+		if (framerateOption.currentValue == 0)
+		{
 			framerateOption.currentValue = maxFrameRate + 1;
 			__changeFPS(framerateOption.currentValue);
 		}
@@ -27,13 +28,16 @@ class AppearanceOptions extends TreeMenuScreen {
 	private function __changeFPS(value:Float)
 	{
 		var framerate = Math.floor(value);
-		@:privateAccess if (framerate > maxFrameRate) {
+		@:privateAccess if (framerate > maxFrameRate)
+		{
 			// the reflect call from NumOption is before the changedCallback so i have to set it manually again
 			Options.framerate = framerate = 0;
 			framerateOption.__number.text = TextOption.OPTION_VALUE_PREFIX + translate('framerate-unlimited');
 		}
-		if (FlxG.updateFramerate < framerate) FlxG.drawFramerate = FlxG.updateFramerate = framerate;
-		else FlxG.updateFramerate = FlxG.drawFramerate = framerate;
+		if (FlxG.updateFramerate < framerate)
+			FlxG.drawFramerate = FlxG.updateFramerate = framerate;
+		else
+			FlxG.updateFramerate = FlxG.drawFramerate = framerate;
 	}
 }
 
@@ -45,10 +49,8 @@ class AdvancedAppearanceOptions extends TreeMenuScreen
 	{
 		super('optionsMenu.advanced', 'optionsTree.appearance.advanced-desc', 'AppearanceOptions.Advanced.');
 
-		add(new ArrayOption(getNameID('quality'), getDescID('quality'),
-			[0, 1, 2], [getID('quality-low'), getID('quality-high'), getID('quality-custom')],
-			'quality', __changeQuality
-		));
+		add(new ArrayOption(getNameID('quality'), getDescID('quality'), [0, 1, 2], [getID('quality-low'), getID('quality-high'), getID('quality-custom')],
+			'quality', __changeQuality));
 
 		for (option in (qualityOptions = [
 			new Checkbox(getNameID('antialiasing'), getDescID('antialiasing'), 'antialiasing', __changeAntialiasing),

@@ -38,8 +38,10 @@ class FunkinGame extends FlxGame
 		skipNextTickUpdate = true;
 	}
 
-	override function __enterFrame(deltaTime:Float) {
-		if (skipNextTickUpdate != (skipNextTickUpdate = false)) ticks = getTicks();
+	override function __enterFrame(deltaTime:Float)
+	{
+		if (skipNextTickUpdate != (skipNextTickUpdate = false))
+			ticks = getTicks();
 		super.__enterFrame(deltaTime);
 	}
 }

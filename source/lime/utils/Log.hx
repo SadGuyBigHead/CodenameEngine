@@ -19,7 +19,7 @@ class Log
 		if (level >= LogLevel.DEBUG)
 		{
 			#if js
-			untyped js.Syntax.code ("console").debug("[" + info.className + "] " + message);
+			untyped js.Syntax.code("console").debug("[" + info.className + "] " + message);
 			#elseif !macro
 			FunkinLogs.trace('[${info.className}] $message', INFO, LIGHTGRAY);
 			#else
@@ -67,7 +67,7 @@ class Log
 		#if sys
 		Sys.print(Std.string(message));
 		#elseif js
-		untyped js.Syntax.code ("console").log(message);
+		untyped js.Syntax.code("console").log(message);
 		#else
 		trace(message);
 		#end
@@ -78,7 +78,7 @@ class Log
 		#if sys
 		Sys.println(Std.string(message));
 		#elseif js
-		untyped js.Syntax.code ("console").log(message);
+		untyped js.Syntax.code("console").log(message);
 		#else
 		trace(Std.string(message));
 		#end
@@ -133,13 +133,15 @@ class Log
 		#end
 
 		#if js
-		if (untyped js.Syntax.code ("typeof console") == "undefined")
+		if (untyped js.Syntax.code("typeof console") == "undefined")
 		{
-			untyped js.Syntax.code ("console = {}");
+			untyped js.Syntax.code("console = {}");
 		}
-		if (untyped js.Syntax.code ("console").log == null)
+		if (untyped js.Syntax.code("console").log == null)
 		{
-			untyped js.Syntax.code ("console").log = function() {};
+			untyped js.Syntax.code("console").log = function()
+			{
+			};
 		}
 		#end
 	}

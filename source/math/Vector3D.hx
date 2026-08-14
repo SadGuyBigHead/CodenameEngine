@@ -94,15 +94,14 @@ abstract Vector3D(BaseVector3D) from BaseVector3D to BaseVector3D
 		return get(x, y, z, w);
 	}
 
-	//public inline function crossProduct(a:Vector3D)
-	//{
+	// public inline function crossProduct(a:Vector3D)
+	// {
 	//	return this.crossProduct(a);
-	//}
-
-	//public inline function crossProductNew(a:Vector3D)
-	//{
+	// }
+	// public inline function crossProductNew(a:Vector3D)
+	// {
 	//	return this.crossProduct(a);
-	//}
+	// }
 
 	public inline function distance(a:Vector3D)
 	{

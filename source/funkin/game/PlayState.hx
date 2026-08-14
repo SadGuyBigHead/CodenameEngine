@@ -1302,7 +1302,8 @@ class PlayState extends MusicBeatState
 			PlayState.instance.gameAndCharsCall("onStageDestroy", [stage]);
 		scripts.call("destroy");
 
-		for (g in __cachedGraphics) g.decrementUseCount();
+		for (g in __cachedGraphics)
+			g.decrementUseCount();
 		@:privateAccess {
 			for (strumLine in strumLines.members)
 				FlxG.sound.destroySound(strumLine.vocals);
@@ -2613,9 +2614,9 @@ class PlayState extends MusicBeatState
 		if (note == null || !note.held)
 			return null;
 
-		var event:SustainMissEvent = EventManager.get(SustainMissEvent).recycle(note, muteVocalsOnMiss, -0.0475, Paths.sound(FlxG.random.getObject(Flags.DEFAULT_MISS_SOUNDS)),
-					FlxG.random.float(0.1, 0.2), combo > 5, "sad", true, true, "miss", strumLine.characters, strumLine.ID,
-					note.noteType, note.strumID);
+		var event:SustainMissEvent = EventManager.get(SustainMissEvent)
+			.recycle(note, muteVocalsOnMiss, -0.0475, Paths.sound(FlxG.random.getObject(Flags.DEFAULT_MISS_SOUNDS)), FlxG.random.float(0.1, 0.2), combo > 5,
+				"sad", true, true, "miss", strumLine.characters, strumLine.ID, note.noteType, note.strumID);
 		event = scripts.event(strumLine != null && !strumLine.cpu ? "onPlayerSustainMiss" : "onDadSustainMiss", event);
 		gameAndCharsEvent("onSustainMiss", event);
 
@@ -2624,10 +2625,10 @@ class PlayState extends MusicBeatState
 			if (gf != null && event.gfSad && gf.hasAnimation(event.gfSadAnim))
 				gf.playAnim(event.gfSadAnim, event.forceGfAnim, MISS);
 
-			//songScore += (1 - note.);
+			// songScore += (1 - note.);
 			if (event.resetCombo)
 				combo = 0;
-			
+
 			if (event.playMissSound)
 				FlxG.sound.play(event.missSound, event.missVolume);
 

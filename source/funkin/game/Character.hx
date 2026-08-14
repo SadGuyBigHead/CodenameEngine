@@ -303,6 +303,7 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 
 	var __storedShader:FlxShader;
 	final __tintShader = new CharacterMissTintShader();
+
 	public override function draw()
 	{
 		final missTint = lastAnimContext == MISS && singing;
@@ -313,7 +314,7 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 			__tintShader.tintColor = missTintColor;
 			__tintShader.tintMix = missTintMix;
 		}
-		
+
 		var e = EventManager.get(DrawEvent).recycle();
 		scripts.call("draw", [e]);
 

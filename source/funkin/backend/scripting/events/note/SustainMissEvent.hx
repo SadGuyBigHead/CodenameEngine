@@ -9,6 +9,7 @@ final class SustainMissEvent extends CancellableEvent
 	@:dox(hide) public var animCancelled:Bool = false;
 	@:dox(hide) public var resetCombo:Bool = true;
 	@:dox(hide) public var playMissSound:Bool = true;
+
 	/**
 	 * Note that has been missed
 	 */

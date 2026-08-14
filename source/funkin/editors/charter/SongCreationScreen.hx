@@ -460,9 +460,13 @@ class SongCreationScreen extends UISubstateWindow
 			{
 				trace(e.stack, e.message);
 				openSubState(new UIWarningSubstate("Importing Song/Charts: Error!", e.details(), [
-					{label: "Ok", color: 0xFFFF0000, onClick: function(t)
 					{
-					}}
+						label: "Ok",
+						color: 0xFFFF0000,
+						onClick: function(t)
+						{
+						}
+					}
 				]));
 			}
 		}
@@ -482,7 +486,8 @@ class SongCreationScreen extends UISubstateWindow
 				opponentModeAllowed: opponentModeCheckbox.checked,
 				coopAllowed: coopAllowedCheckbox.checked,
 				difficulties: [
-					for (diff in difficultiesTextBox.label.text.split(",")) if (diff.length > 0) diff.trim()
+					for (diff in difficultiesTextBox.label.text.split(","))
+						if (diff.length > 0) diff.trim()
 				]
 			});
 

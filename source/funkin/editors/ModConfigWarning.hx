@@ -50,14 +50,16 @@ LOGO_TEXT=""
 [StateRedirects.force] # Use this if you want to override redirects set by subsequent addons/mods
 ';
 
-	public function new(library:ModsFolderLibrary, ?goToState:Class<FlxState>, ?useAPIWarning:Bool = false) {
+	public function new(library:ModsFolderLibrary, ?goToState:Class<FlxState>, ?useAPIWarning:Bool = false)
+	{
 		super();
 		this.library = library;
 		this.goToState = goToState != null ? goToState : funkin.menus.TitleState;
 		this.useAPIWarning = useAPIWarning;
 	}
 
-	public function goBack() {
+	public function goBack()
+	{
 		MusicBeatState.skipTransOut = MusicBeatState.skipTransIn = false;
 		FlxG.switchState(cast Type.createInstance(goToState, []));
 	}
@@ -67,39 +69,47 @@ LOGO_TEXT=""
 		super.createPost();
 		hadPopup = true;
 
-		var substate = useAPIWarning ? new UIWarningSubstate(TU.translate("modApiWarning.warningTitle", [Flags.MOD_API_VERSION != null ? Std.string(Flags.MOD_API_VERSION) : '???', Flags.CURRENT_API_VERSION]), TU.translate("modApiWarning.warningDesc"), [
+		var substate = useAPIWarning ? new UIWarningSubstate(TU.translate("modApiWarning.warningTitle", [
+			Flags.MOD_API_VERSION != null ? Std.string(Flags.MOD_API_VERSION) : '???',
+			Flags.CURRENT_API_VERSION
+		]), TU.translate("modApiWarning.warningDesc"), [
 			{
 				label: TU.translate("editor.ok"),
 				color: 0x969533,
-				onClick: function (_) {
-					goBack();
-				}
-			}
-		], false) : new UIWarningSubstate(TU.translate("modConfigWarning.warningTitle"), TU.translate("modConfigWarning.warningDesc"), [
-			{
-				label: TU.translate("editor.notNow"),
-				color: 0x969533,
-				onClick: function (_) {
-					goBack();
-				}
-			},
-			{
-				label: TU.translate("editor.yes"),
 				onClick: function(_)
 				{
-					var path = '${library.folderPath}/data/config/modpack.ini';
-					CoolUtil.safeSaveFile(path, defaultModConfigText);
-					openSubState(new UIWarningSubstate(TU.translate("modConfigWarning.createdTitle"), TU.translate("modConfigWarning.createdDesc", [path]), [
-						{
-							label: TU.translate("editor.ok"),
-							onClick: function (_) {
-								goBack();
-							}
-						},
-					], false));
+					goBack();
 				}
 			}
-		], false);
+		],
+			false) : new UIWarningSubstate(TU.translate("modConfigWarning.warningTitle"), TU.translate("modConfigWarning.warningDesc"), [
+				{
+					label: TU.translate("editor.notNow"),
+					color: 0x969533,
+					onClick: function(_)
+					{
+						goBack();
+					}
+				},
+				{
+					label: TU.translate("editor.yes"),
+					onClick: function(_)
+					{
+						var path = '${library.folderPath}/data/config/modpack.ini';
+						CoolUtil.safeSaveFile(path, defaultModConfigText);
+						openSubState(new UIWarningSubstate(TU.translate("modConfigWarning.createdTitle"),
+							TU.translate("modConfigWarning.createdDesc", [path]), [
+							{
+								label: TU.translate("editor.ok"),
+								onClick: function(_)
+								{
+									goBack();
+								}
+							},
+						], false));
+					}
+				}
+			], false);
 		openSubState(substate);
 	}
 }

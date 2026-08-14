@@ -11,8 +11,10 @@ class RotatingSpriteGroup extends FlxSpriteGroup
 				return super.recycle(ObjectClass, ObjectFactory, Force, Revive);
 			if (group.members.length < maxSize)
 			{
-				if (ObjectFactory != null) return add(ObjectFactory());
-				if (ObjectClass != null) return add(Type.createInstance(ObjectClass, []));
+				if (ObjectFactory != null)
+					return add(ObjectFactory());
+				if (ObjectClass != null)
+					return add(Type.createInstance(ObjectClass, []));
 
 				return null;
 			}

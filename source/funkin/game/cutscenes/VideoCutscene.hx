@@ -105,11 +105,21 @@ class VideoCutscene extends Cutscene
 		loadingBackdrop.alpha = 0;
 		FlxTween.tween(loadingBackdrop, {alpha: 1}, 0.5, {ease: FlxEase.sineInOut});
 
-		Main.execAsync(function() {
-			if (video.load(localPath)) FlxTimer.wait(0.001, function() {
-				mutex.acquire(); onReady(); mutex.release();
-			});
-			else { mutex.acquire(); close(); mutex.release(); }
+		Main.execAsync(function()
+		{
+			if (video.load(localPath))
+				FlxTimer.wait(0.001, function()
+				{
+					mutex.acquire();
+					onReady();
+					mutex.release();
+				});
+			else
+			{
+				mutex.acquire();
+				close();
+				mutex.release();
+			}
 		});
 
 		add(bg);

@@ -64,9 +64,11 @@ class MultiFramesCollection extends FlxFramesCollection
 
 	public override function destroy():Void
 	{
-		if(parentedFrames != null) {
-			for(collection in parentedFrames) {
-				if(collection != null)
+		if (parentedFrames != null)
+		{
+			for (collection in parentedFrames)
+			{
+				if (collection != null)
 					collection.parent.decrementUseCount();
 			}
 			parentedFrames = null;

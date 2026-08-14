@@ -6,14 +6,15 @@ package dave.timeline;
 class FuncEvent extends TimelineEvent
 {
 	var func:Void->Void;
-	//var undoFunc:Void->Void;
 
-	public function new(beat:Float, func:Void->Void) //, ?undoFunc:Void->Void)
+	// var undoFunc:Void->Void;
+
+	public function new(beat:Float, func:Void->Void) // , ?undoFunc:Void->Void)
 	{
 		super(beat);
 
 		this.func = func;
-		//this.undoFunc = undoFunc;
+		// this.undoFunc = undoFunc;
 	}
 
 	override function run(beat:Float)

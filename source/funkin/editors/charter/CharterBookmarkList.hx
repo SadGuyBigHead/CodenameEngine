@@ -56,7 +56,8 @@ class CharterBookmarkList extends UISubstateWindow
 	{
 		var oldList:Array<ChartBookmark> = Charter.instance.getBookmarkList();
 		var newList:Array<ChartBookmark> = [
-			for (btn in bookmarkList.buttons.members) {time: btn.bookmark.time, name: btn.textBox.label.text, color: btn.bookmark.color}
+			for (btn in bookmarkList.buttons.members)
+				{time: btn.bookmark.time, name: btn.textBox.label.text, color: btn.bookmark.color}
 		];
 
 		PlayState.SONG.bookmarks = newList;

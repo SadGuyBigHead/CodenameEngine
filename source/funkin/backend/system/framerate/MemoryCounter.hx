@@ -33,12 +33,16 @@ class MemoryCounter extends Sprite
 		memoryPeakText.alpha = 0.5;
 	}
 
-	public function reload() {
-		for(label in [memoryText, memoryPeakText]) label.defaultTextFormat = Framerate.textFormat;
+	public function reload()
+	{
+		for (label in [memoryText, memoryPeakText])
+			label.defaultTextFormat = Framerate.textFormat;
 	}
 
-	public override function __enterFrame(t:Float) {
-		if (alpha <= 0.05) return;
+	public override function __enterFrame(t:Float)
+	{
+		if (alpha <= 0.05)
+			return;
 		super.__enterFrame(t);
 
 		final mem = MemoryUtil.currentMemUsage();

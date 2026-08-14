@@ -42,12 +42,16 @@ class FramerateCategory extends Sprite
 		this.text.y = this.title.y + this.title.height + 2;
 	}
 
-	public function reload() {
-		for(label in [this.title, this.text]) label.defaultTextFormat = new TextFormat(Framerate.fontName, label == this.title ? 18 : 12, -1);
+	public function reload()
+	{
+		for (label in [this.title, this.text])
+			label.defaultTextFormat = new TextFormat(Framerate.fontName, label == this.title ? 18 : 12, -1);
 	}
 
-	public override function __enterFrame(t:Float) {
-		if (alpha <= 0.05) return;
+	public override function __enterFrame(t:Float)
+	{
+		if (alpha <= 0.05)
+			return;
 		super.__enterFrame(t);
 
 		var width = Math.max(this.title.width, this.text.width) + (Framerate.instance.x * 2);

@@ -280,7 +280,8 @@ class FreeplayState extends MusicBeatState
 		var event = event("onSelect",
 			EventManager.get(FreeplaySongSelectEvent).recycle(curSong.name, curDifficulties[curDifficulty], curSong.variant, __opponentMode, __coopMode));
 
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		Options.freeplayLastSong = curSong.name;
 		Options.freeplayLastDifficulty = curDifficulties[curDifficulty];

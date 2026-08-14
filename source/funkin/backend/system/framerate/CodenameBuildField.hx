@@ -13,7 +13,8 @@ class CodenameBuildField extends TextField
 		reload();
 	}
 
-	public function reload() {
+	public function reload()
+	{
 		defaultTextFormat = Framerate.textFormat;
 
 		#if TEST_BUILD

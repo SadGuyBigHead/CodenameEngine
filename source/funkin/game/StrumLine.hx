@@ -114,7 +114,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 	 * Extra data that can be added to the strum line.
 	**/
 	public var extra:Map<String, Dynamic> = [];
-	
+
 	/**
 	 * On upscroll, the highest the note is drawn at in pixels from their receptor/playField
 	 */
@@ -124,7 +124,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 	 * On upscroll, the lowest a note can is drawn at in pixels from their refecpepcepcpefpecp
 	 */
 	public var drawDistanceMax:Float = FlxG.height;
-	
+
 	/**
 	 * Value to control the speed of hold singing
 	 * If set to 2.0, then holds will play their animations twice as fast
@@ -150,7 +150,6 @@ class StrumLine extends FlxTypedGroup<Strum>
 	public var justStepped:Bool;
 
 	var lastStep:Int;
-
 
 	private function get_ghostTapping()
 	{
@@ -246,9 +245,9 @@ class StrumLine extends FlxTypedGroup<Strum>
 	public override function draw()
 	{
 		// dont draw cause we have custom rendering
-		//super.draw();
-		//notes.cameras = cameras;
-		//notes.draw();
+		// super.draw();
+		// notes.cameras = cameras;
+		// notes.draw();
 	}
 
 	/**
@@ -342,10 +341,10 @@ class StrumLine extends FlxTypedGroup<Strum>
 			if (endDist > note.strum.confirmLength * .5)
 				note.strum.press(__updateNote_songPos);
 		}
-		
+
 		if (!event.held)
 			return true;
-		
+
 		return endDist < 0;
 	}
 
@@ -549,7 +548,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 			babyArrow.animation.addByPrefix('confirm', '${event.animPrefix} confirm', 24, false);
 
 			final confirm = babyArrow.animation.getByName("confirm");
-			babyArrow.confirmLength = confirm.numFrames * (1/confirm.frameRate) * 1000;
+			babyArrow.confirmLength = confirm.numFrames * (1 / confirm.frameRate) * 1000;
 		}
 
 		babyArrow.cpu = cpu;

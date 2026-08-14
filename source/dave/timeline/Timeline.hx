@@ -31,22 +31,22 @@ class Timeline extends flixel.FlxBasic
 	 */
 	public function add(event:TimelineEvent):Timeline
 	{
-		//if (event.state != UPCOMING)
+		// if (event.state != UPCOMING)
 		//	throw "Only upcoming events can be added";
-		//if (event._broken)
-		//{
+		// if (event._broken)
+		// {
 		//	event.destroy();
 		//	return this;
-		//}
+		// }
 		events.push(event);
-		//event.pushed();
+		// event.pushed();
 		return this;
 	}
 
 	public function remove(event:TimelineEvent):Timeline
 	{
 		garbage.push(event);
-		//getEventArray(event.state).remove(event);
+		// getEventArray(event.state).remove(event);
 		return this;
 	}
 
@@ -56,7 +56,7 @@ class Timeline extends flixel.FlxBasic
 		return this;
 	}
 
-	override function update(elapsed:Float) 
+	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 		run(conductor.currentBeatTime);
@@ -76,7 +76,7 @@ class Timeline extends flixel.FlxBasic
 				}
 				catch (e)
 				{
-					//log(['[HAXE ERROR] $e', e.stack, e.details()]);
+					// log(['[HAXE ERROR] $e', e.stack, e.details()]);
 					trace("event ereror :(", e.stack, e.details());
 					ret = true;
 				}
@@ -108,7 +108,6 @@ class Timeline extends flixel.FlxBasic
 
 	override function destroy()
 	{
-		
 	}
 
 	// simple events
@@ -143,10 +142,10 @@ class Timeline extends flixel.FlxBasic
 		add(new PerframeEvent(beat, length, func));
 	}
 
-	//public function implementToHScript(hscript:HScript)
-	//{
+	// public function implementToHScript(hscript:HScript)
+	// {
 	//	hscript.set("func", func);
 	//	hscript.set("funcEase", funcEase);
 	//	hscript.set("perframe", perframe);
-	//}
+	// }
 }

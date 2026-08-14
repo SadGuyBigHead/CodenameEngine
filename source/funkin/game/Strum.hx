@@ -183,7 +183,6 @@ class Strum extends FlxSprite
 
 	public override function draw()
 	{
-		
 	}
 
 	@:noCompletion public static inline final PIX180:Float = 565.4866776461628; // 180 * Math.PI
@@ -241,7 +240,6 @@ class Strum extends FlxSprite
 
 		if (shouldX || shouldY)
 		{
-			
 		}
 	}
 

@@ -396,7 +396,8 @@ class StoryWeeklist
 	{
 		var path:String = Paths.txt('weeks/weeks');
 		var weeksFound:Array<String> = useTxt && Paths.assetsTree.existsSpecific(path, "TEXT", source) ? CoolUtil.coolTextFile(path) : [
-			for (c in Paths.getFolderContent('data/weeks/weeks/', false, source)) if (Path.extension(c).toLowerCase() == "xml") Path.withoutExtension(c)
+			for (c in Paths.getFolderContent('data/weeks/weeks/', false, source))
+				if (Path.extension(c).toLowerCase() == "xml") Path.withoutExtension(c)
 		];
 
 		if (weeksFound.length > 0)

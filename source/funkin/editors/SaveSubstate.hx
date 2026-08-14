@@ -33,11 +33,13 @@ class SaveSubstate extends MusicBeatSubstate
 		super.create();
 
 		#if lime_funkin
-		FileDialog.saveFile(FlxG.stage.window, "Save File", (fileName:String, activeFilter:FileDialogFilter) -> {
+		FileDialog.saveFile(FlxG.stage.window, "Save File", (fileName:String, activeFilter:FileDialogFilter) ->
+		{
 			CoolUtil.safeSaveFile(fileName, data);
 			close();
-		}, [new FileDialogFilter("Specified File Extension", options.saveExt.getDefault(Path.extension(options.defaultSaveFile)))],
-			options.defaultSaveFile);
+		}, [
+				new FileDialogFilter("Specified File Extension", options.saveExt.getDefault(Path.extension(options.defaultSaveFile)))
+		], options.defaultSaveFile);
 		#else
 		var fileDialog = new FileDialog();
 		fileDialog.onCancel.add(function() close());

@@ -12,8 +12,10 @@ import flixel.util.FlxColor;
  * Class for functions that talk to a lower level than haxe, such as message boxes, and more.
  * Some functions might not have effect on some platforms.
  */
-class NativeAPI {
-	@:dox(hide) public static function registerAsDPICompatible() {
+class NativeAPI
+{
+	@:dox(hide) public static function registerAsDPICompatible()
+	{
 		#if windows
 		Windows.registerAsDPICompatible();
 		#end

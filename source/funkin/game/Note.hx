@@ -14,7 +14,7 @@ using StringTools;
 
 @:allow(funkin.game.PlayState)
 class Note extends FlxSprite
-{	
+{
 	public var player(get, never):Int;
 
 	function get_player()
@@ -31,7 +31,6 @@ class Note extends FlxSprite
 	public var holdScore:Float = 450;
 
 	// who cares
-
 	public var extra:Map<String, Dynamic> = [];
 
 	public var strumTime:Float = 0;
@@ -109,7 +108,7 @@ class Note extends FlxSprite
 	public var updateFlipY:Bool = true;
 
 	public var noteType(get, never):String;
-	
+
 	public var strum:Strum;
 
 	@:dox(hide) @:allow(funkin.game.Strum) @:noCompletion private var __strumCameras:Array<FlxCamera> = null;
@@ -247,7 +246,6 @@ class Note extends FlxSprite
 
 	override function draw()
 	{
-		
 	}
 
 	function applyStrumPos()

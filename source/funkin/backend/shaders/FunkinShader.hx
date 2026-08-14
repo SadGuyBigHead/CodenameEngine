@@ -2,9 +2,7 @@ package funkin.backend.shaders;
 
 import haxe.io.Path;
 import haxe.Exception;
-
 import hscript.IHScriptCustomBehaviour;
-
 import openfl.display.BitmapData;
 import openfl.display.Shader;
 import openfl.display.ShaderParameter;
@@ -16,7 +14,6 @@ import openfl.display3D._internal.GLShader;
 import openfl.display3D.Program3D;
 import openfl.utils._internal.Log;
 import openfl.utils.GLSLSourceAssembler;
-
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.graphics.FlxGraphic;
 import flixel.util.FlxSignal.FlxTypedSignal;
@@ -26,22 +23,30 @@ import flixel.util.FlxStringUtil;
 @:access(openfl.display3D.Program3D)
 @:access(openfl.display.ShaderInput)
 @:access(openfl.display.ShaderParameter)
-class FunkinShader extends FlxRuntimeShader implements IHScriptCustomBehaviour {
+class FunkinShader extends FlxRuntimeShader implements IHScriptCustomBehaviour
+{
 	public var onGLUpdate:FlxTypedSignal<Void->Void> = new FlxTypedSignal<Void->Void>();
 
-	public function new(?fragmentSource:String, ?vertexSource:String, ?version:String) {
-		super(fragmentSource, vertexSource, version ?? (fragmentSource != null || vertexSource != null ? Flags.DEFAULT_GLSL_VERSION : null));
+	public function new(?fragmentSource:String, ?vertexSource:String, ?version:String)
+	{
+		super(fragmentSource, vertexSource, version ?? (fragmentSource != null
+			|| vertexSource != null ? Flags.DEFAULT_GLSL_VERSION : null));
 	}
 
-	public static function fromFile(fragmentPath:String, ?vertexPath:String, ?version:String):FunkinShader {
+	public static function fromFile(fragmentPath:String, ?vertexPath:String, ?version:String):FunkinShader
+	{
 		return new FunkinShader().loadShaderFile(fragmentPath, vertexPath, version);
 	}
 
-	public function loadShaderFile(fragmentPath:String, ?vertexPath:String, ?version:String):FunkinShader {
-		if (vertexPath == null) {
+	public function loadShaderFile(fragmentPath:String, ?vertexPath:String, ?version:String):FunkinShader
+	{
+		if (vertexPath == null)
+		{
 			final idx = fragmentPath.lastIndexOf(".");
-			if (idx == -1) vertexPath = fragmentPath;
-			else vertexPath = fragmentPath.substr(0, idx);
+			if (idx == -1)
+				vertexPath = fragmentPath;
+			else
+				vertexPath = fragmentPath.substr(0, idx);
 		}
 
 		fragmentPath = FlxRuntimeShader._getPath(fragmentPath, false);
@@ -52,11 +57,15 @@ class FunkinShader extends FlxRuntimeShader implements IHScriptCustomBehaviour {
 	}
 
 	#if REGION /* IHScriptCustomBehaviour */
-	public function hget(name:String):Dynamic {
-		if (__glSourceDirty) __init();
+	public function hget(name:String):Dynamic
+	{
+		if (__glSourceDirty)
+			__init();
 
-		if (__thisHasField(name) || __thisHasField('get_${name}')) return Reflect.getProperty(this, name);
-		else if (!Reflect.hasField(__data, name)) return null;
+		if (__thisHasField(name) || __thisHasField('get_${name}'))
+			return Reflect.getProperty(this, name);
+		else if (!Reflect.hasField(__data, name))
+			return null;
 
 		final field:Dynamic = Reflect.field(__data, name);
 
@@ -77,14 +86,18 @@ class FunkinShader extends FlxRuntimeShader implements IHScriptCustomBehaviour {
 		return field;
 	}
 
-	public function hset(name:String, val:Dynamic):Dynamic {
-		if (__glSourceDirty) __init();
+	public function hset(name:String, val:Dynamic):Dynamic
+	{
+		if (__glSourceDirty)
+			__init();
 
-		if (__thisHasField(name) || __thisHasField('set_${name}')) {
+		if (__thisHasField(name) || __thisHasField('set_${name}'))
+		{
 			Reflect.setProperty(this, name, val);
 			return val;
 		}
-		else if (!Reflect.hasField(__data, name)) {
+		else if (!Reflect.hasField(__data, name))
+		{
 			// ??? huh
 			Reflect.setField(__data, name, val);
 			return val;
@@ -148,16 +161,19 @@ class FunkinShader extends FlxRuntimeShader implements IHScriptCustomBehaviour {
 	}
 	#end
 
-	override function __updateGL():Void {
+	override function __updateGL():Void
+	{
 		onGLUpdate.dispatch();
 		super.__updateGL();
 	}
 
-	override function __createAssembler():Void {
+	override function __createAssembler():Void
+	{
 		__glSourceAssembler = new FunkinShaderSourceAssembler(this);
 	}
 
-	override function toString():String {
+	override function toString():String
+	{
 		return __cacheProgramId != null ? 'FunkinShader(${__cacheProgramId})' : 'FunkinShader';
 	}
 
@@ -173,59 +189,91 @@ class FunkinShader extends FlxRuntimeShader implements IHScriptCustomBehaviour {
 	private static var VERTEX_SHADER = 1;
 
 	public var fileName(get, set):String;
-	inline function get_fileName():String return _fragmentFilePath ?? _vertexFilePath ?? "FunkinShader";
-	inline function set_fileName(v:String):String return _fragmentFilePath = _vertexFilePath = v;
+
+	inline function get_fileName():String
+		return _fragmentFilePath ?? _vertexFilePath ?? "FunkinShader";
+
+	inline function set_fileName(v:String):String
+		return _fragmentFilePath = _vertexFilePath = v;
 
 	public var fragFileName(get, set):String;
-	inline function get_fragFileName():String return _fragmentFilePath ?? "FunkinShader";
-	inline function set_fragFileName(v:String):String return _fragmentFilePath = v;
+
+	inline function get_fragFileName():String
+		return _fragmentFilePath ?? "FunkinShader";
+
+	inline function set_fragFileName(v:String):String
+		return _fragmentFilePath = v;
 
 	public var vertFileName(get, set):String;
-	inline function get_vertFileName():String return _vertexFilePath ?? "FunkinShader";
-	inline function set_vertFileName(v:String):String return _vertexFilePath = v;
+
+	inline function get_vertFileName():String
+		return _vertexFilePath ?? "FunkinShader";
+
+	inline function set_vertFileName(v:String):String
+		return _vertexFilePath = v;
 
 	public var glslVer(get, set):String;
-	inline function get_glslVer():String return glVersion;
-	inline function set_glslVer(v:String):String return glVersion = v;
+
+	inline function get_glslVer():String
+		return glVersion;
+
+	inline function set_glslVer(v:String):String
+		return glVersion = v;
 
 	public var glRawFragmentSource(get, set):String;
-	inline function get_glRawFragmentSource():String return __glFragmentSourceRaw;
-	inline function set_glRawFragmentSource(v:String):String return __glFragmentSourceRaw = v;
+
+	inline function get_glRawFragmentSource():String
+		return __glFragmentSourceRaw;
+
+	inline function set_glRawFragmentSource(v:String):String
+		return __glFragmentSourceRaw = v;
 
 	public var glRawVertexSource(get, set):String;
-	inline function get_glRawVertexSource():String return __glVertexSourceRaw;
-	inline function set_glRawVertexSource(v:String):String return __glVertexSourceRaw = v;
 
-	function thisHasField(v:String):Bool return __thisHasField(v);
+	inline function get_glRawVertexSource():String
+		return __glVertexSourceRaw;
 
-	function registerParameter(name:String, type:String, isUniform:Bool) {
+	inline function set_glRawVertexSource(v:String):String
+		return __glVertexSourceRaw = v;
+
+	function thisHasField(v:String):Bool
+		return __thisHasField(v);
+
+	function registerParameter(name:String, type:String, isUniform:Bool)
+	{
 		__registerParameter(name, Shader.getParameterTypeFromGLSL(type, false), StringTools.startsWith(type, "sampler"), 1, null, isUniform, null);
 	}
 
 	// Unused... cne-openfl uses a different system
 	var __cancelNextProcessGLData:Bool = false;
-	public var onProcessGLData:FlxTypedSignal<(String, String)->Void> = new FlxTypedSignal<(String, String)->Void>();
+
+	public var onProcessGLData:FlxTypedSignal<(String, String) -> Void> = new FlxTypedSignal<(String, String) -> Void>();
 	#end
 }
 
-class FunkinShaderSourceAssembler extends FlxRuntimeShader.FlxShaderSourceAssembler {
+class FunkinShaderSourceAssembler extends FlxRuntimeShader.FlxShaderSourceAssembler
+{
 	final funkinParent:FunkinShader;
 
-	public function new(parent:FunkinShader) {
+	public function new(parent:FunkinShader)
+	{
 		super(funkinParent = parent);
 	}
 
 	override function __appendIncludes(source:String, isVertex:Bool, ?includedKeys:Map<String, Bool>):String
 	{
-		if (includedKeys == null) includedKeys = [];
+		if (includedKeys == null)
+			includedKeys = [];
 
 		source = GLSLSourceAssembler.__getIncludeFinder().map(source, (regex:EReg) ->
 		{
 			var key = regex.matched(1);
-			if (includedKeys.get(key)) return '/*Recursive include $key*/\n';
+			if (includedKeys.get(key))
+				return '/*Recursive include $key*/\n';
 
 			var include = __getIncludeSource(key, isVertex);
-			if (include == null) return '/*Unknown include $key*/\n';
+			if (include == null)
+				return '/*Unknown include $key*/\n';
 
 			includedKeys.set(key, true);
 			return '/*include $key*/\n' + __appendIncludes(include, isVertex, includedKeys);
@@ -234,22 +282,27 @@ class FunkinShaderSourceAssembler extends FlxRuntimeShader.FlxShaderSourceAssemb
 		return __getImportCompatibilityFinder().map(source, (regex:EReg) ->
 		{
 			var key = regex.matched(1);
-			if (includedKeys.get(key)) return '/*Recursive import $key*/\n';
+			if (includedKeys.get(key))
+				return '/*Recursive import $key*/\n';
 
 			var include = __getIncludeSource(key, isVertex);
-			if (include == null) return '/*Unknown import $key*/\n';
+			if (include == null)
+				return '/*Unknown import $key*/\n';
 
 			includedKeys.set(key, true);
 			return '/*import $key*/\n' + __appendIncludes(include, isVertex, includedKeys);
 		});
 	}
 
-	override function __getIncludeSource(include:String, fromVertex:Bool):Null<String> {
+	override function __getIncludeSource(include:String, fromVertex:Bool):Null<String>
+	{
 		final path = Paths.getPath('shaders/' + include);
-		if (Assets.exists(path)) return Assets.getText(path);
+		if (Assets.exists(path))
+			return Assets.getText(path);
 
 		final fallback = __getIncludeSource(include, fromVertex);
-		if (fallback != null) return fallback;
+		if (fallback != null)
+			return fallback;
 
 		Logs.traceColored([
 			Logs.logText('[Shader] ', RED),
@@ -265,8 +318,10 @@ class FunkinShaderSourceAssembler extends FlxRuntimeShader.FlxShaderSourceAssemb
 
 		result += funkinParent.shaderPrefix + "\n" + (isVertex ? funkinParent.vertexPrefix : funkinParent.fragmentPrefix) + "\n";
 
-		if (source != null) {
-			if (!isVertex && versionNumber >= 300 && versionProfile != "compatibility" && !StringTools.contains(source, "out vec4")) {
+		if (source != null)
+		{
+			if (!isVertex && versionNumber >= 300 && versionProfile != "compatibility" && !StringTools.contains(source, "out vec4"))
+			{
 				result += "out vec4 openfl_FragColor;\n";
 			}
 			result += source;
@@ -275,13 +330,15 @@ class FunkinShaderSourceAssembler extends FlxRuntimeShader.FlxShaderSourceAssemb
 		return result;
 	}
 
-	private static inline function __getImportCompatibilityFinder():EReg {
+	private static inline function __getImportCompatibilityFinder():EReg
+	{
 		return ~/#import\s+(?|"([^"]+)"|'([^']+)'|<(.*)>|([^\s]+))/g;
 	}
 }
 
 #if REGION /* Backward Compatibility */
-class ShaderTemplates {
+class ShaderTemplates
+{
 	public static final vertHeader:String = "attribute float openfl_Alpha;
 attribute vec4 openfl_ColorMultiplier;
 attribute vec4 openfl_ColorOffset;

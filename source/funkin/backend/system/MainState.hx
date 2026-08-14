@@ -189,14 +189,15 @@ class MainState extends FlxState
 		if (Options.devMode && Options.allowConfigWarning && !isZipMod)
 		{
 			var lib:ModsFolderLibrary;
-			for (e in Paths.assetsTree.libraries) if ((lib = cast AssetsLibraryList.getCleanLibrary(e)) is ModsFolderLibrary
-				&& lib.modName == ModsFolder.currentModFolder)
-			{
-				if (!outdatedAPI && lib.exists(Paths.ini("config/modpack"), lime.utils.AssetType.TEXT)) break;
+			for (e in Paths.assetsTree.libraries)
+				if ((lib = cast AssetsLibraryList.getCleanLibrary(e)) is ModsFolderLibrary && lib.modName == ModsFolder.currentModFolder)
+				{
+					if (!outdatedAPI && lib.exists(Paths.ini("config/modpack"), lime.utils.AssetType.TEXT))
+						break;
 
-				FlxG.switchState(new ModConfigWarning(lib, startState, outdatedAPI));
-				return;
-			}
+					FlxG.switchState(new ModConfigWarning(lib, startState, outdatedAPI));
+					return;
+				}
 		}
 
 		FlxG.switchState(cast Type.createInstance(startState, []));

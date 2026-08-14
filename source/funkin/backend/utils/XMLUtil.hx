@@ -135,26 +135,34 @@ final class XMLUtil
 	 * @param node The XML node
 	 * @param parentFolder The parent folder
 	 */
-	public static function appendSpriteSheetsFromXML(spr:FunkinSprite, node:Access, ?parentFolder:String = ''):FlxFramesCollection {
-		if (spr == null) return null;
+	public static function appendSpriteSheetsFromXML(spr:FunkinSprite, node:Access, ?parentFolder:String = ''):FlxFramesCollection
+	{
+		if (spr == null)
+			return null;
 		var defaultPath = '$parentFolder${node.getAtt("sprite").getDefault(spr.name)}';
-		if (!node.hasNode.spritesheet && !node.hasNode.sheet) {
+		if (!node.hasNode.spritesheet && !node.hasNode.sheet)
+		{
 			spr.loadSprite(Paths.image(defaultPath, null, true));
 			return spr.frames;
 		}
 		var seenSheets:Array<String> = [defaultPath];
-		for (n in node.elements) {
-			if (n.name != 'spritesheet' && n.name != 'sheet') continue;
+		for (n in node.elements)
+		{
+			if (n.name != 'spritesheet' && n.name != 'sheet')
+				continue;
 			var path = n.x.get('path') ?? n.x.firstChild()?.nodeValue?.trim();
-			if (path == null) {
+			if (path == null)
+			{
 				Logs.warn('Spritesheet node is missing text content or the path attribute. Skipping...');
 				continue;
 			}
-			if (seenSheets.contains(path)) {
+			if (seenSheets.contains(path))
+			{
 				Logs.warn('Spritesheet "${Paths.image(path)}" was already added. Skipping...');
 				continue;
 			}
-			if (!Paths.framesExists(path, true)) {
+			if (!Paths.framesExists(path, true))
+			{
 				Logs.warn('Could not find a BitmapData asset with ID "${Paths.image(path)}". Skipping...');
 				continue;
 			}
@@ -162,6 +170,7 @@ final class XMLUtil
 		}
 		return spr.frames = Paths.getMultiFrames(seenSheets, false, null, null, spr.animateSettings);
 	}
+
 	/**
 	 * Sets the properties of a sprite based on a XML node.
 	 * @param spr The sprite
@@ -177,7 +186,8 @@ final class XMLUtil
 
 		spr.name = node.getAtt("name");
 		spr.antialiasing = true;
-		if (loadGraphic) {
+		if (loadGraphic)
+		{
 			appendSpriteSheetsFromXML(spr, node, parentFolder);
 		}
 		spr.spriteAnimType = defaultAnimType;
@@ -300,10 +310,10 @@ final class XMLUtil
 			spr.color = FlxColor.fromString(node.getAtt("color")).getDefault(0xFFFFFFFF);
 
 		// no need to getDefault here ? since null blend acts like normal blend
-		@:privateAccess if(node.has.blend)
+		@:privateAccess if (node.has.blend)
 			spr.blend = BlendMode.fromString(node.getAtt("blend"));
 
-		if(node.has.angle)
+		if (node.has.angle)
 			spr.angle = Std.parseFloat(node.getAtt("angle")).getDefault(spr.angle);
 
 		if (node.has.playOnCountdown)
@@ -376,17 +386,28 @@ final class XMLUtil
 			label: false
 		};
 
-		if (anim.has.name) animData.name = anim.att.name;
-		if (anim.has.type) animData.animType = XMLAnimType.fromString(anim.att.type, animData.animType);
-		if (anim.has.anim) animData.anim = anim.att.anim;
-		if (anim.has.fps) animData.fps = Std.parseFloat(anim.att.fps).getDefaultFloat(animData.fps);
-		if (anim.has.x) animData.x = Std.parseFloat(anim.att.x).getDefaultFloat(animData.x);
-		if (anim.has.y) animData.y = Std.parseFloat(anim.att.y).getDefaultFloat(animData.y);
-		if (anim.has.loop) animData.loop = anim.att.loop == "true";
-		if (anim.has.forced) animData.forced = anim.att.forced == "true";
-		if (anim.has.indices) animData.indices = CoolUtil.parseNumberRange(anim.att.indices);
-		if (anim.has.label) animData.label = anim.att.label == "true";
-		if (anim.has.isAnimate) animData.isAnimate = anim.att.isAnimate == "true";
+		if (anim.has.name)
+			animData.name = anim.att.name;
+		if (anim.has.type)
+			animData.animType = XMLAnimType.fromString(anim.att.type, animData.animType);
+		if (anim.has.anim)
+			animData.anim = anim.att.anim;
+		if (anim.has.fps)
+			animData.fps = Std.parseFloat(anim.att.fps).getDefaultFloat(animData.fps);
+		if (anim.has.x)
+			animData.x = Std.parseFloat(anim.att.x).getDefaultFloat(animData.x);
+		if (anim.has.y)
+			animData.y = Std.parseFloat(anim.att.y).getDefaultFloat(animData.y);
+		if (anim.has.loop)
+			animData.loop = anim.att.loop == "true";
+		if (anim.has.forced)
+			animData.forced = anim.att.forced == "true";
+		if (anim.has.indices)
+			animData.indices = CoolUtil.parseNumberRange(anim.att.indices);
+		if (anim.has.label)
+			animData.label = anim.att.label == "true";
+		if (anim.has.isAnimate)
+			animData.isAnimate = anim.att.isAnimate == "true";
 
 		return animData;
 	}
@@ -419,8 +440,9 @@ final class XMLUtil
 			if (animData.fps <= 0 #if web || animData.fps == null #end)
 				animData.fps = 24;
 
-			if ((sprite.frames is FlxAnimateFrames) == (animData.isAnimate ?? true)) {
-				if(animData.anim == null)
+			if ((sprite.frames is FlxAnimateFrames) == (animData.isAnimate ?? true))
+			{
+				if (animData.anim == null)
 					return MISSING_PROPERTY;
 
 				var animateAnim = cast(sprite, FunkinSprite).anim;
@@ -509,7 +531,8 @@ final class XMLUtil
 				{
 					var a = n.nodeValue.split("\n");
 					n.nodeValue = [
-						for (i => x in a) i == 0 ? x.rtrim() : i == arr.length - 1 ? x.ltrim() : x.trim()
+						for (i => x in a)
+							i == 0 ? x.rtrim() : i == arr.length - 1 ? x.ltrim() : x.trim()
 					].join("\n");
 				}
 			}

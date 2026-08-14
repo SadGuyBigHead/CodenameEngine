@@ -1,4 +1,5 @@
 ## NOTE
+
 Keep in mind that a certain criteria was used to place events in their corresponding folders which is simply what the events themselves are mostly related to.
 
 For example:

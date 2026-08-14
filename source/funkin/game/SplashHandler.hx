@@ -39,7 +39,6 @@ final class SplashHandler extends FlxTypedGroup<SplashGroup>
 
 	public override function draw()
 	{
-		
 	}
 
 	var __grp:SplashGroup;

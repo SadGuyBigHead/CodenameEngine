@@ -14,7 +14,6 @@ import modchart.macro.ArrowEffectsUtil.getAccels;
 import modchart.macro.ArrowEffectsUtil.getEffects;
 import modchart.macro.ArrowEffectsUtil.getAppearances;
 import modchart.macro.ArrowEffectsUtil.getScrolls;
-
 import funkin.game.PlayState;
 
 #if !modchart_debug
@@ -1454,7 +1453,7 @@ final class PlayerState
 		this.playField = playField;
 		keyCount = playField.strumLine.data.keyCount ?? 4;
 		MOD_LENGTH = keyCount + 1;
-		
+
 		_accels = new Vector<Float>(NUM_ACCELS * MOD_LENGTH, true);
 		_effects = new Vector<Float>(NUM_EFFECTS * MOD_LENGTH, true);
 		_appearances = new Vector<Float>(NUM_APPEARANCES * MOD_LENGTH, true);

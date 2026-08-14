@@ -58,7 +58,8 @@ class Main extends Sprite
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
-	public static function preInit() {
+	public static function preInit()
+	{
 		#if sys
 		funkin.backend.utils.NativeAPI.registerAsDPICompatible();
 		funkin.backend.system.CommandLineHandler.parseCommandLine(Sys.args());
@@ -97,7 +98,8 @@ class Main extends Sprite
 	public static var startedFromSource:Bool = #if TEST_BUILD true #else false #end;
 
 	// DEPRECATED
-	@:dox(hide) public static function execAsync(func:Void->Void) ThreadUtil.execAsync(func);
+	@:dox(hide) public static function execAsync(func:Void->Void)
+		ThreadUtil.execAsync(func);
 
 	public static function loadGameSettings()
 	{

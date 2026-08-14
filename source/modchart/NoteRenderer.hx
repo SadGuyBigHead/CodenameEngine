@@ -309,13 +309,14 @@ final class NoteRenderer extends flixel.FlxBasic
 			// check if we are really gonna draw
 			if (hold.hit && bodyHeight < .0 && endY < .0 || !hold.hit && bodyHeight < .0)
 				continue;
-			
+
 			final originalX = note.x;
 			final originalY = note.y;
 			note.applyStrumPos();
 
 			final aa = hold.antialiasing;
-			final drawItem = camera.startQuadBatch(hold.graphic, note.colorTransform.hasRGBMultipliers(), note.colorTransform.hasRGBAOffsets(), null, aa, simpleShader);
+			final drawItem = camera.startQuadBatch(hold.graphic, note.colorTransform.hasRGBMultipliers(), note.colorTransform.hasRGBAOffsets(), null, aa,
+				simpleShader);
 			initDrawItem(pn, drawItem);
 
 			// draw body
@@ -354,7 +355,7 @@ final class NoteRenderer extends flixel.FlxBasic
 					capY = .0;
 				}
 				// frame.uv.top = FlxMath.lerp(h.body.uv.top, h.body.uv.bottom, ratio);
-	
+
 				if (frame.frame.height > .0)
 				{
 					frame.prepareMatrix(matrix, FlxFrameAngle.ANGLE_0, false, false);

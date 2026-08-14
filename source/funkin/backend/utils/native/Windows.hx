@@ -29,8 +29,8 @@ import funkin.backend.utils.NativeAPI.MessageBoxIcon;
 #include <uxtheme.h>
 ')
 @:dox(hide)
-final class Windows {
-
+final class Windows
+{
 	@:functionCode('
 		int darkMode = enable ? 1 : 0;
 
