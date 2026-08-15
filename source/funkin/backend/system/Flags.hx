@@ -379,7 +379,7 @@ class Flags
 		flixel.addons.effects.FlxTrail.defaultDelayBackwardCompatibility = cast USE_FLXTRAIL_FRAMES;
 
 		if (USE_LEGACY_CENTER_CAM == null)
-			USE_LEGACY_CENTER_CAM = MOD_API_VERSION < 3;
+			USE_LEGACY_CENTER_CAM = true;
 		if (USE_LEGACY_FLXANIMATE_STAGE_MATRIX == null)
 			USE_LEGACY_FLXANIMATE_STAGE_MATRIX = MOD_API_VERSION < 3;
 	}
