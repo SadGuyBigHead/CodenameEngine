@@ -918,6 +918,7 @@ class SimpleShader extends FlxShader
 			_b = b;
 			_rgb_mix = rgb_mix;
 			_hue = hue;
+			gl_Position = openfl_Matrix * openfl_Position;
 		}
 	')
 	@:glFragmentSource('
