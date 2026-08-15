@@ -91,11 +91,16 @@
       "ref": "b1b5cc72",
       "url": "https://github.com/CodenameCrew/cne-openfl"
     },
-
     {
       "name": "svg",
       "type": "haxelib",
       "version": "1.2.0"
+    },
+    {
+      "name": "linc_luajit",
+      "type": "git",
+      "ref": "508f81352e7687f35231ea7475219c51fff5210c",
+      "url": "https://github.com/mayo78/linc_luajit"
     }
   ]
 }
