@@ -4,7 +4,7 @@ import flixel.addons.display.FlxBackdrop;
 import flixel.graphics.FlxGraphic;
 import funkin.backend.system.Conductor;
 import openfl.geom.Rectangle;
-import funkin.backend.shaders.CustomShader;
+import funkin.backend.shaders.FunkinShader;
 
 class FlxFastTypedGroup<T:FlxBasic> extends FlxTypedGroup<T>
 {
@@ -207,7 +207,7 @@ class CharterBackdrop extends FlxTypedGroup<FlxBasic>
 	public var notesGroup:NotesDrawGroup = new NotesDrawGroup();
 	public var strumLine:CharterStrumline;
 
-	public var gridShader:CustomShader = new CustomShader("engine/charterGrid");
+	public var gridShader:FunkinShader;
 
 	var __lastKeyCount:Int = 4;
 
@@ -216,6 +216,8 @@ class CharterBackdrop extends FlxTypedGroup<FlxBasic>
 	public function new()
 	{
 		super();
+
+		gridShader = FunkinShader.fromFile("engine/charterGrid");
 
 		gridBackDrop = new FlxBackdrop(null, Y, 0, 0);
 		gridBackDrop.makeSolid(1, 1, -1);

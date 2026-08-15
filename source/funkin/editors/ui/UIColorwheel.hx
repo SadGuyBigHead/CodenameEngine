@@ -2,14 +2,14 @@ package funkin.editors.ui;
 
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
-import funkin.backend.shaders.CustomShader;
+import funkin.backend.shaders.FunkinShader;
 
 using flixel.util.FlxSpriteUtil;
 
 class UIColorwheel extends UISliceSprite
 {
 	var colorPicker:FlxSprite;
-	var colorPickerShader:CustomShader;
+	var colorPickerShader:FunkinShader;
 	var colorPickerSelector:UIColorWheelSelector;
 
 	var colorSlider:FlxSprite;
@@ -34,7 +34,7 @@ class UIColorwheel extends UISliceSprite
 		saturation = curColor.saturation;
 		brightness = curColor.brightness;
 
-		colorPickerShader = new CustomShader("engine/colorPicker");
+		colorPickerShader = FunkinShader.fromFile("engine/colorPicker");
 
 		colorPicker = new FlxSprite(x + 12.5, (y + 125 / 2) - (100 / 2)).makeGraphic(100, 100, FlxColor.TRANSPARENT);
 		colorPicker.drawRoundRect(0, 0, 100, 100, 10, 10, FlxColor.WHITE);
