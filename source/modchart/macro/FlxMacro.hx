@@ -69,7 +69,7 @@ class FlxMacro
 		{
 			switch (field.name)
 			{
-				case "reset":
+				case "baseReset":
 					field.pos = Context.currentPos();
 					switch field.kind
 					{
