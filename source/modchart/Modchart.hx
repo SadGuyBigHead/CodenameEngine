@@ -81,8 +81,8 @@ final class Modchart extends FlxBasic
 		this.parent = parent;
 
 		// PlayState.instance?.callOnHScript("onModchart", [this]);
-		// if (modchartPath != null && openfl.Assets.exists(modchartPath))
-		if (false)
+		if (modchartPath != null && openfl.Assets.exists(modchartPath))
+		//if (false)
 		{
 			#if LUA_ALLOWED
 			lua = LuaUtil.get();

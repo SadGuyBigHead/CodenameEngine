@@ -1463,7 +1463,7 @@ final class PlayerState
 
 		xOffset = new Vector<Float>(keyCount, true, [
 			for (i in 0...keyCount)
-				((i - (y / 2)) * ArrowEffects.ARROW_SIZE) + ArrowEffects.ARROW_SIZE_HALF
+				((i - (keyCount / 2)) * ArrowEffects.ARROW_SIZE) + ArrowEffects.ARROW_SIZE_HALF
 		]);
 
 		colDark = colVec();

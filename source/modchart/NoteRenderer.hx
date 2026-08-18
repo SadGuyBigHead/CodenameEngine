@@ -291,8 +291,8 @@ final class NoteRenderer extends flixel.FlxBasic
 				continue;
 			// since holds are drawn first we always update these values no matter what
 			note.__distance = note.strum.getDistance(note);
-			final dark = getMissDark(note);
-			note.colorTransform.setOffsets(dark, dark, dark, 0);
+			note.__dark = getMissDark(note);
+			note.colorTransform.setOffsets(note.__dark, note.__dark, note.__dark, 0);
 
 			if (note.__distance > strumLine.drawDistanceMax)
 				break;
@@ -307,7 +307,7 @@ final class NoteRenderer extends flixel.FlxBasic
 			final bodyHeight = capY - startY;
 
 			// check if we are really gonna draw
-			if (hold.hit && bodyHeight < .0 && endY < .0 || !hold.hit && bodyHeight < .0)
+			if (hold.hit && endY < .0 || !hold.hit && bodyHeight < .0)
 				continue;
 
 			final originalX = note.x;
@@ -376,6 +376,7 @@ final class NoteRenderer extends flixel.FlxBasic
 
 	function drawModHolds(camera:FlxCamera, pn:Int)
 	{
+		// messy ill make it better later i just want it to work right now
 		final strumLine = strumLine(pn);
 		final ng = strumLine.notes;
 
@@ -388,28 +389,19 @@ final class NoteRenderer extends flixel.FlxBasic
 			final note = ng.__loopSprite = ng.members[i--];
 			if (!note?.exists)
 				continue;
-			final hold = note.hold;
-			final clip = hold.hit;
-			final zeroOffset = !clip ? .0 : getYOffset(pn, hold.column, mods.conductor.currentBeatTime, mods.conductor.songPosition);
-			final startYOffset = clip ? zeroOffset : getYOffset(pn, hold.column, hold.startBeat, hold.startMs);
+			// now, get distance from y offset!
+			note.__distance = getYOffset(pn, note.noteData, note.beatTime, note.strumTime);
+			note.__dark = getMissDark(note);
 
-			if (isTooFar(pn))
+			if (note.__distance > strumLine.drawDistanceMax)
 				break;
-			else if (note.sustainLength <= 0)
+			else if (note.sustainLength <= 0 || note.held && mods.conductor.songPosition > note.endTime)
 				continue;
+			final hold = note.hold;
+			final clip = note.held;
 
+			final startYOffset = (clip ? getYOffset(pn, hold.column, mods.conductor.currentBeatTime, mods.conductor.songPosition) : note.__distance);
 			final endYOffset = getYOffset(pn, hold.column, hold.endBeat, hold.endMs);
-
-			final item = camera.startTrianglesBatch(hold.graphic, hold.antialiasing, true, null, true, shaders[pn]);
-			item.colorMultipliers ??= [];
-			item.colorOffsets ??= [];
-			var numVertices = item.numVertices;
-			initDrawItem(pn, item);
-			// item.modsShader = null;
-			// item.shader = null;
-
-			if (endYOffset < startYOffset && clip)
-				continue;
 
 			final dist = endYOffset - startYOffset;
 			final bodyDist = dist - hold.capHeight;
@@ -418,172 +410,167 @@ final class NoteRenderer extends flixel.FlxBasic
 			final capBeat = FlxMath.lerp(clip ? mods.conductor.currentBeatTime : hold.startBeat, hold.endBeat, endRatio);
 			final capMs = FlxMath.lerp(clip ? mods.conductor.songPosition : hold.startMs, hold.endMs, endRatio);
 			final capYOffset = FlxMath.lerp(startYOffset, endYOffset, endRatio);
-			final drawBody = !clip || capYOffset > zeroOffset;
 
-			// inline function distanceUvt(dist:Float)
-			// {
-			//	return FlxMath.remapToRange(dist, 0, -note.bodyHeight * note.body.offset.y, note.bodyUV.bottom, note.bodyUV.top);
-			// }
+			final capClip = -Math.min(0, bodyDist);
+			final realCapHeight = hold.capHeight - capClip;
 
-			// final totalV = distanceUvt(bodyDist);
+			final drawBody = !clip || capYOffset > startYOffset;
+
+			// check if we are really gonna draw
+			if (hold.hit && !drawBody && endYOffset < .0 || !hold.hit && !drawBody)
+				continue;
+
+			final aa = hold.antialiasing;
+			// todo: detect when we need color mults or offsets
+			final drawItem = camera.startQuadBatch(hold.graphic, true, true, null, aa, simpleShader);
+			initDrawItem(pn, drawItem);
 
 			modYOffset = startYOffset;
 
 			var i = 0;
 			// the stupid version
-			inline function drawPart(startBeat:Float, endBeat:Float, startMs:Float, endMs:Float, segments:Float, cap:Bool)
+			inline function drawPart(segments:Float, cap:Bool)
 			{
-				var startV = .0;
-				if (clip && startBeat <= mods.conductor.currentBeatTime)
-					startV = FlxMath.bound(Math.abs(capYOffset - startYOffset) / hold.capHeight, 0.0, 1.0);
-				final uv = cap ? hold.capUV : hold.bodyUV;
-				final halfU = cap ? hold.capHalfU : hold.bodyHalfU;
-				final halfWidth = cap ? hold.capHalfWidth : hold.bodyHalfWidth;
+				final startBeat = if (!cap) //
+					clip ? mods.conductor.currentBeatTime : hold.startBeat; //
+				else //
+					clip ? Math.max(capBeat, mods.conductor.currentBeatTime) : capBeat; //
 
-				inline function pushVertices()
+				final endBeat = if (!cap) //
+					capBeat; //
+				else //
+					hold.endBeat; //
+
+				final startMs = if (!cap) //
+					clip ? mods.conductor.songPosition : hold.startMs; //
+				else //
+					clip ? Math.max(capMs, mods.conductor.songPosition) : capMs; //
+
+				final endMs = if (!cap) //
+					capMs; //
+				else //
+					hold.endMs; //
+
+				// var startV = .0;
+				// if (clip && start <= mods.conductor.currentBeatTime)
+				//	startV = FlxMath.bound(Math.abs(capYOffset - startYOffset) / hold.capHeight, 0.0, 1.0);
+
+				final sourceFrame = cap ? hold.cap : hold.body;
+
+				var frame = clippedFrame;
+				if (frame == null || clippedFrame.parent != sourceFrame.parent)
+					frame = clippedFrame = sourceFrame.copyTo(clippedFrame);
+				else
+					frame.frame.copyFrom(sourceFrame.frame);
+				frame.frame.y = frame.frame.height = 0;
+
+				final mat = cap ? hold.capMatrix : hold.bodyMatrix;
+
+				inline function updateDrawInfo()
 				{
-					item.vertices.pushr( //
-						HALF_SIZE - halfWidth, HALF_SIZE, // left
-						// HALF_SIZE, 				HALF_SIZE, // center (we dont actually need it)
-						HALF_SIZE + halfWidth, HALF_SIZE, // right
-					);
+					// get spiral holds
+					modPos.y += ArrowEffects.ARROW_SIZE_HALF;
+					//final angleX = spiralHolds2D(pn, p.set(modPos.z, modPos.y), p2.set(v3.z, v3.y));
+					//final angleY = spiralHolds2D(pn, p.set(modPos.x, modPos.z), p2.set(v3.x, v3.z)) + modRot.y;
+					final angleZ = spiralHolds2D(pn, p.set(modPos.x, modPos.y), p2.set(v3.x, v3.y));
+
+					matrix3d.identity();
+					// basically flatten out the point vertically
+					matrix3d.appendScale(1, 0, 1);
+					//matrix3d.appendRotation(angleX, Vector3D.X_AXIS);
+					matrix3d.appendRotation(modRot.y, Vector3D.Y_AXIS);
+					matrix3d.appendRotation(angleZ, Vector3D.Z_AXIS);
+					matrix3d.appendScale(modZoom.x, modZoom.y, .0);
+					matrix3d.appendTranslation(modPos.x, modPos.y, modPos.z);
+
+					var ofs:Float = note.__dark;
+					if (mods.active)
+					{
+						ct.setMultipliers(1 - modColor.redFloat, 1 - modColor.greenFloat, 1 - modColor.blueFloat, modColor.alphaFloat);
+						ofs += modGlow * 255.;
+					}
+					ct.setOffsets(ofs, ofs, ofs, .0);
 				}
 
-				final iStart = i;
-				do
+				if (cap)
+					segments++;
+				var i = .0;
+				while (i < segments)
 				{
-					final isEnd = i - iStart + 1 >= segments;
-					final t = (i - iStart) / segments;
-					final t2 = Math.min(1.0, (i - iStart + 1) / segments);
-					final beat = FlxMath.lerp(startBeat, endBeat, t);
-					final beat2 = FlxMath.lerp(startBeat, endBeat, t2);
-					final ms = FlxMath.lerp(startMs, endMs, t);
-					final ms2 = FlxMath.lerp(startMs, endMs, t2);
+					final i2 = Math.min(i + 1, segments);
 
-					if (i == iStart)
-						getArrowEffectsPos(pn, beat, ms, hold.column, false, true);
-					if (isTooFar(pn))
-						break;
-
-					final v = if (cap) //
-						FlxMath.lerp(FlxMath.lerp(uv.top, uv.bottom, startV), uv.bottom, t); //
-					else //
-						FlxMath.remapToRange(modYOffset - endYOffset, -hold.bodyHeight, 0, hold.bodyUV.bottom, hold.bodyUV.top); //
-
-					modPos1.copyFrom(modPos);
-					modRot1.copyFrom(modRot);
-					modZoom1.copyFrom(modZoom);
-					modColor1 = modColor;
-					modGlow1 = modGlow;
-
-					getArrowEffectsPos(pn, beat2, ms2, hold.column, false, true);
-
-					// if (isTooFar(pn))
-					//	break;
-
-					// spiral holds
-					modRot.x += spiralHolds2D(pn, p.set(modPos.z, modPos.y), p2.set(modPos1.z, modPos1.y));
-					modRot.y += spiralHolds2D(pn, p.set(modPos.x, modPos.z), p2.set(modPos1.x, modPos1.z));
-					modRot.z += spiralHolds2D(pn, p.set(modPos.x, modPos.y), p2.set(modPos1.x, modPos1.y));
-
-					final v2 = if (cap) //
-						FlxMath.lerp(FlxMath.lerp(uv.top, uv.bottom, startV), uv.bottom, t2); //
-					else //
-						FlxMath.remapToRange(modYOffset - endYOffset, -hold.bodyHeight, 0, hold.bodyUV.bottom, hold.bodyUV.top); //
-
-					pushVertices();
-					pushVertices();
-
-					// bad
-
-					item.uvtData.pushr( //
-						uv.left, v, // left
-						// halfU, v, // center
-						uv.right, v, // right
-						uv.left, v2, // left 2
-						// halfU, v2, // center 2
-						uv.right, v2, // right 2
-					);
-
+					if (!cap)
 					{
-						final ip = numVertices;
-						item.indices.pushr( //
-							ip + 0, ip + 1, ip + 2, ip + 1, ip + 2, ip + 3,);
-
-						// stupidness ultimate
-						inline function push()
-						{
-							pushPoint(item.localOrigin, p.set(HALF_SIZE, HALF_SIZE));
-							pushPoint(item.localOrigin, p.set());
-							pushVector3D(item.localSkew, v3);
-							pushRGBHueColor(null, 0, item);
-						}
-
-						inline function push1()
-						{
-							push();
-							pushVector3D(item.localPosition, modPos1);
-							pushVector3D(item.localRotation, modRot1);
-							pushVector3D(item.localZoom, modZoom1);
-							item.alphas.pushr(0.6 * modColor1.alphaFloat);
-							pushModColor(item.colorMultipliers, modColor1);
-							pushGlow(item.colorOffsets, modGlow1);
-						}
-
-						inline function push2()
-						{
-							push();
-							pushVector3D(item.localPosition, modPos);
-							pushVector3D(item.localRotation, modRot);
-							pushVector3D(item.localZoom, modZoom);
-							item.alphas.pushr(0.6 * modColor.alphaFloat);
-							pushModColor(item.colorMultipliers, modColor);
-							pushGlow(item.colorOffsets, modGlow);
-						}
-
-						// basically fuck the sequel
-						push1();
-						push1();
-						push2();
-						push1();
-						push2();
-						push2();
-
-						// if (isEnd)
-						// {
-						//	pushOurFriend();
-						// }
+						frame.frame.y = -Math.abs(bodyDist * ((segments - i) / segments)) / hold.scale;
+						frame.frame.bottom = -Math.abs(bodyDist * ((segments - i2) / segments)) / hold.scale;
+					}
+					else
+					{
+						frame.frame.y = (capClip + Math.abs(realCapHeight * (i / segments))) / hold.scale;
+						frame.frame.bottom = (capClip + Math.abs(realCapHeight * (i2 / segments))) / hold.scale;
 					}
 
-					i++;
-					numVertices += 4;
+					// if we don't have a last position (cause we just started) then make one
+					if (i == .0 && !cap)
+					{
+						getArrowEffectsPos(pn, startBeat, startMs, note.noteData, false, false, cap ? null : startYOffset);
+						v3.copyFrom(modPos); // just copy it for 0 holds :)
+						v3.y += ArrowEffects.ARROW_SIZE_HALF;
+						updateDrawInfo();
+					}
 
-					if (isEnd)
+					if (isTooClose(pn))
+					{
+						i = i2;
+						continue;
+					}
+					else if (isTooFar(pn))
+					{
 						break;
-					// if (!pushIndices)
-					//	break;
+					}
+
+					drawItem.addQuad(frame, mat, ct);
+
+					// and now push the position of the last (or firsts?? ) ones
+					for (_ in 0...2)
+					{
+						pushRGBHueColor(null, 0, drawItem);
+						pushLocalTransform(drawItem);
+					}
+
+					v3.copyFrom(modPos); // save last pos for spiralholds
+					final t2 = i2 / segments;
+					getArrowEffectsPos(pn, FlxMath.lerp(startBeat, endBeat, t2), FlxMath.lerp(startMs, endMs, t2), note.noteData, false, false);
+					updateDrawInfo();
+
+					// and now now now
+					final len = drawItem.colorMultipliers.length;
+					for (i in 0...2)
+					{
+						pushRGBHueColor(null, 0, drawItem);
+						pushLocalTransform(drawItem);
+
+						// we gotta override the old colors
+						final i4 = (i * 4);
+						drawItem.colorMultipliers[len - 4 - i4] = ct.redMultiplier;
+						drawItem.colorMultipliers[len - 3 - i4] = ct.greenMultiplier;
+						drawItem.colorMultipliers[len - 2 - i4] = ct.blueMultiplier;
+						drawItem.colorMultipliers[len - 1 - i4] = ct.alphaMultiplier;
+
+						drawItem.colorOffsets[len - 4 - i4] = ct.redOffset;
+						drawItem.colorOffsets[len - 3 - i4] = ct.greenOffset;
+						drawItem.colorOffsets[len - 2 - i4] = ct.blueOffset;
+						drawItem.colorOffsets[len - 1 - i4] = ct.alphaOffset;
+					}
+
+					i = i2;
 				}
-				while (true);
 			}
 			// if we dont need to, just render holds with 4 segments total
 			final grain = wavyHolds[pn] ? mods.playerStates[pn].fGrain : 512;
 			if (drawBody)
-				drawPart(clip ? mods.conductor.currentBeatTime : hold.startBeat, capBeat, clip ? mods.conductor.songPosition : hold.startMs, capMs,
-					bodyDist / grain, false);
-			drawPart(clip ? Math.max(capBeat, mods.conductor.currentBeatTime) : capBeat, hold.endBeat,
-				clip ? Math.max(capMs, mods.conductor.songPosition) : capMs, hold.endMs, hold.capHeight / grain, true);
-			// FlxG.watch.addQuick("vertices", item.vertices);
-			// FlxG.watch.addQuick("verticesLen", item.vertices.length);
-			// FlxG.watch.addQuick("uvtData", item.uvtData);
-			// FlxG.watch.addQuick("uvtDataLen", item.uvtData.length);
-			// FlxG.watch.addQuick("indices", item.indices);
-			// FlxG.watch.addQuick("indicesLen", item.indices.length);
-			// FlxG.watch.addQuick("localZoom", item.localZoom);
-			// FlxG.watch.addQuick("localPositionLen", item.localPosition.length);
-			// FlxG.watch.addQuick("colorMultipliers", item.colorMultipliers);
-			// FlxG.watch.addQuick("colorMultipliersLen", item.colorMultipliers.length);
-			// FlxG.watch.addQuick("r", item.r);
-			// FlxG.watch.addQuick("rLen", item.r.length);
+				drawPart(bodyDist / grain, false);
+			drawPart(realCapHeight / grain, true);
 		}
 		ng.__currentlyLooping = oldCur;
 	}
@@ -604,7 +591,7 @@ final class NoteRenderer extends flixel.FlxBasic
 				continue;
 			// update mod positions (or not)
 			if (mods.active)
-				getArrowEffectsPos(pn, note.beatTime, note.strumTime, note.noteData, false, false);
+				getArrowEffectsPos(pn, note.beatTime, note.strumTime, note.noteData, false, false, note.__distance);
 			else
 				modYOffset = note.__distance; // with relative pos the y is just the distance
 
@@ -621,7 +608,7 @@ final class NoteRenderer extends flixel.FlxBasic
 
 			// apply colors
 			// todo: fancy dark animation
-			var ofs:Float = getMissDark(note);
+			var ofs:Float = note.__dark;
 			if (mods.active)
 			{
 				note.colorTransform.setMultipliers(1 - modColor.redFloat, 1 - modColor.greenFloat, 1 - modColor.blueFloat, modColor.alphaFloat);
@@ -662,6 +649,17 @@ final class NoteRenderer extends flixel.FlxBasic
 		final item = camera._headTiles;
 		initDrawItem(pn, item);
 
+		if (mods.active)
+		{
+			matrix3d.identity();
+			matrix3d.appendTranslation(-sprite.origin.x, -sprite.origin.y, 0);
+			matrix3d.appendRotation(-modRot.x, Vector3D.X_AXIS);
+			matrix3d.appendRotation(modRot.y, Vector3D.Y_AXIS);
+			matrix3d.appendRotation(modRot.z, Vector3D.Z_AXIS);
+			matrix3d.appendScale(modZoom.x, modZoom.y, modZoom.z);
+			matrix3d.appendTranslation(modPos.x + sprite.origin.x - p.x, modPos.y + sprite.origin.y - p.y, modPos.z);
+		}
+
 		for (_ in 0...FlxDrawQuadsItem.VERTICES_PER_QUAD)
 		{
 			pushRGBHueColor(rgbColor, hue, item);
@@ -669,12 +667,14 @@ final class NoteRenderer extends flixel.FlxBasic
 			if (mods.active)
 			{
 				// its a vec4 im justpacking them together cause it was being weird when they were seperate
-				pushPoint(item.localOrigin, sprite.origin);
-				pushPoint(item.localOrigin, p);
+				// pushPoint(item.localOrigin, sprite.origin);
+				// pushPoint(item.localOrigin, p);
 
-				pushVector3D(item.localPosition, modPos);
-				pushVector3D(item.localRotation, modRot);
-				pushVector3D(item.localZoom, modZoom);
+				// pushVector3D(item.localPosition, modPos);
+				// pushVector3D(item.localRotation, modRot);
+				// pushVector3D(item.localZoom, modZoom);
+
+				pushLocalTransform(item);
 			}
 		}
 	}
@@ -772,6 +772,7 @@ final class NoteRenderer extends flixel.FlxBasic
 	{
 		if (item.playFieldTransform.length > 0)
 			return;
+		item.wrapMode = CLAMP_U_REPEAT_V;
 		if (!mods.active)
 		{
 			item.simpleShader = simpleShader;
@@ -779,9 +780,8 @@ final class NoteRenderer extends flixel.FlxBasic
 		else
 		{
 			item.modsShader = shaders[pn];
-			pushMatrix(item.playFieldTransform, playField(pn).matrix);
+			pushPlayFieldMatrix(item, playField(pn).matrix);
 			v3.copyFrom(playField(pn).pos);
-			v3.z = 0;
 			pushVector3D(item.playFieldPos, v3);
 			item.fov = playField(pn).fov;
 
@@ -821,20 +821,26 @@ final class NoteRenderer extends flixel.FlxBasic
 		arr.setRestOffset(offset, color.redFloat, color.greenFloat, color.blueFloat);
 	}
 
-	inline function pushMatrix(arr:Array<Float>, matrix:Matrix3D)
+	inline function pushPlayFieldMatrix<T>(item:FlxDrawBaseItem<T>, matrix:Matrix3D)
 	{
-		final len = arr.length;
-		// convert OpenF Lmatrix to Float32Array
-		// why?
-		// no wait i understand why i think
-		var p = 0;
-		for (i in 0...16)
-		{
-			arr[len + p] = matrix.rawData[i];
-			p += 4;
-			if (p >= 16)
-				p -= 15;
-		}
+		final r = matrix.rawData;
+		item.playFieldTransform.pushr( //
+			r[0], r[4], r[8], r[12], //
+			r[1], r[5], r[9], r[13], //
+			r[2], r[6], r[10], r[14], //
+			r[3], r[7], r[11], r[15], //
+		); //
+	}
+
+	static final __fullMatrix:Array<Float> = [];
+
+	inline function pushLocalTransform<T>(item:FlxDrawBaseItem<T>)
+	{
+		// when we dont do it like this haxe compiles it evily
+		item.localTransform0.pushr(matrix3d.rawData[0], matrix3d.rawData[4], matrix3d.rawData[8], matrix3d.rawData[12]);
+		item.localTransform1.pushr(matrix3d.rawData[1], matrix3d.rawData[5], matrix3d.rawData[9], matrix3d.rawData[13]);
+		item.localTransform2.pushr(matrix3d.rawData[2], matrix3d.rawData[6], matrix3d.rawData[10], matrix3d.rawData[14]);
+		item.localTransform3.pushr(matrix3d.rawData[3], matrix3d.rawData[7], matrix3d.rawData[11], matrix3d.rawData[15]);
 	}
 
 	inline function pushPoint(arr:Array<Float>, p:FlxPoint)
@@ -868,7 +874,7 @@ final class NoteRenderer extends flixel.FlxBasic
 		}
 		else
 		{
-			return (FlxAngle.radiansFromOrigin(b.x - a.x, b.y - a.y) + HALF_PI) * spiral;
+			return FlxAngle.TO_DEG * (FlxAngle.radiansFromOrigin(b.x - a.x, b.y - a.y) + HALF_PI) * spiral;
 		}
 	}
 
@@ -969,17 +975,16 @@ class ModsShader extends FlxShader
 		const vec3 Y_AXIS = vec3(0.0, 1.0, 0.0);
 		const vec3 Z_AXIS = vec3(0.0, 0.0, 1.0);
 	
-		attribute vec3 r;
-		attribute vec3 g;
-		attribute vec3 b;
-		attribute float rgb_mix;
+		//attribute vec3 r;
+		//attribute vec3 g;
+		//attribute vec3 b;
+		//attribute float rgb_mix;
 		attribute float hue;
 
-		attribute vec3 localRotation;
-		attribute vec3 localZoom;
-		attribute vec3 localPosition;
-		attribute vec2 localSkew;
-		attribute vec4 localOrigin;
+		attribute vec4 localTransform0;
+		attribute vec4 localTransform1;
+		attribute vec4 localTransform2;
+		attribute vec4 localTransform3;
 
 		uniform mat4 playFieldTransform;
 		uniform vec3 playFieldPos;
@@ -988,12 +993,11 @@ class ModsShader extends FlxShader
 		const float far = 100.;
 		const float near = 0.1;
 		uniform float fov;
-		const float aspect = 1280.0/720.0;
 	
-		varying vec3 _r;
-		varying vec3 _g;
-		varying vec3 _b;
-		varying float _rgb_mix;
+		//varying vec3 _r;
+		//varying vec3 _g;
+		//varying vec3 _b;
+		//varying float _rgb_mix;
 		varying float _hue;
 		varying float depth;
 
@@ -1037,16 +1041,13 @@ class ModsShader extends FlxShader
 		{
 			#pragma body
 
-			vec4 pos = openfl_Position;
-			pos.xy -= localOrigin.xy; // origin
-			pos.xyz *= rotateX(TO_RAD * localRotation.x);
-			pos.xyz *= rotateY(TO_RAD * localRotation.y);
-			pos.xyz *= rotateZ(TO_RAD * localRotation.z);
-			pos = (((pos * vec4(localZoom, 1.0)) + vec4(localPosition, 0.0)) * playFieldTransform);
-			pos.xy += localOrigin.xy; // origin
-			pos.xy -= localOrigin.zw; // offset
-			
-			
+			mat4 localTransform = mat4(
+				localTransform0, 
+				localTransform1, 
+				localTransform2, 
+				localTransform3
+			);
+			vec4 pos = openfl_Position * localTransform * playFieldTransform;
 			// yes this is just the shitty funkin modchart projection but here instead cause im too stupid to use a matrix
 			float projectedZ = depthStuff.x * min((pos.z / 1280.) - 1.0, 0.0) + depthStuff.y;
 			float projectedFov = (depthStuff.z / projectedZ);
@@ -1055,20 +1056,20 @@ class ModsShader extends FlxShader
 			depth = projectedZ;
 
 			gl_Position = openfl_Matrix * (pos + vec4(playFieldPos, 0.0));
-			_r = r;
-			_g = g;
-			_b = b;
-			_rgb_mix = rgb_mix;
+			//_r = r;
+			//_g = g;
+			//_b = b;
+			//_rgb_mix = rgb_mix;
 			_hue = hue;
 		}
 	')
 	@:glFragmentSource('
 		#pragma header
 	
-		varying vec3 _r;
-		varying vec3 _g;
-		varying vec3 _b;
-		varying float _rgb_mix;
+		//varying vec3 _r;
+		//varying vec3 _g;
+		//varying vec3 _b;
+		//varying float _rgb_mix;
 		varying float _hue;
 		varying float depth;
 

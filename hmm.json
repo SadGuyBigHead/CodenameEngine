@@ -88,8 +88,8 @@
     {
       "name": "openfl",
       "type": "git",
-      "ref": "b1b5cc72",
-      "url": "https://github.com/CodenameCrew/cne-openfl"
+      "ref": "3576951146ee8a53c5b47cefc37c1a0c03cb9ec0",
+      "url": "https://github.com/SadGuyBigHead/cne-openfl"
     },
     {
       "name": "svg",

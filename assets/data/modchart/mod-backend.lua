@@ -1031,7 +1031,7 @@ local function angleMod(angle, confusion)
 		'ConfusionOffset'..confusion, 'Confusion'..confusion..'Offset0', 'Confusion'..confusion..'Offset1', 'Confusion'..confusion..'Offset2', 'Confusion'..confusion..'Offset3'
 	}
 end
-angleMod("", "")
+--angleMod("", "")
 --angleMod("x", "X")
 --angleMod("y", "Y")
 

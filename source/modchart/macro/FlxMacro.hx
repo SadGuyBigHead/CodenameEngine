@@ -23,11 +23,10 @@ class FlxMacro
 			"r",
 			"g",
 			"b",
-			"localRotation",
-			"localZoom",
-			"localSkew",
-			"localOrigin",
-			"localPosition",
+			"localTransform0",
+			"localTransform1",
+			"localTransform2",
+			"localTransform3",
 			"playFieldTransform",
 			"playFieldPos",
 			"rgbMix",
@@ -135,11 +134,10 @@ class FlxMacro
 										modsShader.playFieldPos.value = playFieldPos;
 										modsShader.depthStuff.value = depthStuff;
 
-										modsShader.localRotation.value = localRotation;
-										modsShader.localZoom.value = localZoom;
-										modsShader.localSkew.value = localSkew;
-										modsShader.localOrigin.value = localOrigin;
-										modsShader.localPosition.value = localPosition;
+										modsShader.localTransform0.value = localTransform0;
+										modsShader.localTransform1.value = localTransform1;
+										modsShader.localTransform2.value = localTransform2;
+										modsShader.localTransform3.value = localTransform3;
 
 										modsShader.fov.value[0] = fov;
 										shader = modsShader;
