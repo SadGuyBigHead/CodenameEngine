@@ -207,6 +207,8 @@
 
 	<haxeflag name="--macro" value="funkin.backend.system.macros.BuildInfo.printBuildInfo()"/>
 
+	<!-- let dave be free -->
+	<haxeflag name="--macro" value="include('dave')" />
 	<!-- sgbh modchart stuff -->
 	<haxeflag name="--macro" value="include('modchart')" />
 
