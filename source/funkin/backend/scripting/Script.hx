@@ -129,6 +129,9 @@ class Script extends FlxBasic implements IFlxDestroyable
 			#if TRANSLATIONS_SUPPORT
 			"TranslationUtil" => funkin.backend.utils.TranslationUtil, "translate" => funkin.backend.utils.TranslationUtil.get,
 			#end
+
+			// sgbh stuff
+			"DaveBitmapText" => dave.DaveBitmapText,
 		];
 	}
 
