@@ -40,7 +40,7 @@ class CharterEventTypeSelection extends UISubstateWindow
 
 		var disableConductorEvents:Bool = false;
 		var disableOnlyContinuousChanges:Bool = false;
-		for (change in Conductor.bpmChangeMap)
+		for (change in Conductor.instance.bpmChangeMap)
 		{
 			if (change.continuous
 				&& MathUtil.greaterThanEqual(eventStepTime, change.stepTime)

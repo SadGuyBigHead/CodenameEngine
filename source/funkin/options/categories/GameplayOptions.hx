@@ -28,7 +28,7 @@ class GameplayOptions extends TreeMenuScreen
 		FlxG.autoPause = Options.autoPause;
 
 	private function __changeOffset(offset:Float)
-		Conductor.songOffset = offset;
+		Conductor.instance.songOffset = offset;
 
 	private function __changeVolumeMusic(value:Float)
 		FlxG.sound.defaultMusicGroup.volume = value;
@@ -43,13 +43,13 @@ class GameplayOptions extends TreeMenuScreen
 
 		if (offsetSetting.selected)
 		{
-			if (__lastBeat != Conductor.curBeat)
+			if (__lastBeat != Conductor.instance.curBeat)
 			{
 				FlxG.camera.zoom += 0.03;
-				__lastBeat = Conductor.curBeat;
+				__lastBeat = Conductor.instance.curBeat;
 			}
 
-			var beat = Math.floor(Conductor.getTimeInBeats(FlxG.sound.music.time));
+			var beat = Math.floor(Conductor.instance.getTimeInBeats(FlxG.sound.music.time));
 			if (__lastSongBeat != beat)
 			{
 				__metronome.replay();

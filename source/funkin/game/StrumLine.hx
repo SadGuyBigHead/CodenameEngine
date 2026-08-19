@@ -255,7 +255,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 	**/
 	public inline function updateNotes()
 	{
-		__updateNote_songPos = Conductor.songPosition;
+		__updateNote_songPos = Conductor.instance.songPosition;
 		if (__updateNote_event == null)
 			__updateNote_event = PlayState.instance.__updateNote_event;
 		notes.forEach(updateNote);
@@ -384,7 +384,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 	public function updateInput(id:Int = 0)
 	{
 		justStepped = false;
-		final holdSingStep = Math.floor(Conductor.curStepFloat * sustainSingSpeed);
+		final holdSingStep = Math.floor(Conductor.instance.curStepFloat * sustainSingSpeed);
 		if (lastStep != holdSingStep)
 		{
 			justStepped = true;

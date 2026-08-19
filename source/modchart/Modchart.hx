@@ -23,6 +23,7 @@ import flixel.system.debug.log.LogStyle;
 #end
 import flixel.tweens.FlxEase.EaseFunction;
 import dave.timeline.*;
+import funkin.backend.system.Conductor;
 
 using util.LuaUtil;
 
@@ -686,13 +687,13 @@ class GameState
 	@:toLua
 	public function GetCurBPS():Float
 	{
-		return DaveConductor.instance.bpm / 60;
+		return Conductor.instance.bpm / 60;
 	}
 
 	@:toLua
 	public function GetSongBeat():Float
 	{
-		return DaveConductor.instance.currentBeatTime;
+		return Conductor.instance.curBeatFloat;
 	}
 
 	@:toLua
@@ -704,7 +705,7 @@ class GameState
 	@:toLua
 	public function GetSongTime():Float
 	{
-		return DaveConductor.instance.songPosition / 1000;
+		return Conductor.instance.songPosition / 1000;
 	}
 
 	@:toLua

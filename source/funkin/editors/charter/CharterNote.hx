@@ -185,7 +185,7 @@ class CharterNote extends UISprite implements ICharterSelectable
 			sustainDraggable = UIState.state.isOverlapping(sustainSpr, @:privateAccess sustainSpr.__rect);
 		}
 
-		if (__passed != (__passed = step < Conductor.curStepFloat + (Options.songOffsetAffectEditors ? (Conductor.songOffset / Conductor.stepCrochet) : 0)))
+		if (__passed != (__passed = step < Conductor.instance.curStepFloat + (Options.songOffsetAffectEditors ? (Conductor.instance.songOffset / Conductor.instance.stepCrochet) : 0)))
 		{
 			if (__passed && FlxG.sound.music.playing)
 			{

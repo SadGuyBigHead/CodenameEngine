@@ -104,7 +104,7 @@ final class NoteRenderer extends flixel.FlxBasic
 		for (shader in shaders)
 			shader.fov.value = [90.0];
 		this.game = game;
-		mods = new ArrowEffects(new NotePositionMetrics(), game.strumLines.length);
+		mods = new ArrowEffects(new NotePositionMetrics(), game.strumLines.length, game.conductor);
 
 		// final luaPath = ''
 		modchart = new Modchart(game.timeline, mods, "songs/" + PlayState.SONG.meta.name + "/modchart.lua");
@@ -119,7 +119,7 @@ final class NoteRenderer extends flixel.FlxBasic
 		final playerState = mods.playerStates[pn];
 		mods.curr_options = playerState;
 		playerState.curr_dir = column + 1;
-		if (beat == mods.conductor.currentBeatTime)
+		if (beat == mods.conductor.curBeatFloat)
 		{
 			final z = playerState.getZeroYOffset();
 			if (z != null)
@@ -256,7 +256,7 @@ final class NoteRenderer extends flixel.FlxBasic
 			// update mod positions
 			if (mods.active)
 			{
-				getArrowEffectsPos(pn, mods.conductor.currentBeatTime, mods.conductor.songPosition, col, true, false);
+				getArrowEffectsPos(pn, mods.conductor.curBeatFloat, mods.conductor.songPosition, col, true, false);
 
 				if (!isOnScreen(pn))
 					continue;
@@ -415,14 +415,14 @@ final class NoteRenderer extends flixel.FlxBasic
 			final hold = note.hold;
 			final clip = note.held;
 
-			final startYOffset = (clip ? getYOffset(pn, hold.column, mods.conductor.currentBeatTime, mods.conductor.songPosition) : note.__distance);
+			final startYOffset = (clip ? getYOffset(pn, hold.column, mods.conductor.curBeatFloat, mods.conductor.songPosition) : note.__distance);
 			final endYOffset = getYOffset(pn, hold.column, hold.endBeat, hold.endMs);
 
 			final dist = endYOffset - startYOffset;
 			final bodyDist = dist - hold.capHeight;
 			final endRatio = bodyDist / dist;
 
-			final capBeat = FlxMath.lerp(clip ? mods.conductor.currentBeatTime : hold.startBeat, hold.endBeat, endRatio);
+			final capBeat = FlxMath.lerp(clip ? mods.conductor.curBeatFloat : hold.startBeat, hold.endBeat, endRatio);
 			final capMs = FlxMath.lerp(clip ? mods.conductor.songPosition : hold.startMs, hold.endMs, endRatio);
 			final capYOffset = FlxMath.lerp(startYOffset, endYOffset, endRatio);
 
@@ -446,9 +446,9 @@ final class NoteRenderer extends flixel.FlxBasic
 			inline function drawPart(segments:Float, cap:Bool)
 			{
 				final startBeat = if (!cap) //
-					clip ? mods.conductor.currentBeatTime : hold.startBeat; //
+					clip ? mods.conductor.curBeatFloat : hold.startBeat; //
 				else //
-					clip ? Math.max(capBeat, mods.conductor.currentBeatTime) : capBeat; //
+					clip ? Math.max(capBeat, mods.conductor.curBeatFloat) : capBeat; //
 
 				final endBeat = if (!cap) //
 					capBeat; //
@@ -466,7 +466,7 @@ final class NoteRenderer extends flixel.FlxBasic
 					hold.endMs; //
 
 				// var startV = .0;
-				// if (clip && start <= mods.conductor.currentBeatTime)
+				// if (clip && start <= mods.conductor.curBeatFloat)
 				//	startV = FlxMath.bound(Math.abs(capYOffset - startYOffset) / hold.capHeight, 0.0, 1.0);
 
 				final sourceFrame = cap ? hold.cap : hold.body;
@@ -728,7 +728,7 @@ final class NoteRenderer extends flixel.FlxBasic
 			// update mod positions
 			if (mods.active)
 			{
-				getArrowEffectsPos(pn, mods.conductor.currentBeatTime, mods.conductor.songPosition, splash.strum.ID, true, false);
+				getArrowEffectsPos(pn, mods.conductor.curBeatFloat, mods.conductor.songPosition, splash.strum.ID, true, false);
 				if (!isOnScreen(pn))
 					continue;
 			}
@@ -760,7 +760,7 @@ final class NoteRenderer extends flixel.FlxBasic
 			// update mod positions
 			if (mods.active)
 			{
-				getArrowEffectsPos(pn, mods.conductor.currentBeatTime, mods.conductor.songPosition, cover.ID, true, false);
+				getArrowEffectsPos(pn, mods.conductor.curBeatFloat, mods.conductor.songPosition, cover.ID, true, false);
 				if (!isOnScreen(pn))
 					continue;
 			}

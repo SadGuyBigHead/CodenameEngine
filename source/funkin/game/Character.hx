@@ -204,7 +204,7 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 		switch (lastAnimContext)
 		{
 			case SING | MISS:
-				if (lastHit + (Conductor.stepCrochet * holdTime) < Conductor.songPosition)
+				if (lastHit + (Conductor.instance.stepCrochet * holdTime) < Conductor.instance.songPosition)
 					dance();
 			case DANCE:
 				dance();
@@ -229,7 +229,7 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 		if (skipNegativeBeats && curBeat < 0)
 			return;
 		if (danceOnBeat
-			&& (curBeat + beatOffset) % (beatInterval * CoolUtil.maxInt(Math.floor(4 / Conductor.stepsPerBeat), 1)) == 0 && !__lockAnimThisFrame)
+			&& (curBeat + beatOffset) % (beatInterval * CoolUtil.maxInt(Math.floor(4 / Conductor.instance.stepsPerBeat), 1)) == 0 && !__lockAnimThisFrame)
 			tryDance();
 	}
 
@@ -374,7 +374,7 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 
 		offset.set((isPlayer != playerOffsets) ? globalOffset.x : -globalOffset.x, -globalOffset.y);
 		if (event.context == SING || event.context == MISS)
-			lastHit = Conductor.songPosition;
+			lastHit = Conductor.instance.songPosition;
 	}
 
 	public inline function getCameraPosition()

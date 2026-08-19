@@ -402,22 +402,22 @@ class CharterGridSeperatorBase extends FlxSprite
 		minStep = (conductorSprY - zoomOffset) / 40;
 		maxStep = (conductorSprY + zoomOffset) / 40;
 
-		var minTime:Float = Conductor.getStepsInTime(minStep);
-		var maxTime:Float = Conductor.getStepsInTime(maxStep);
+		var minTime:Float = Conductor.instance.getStepsInTime(minStep);
+		var maxTime:Float = Conductor.instance.getStepsInTime(maxStep);
 
-		var minBpmChange = Conductor.bpmChangeMap[Conductor.getTimeInChangeIndex(minTime)];
-		var maxBpmChange = Conductor.bpmChangeMap[Conductor.getTimeInChangeIndex(maxTime)];
+		var minBpmChange = Conductor.instance.bpmChangeMap[Conductor.instance.getTimeInChangeIndex(minTime)];
+		var maxBpmChange = Conductor.instance.bpmChangeMap[Conductor.instance.getTimeInChangeIndex(maxTime)];
 
-		minBeat = Conductor.getTimeInBeats(minTime);
-		maxBeat = Conductor.getTimeInBeats(maxTime);
+		minBeat = Conductor.instance.getTimeInBeats(minTime);
+		maxBeat = Conductor.instance.getTimeInBeats(maxTime);
 
 		minMeasure = minBpmChange.measureTime + (minBeat - minBpmChange.beatTime) / minBpmChange.beatsPerMeasure;
 		maxMeasure = maxBpmChange.measureTime + (maxBeat - maxBpmChange.beatTime) / maxBpmChange.beatsPerMeasure;
 
 		// cap out the beats/measures at the end of the song
-		var endTime = Conductor.getStepsInTime(Charter.instance.__endStep);
-		var endBeat = Conductor.getTimeInBeats(endTime);
-		var endBpmChange = Conductor.bpmChangeMap[Conductor.getTimeInChangeIndex(endTime)];
+		var endTime = Conductor.instance.getStepsInTime(Charter.instance.__endStep);
+		var endBeat = Conductor.instance.getTimeInBeats(endTime);
+		var endBpmChange = Conductor.instance.bpmChangeMap[Conductor.instance.getTimeInChangeIndex(endTime)];
 		var endMeasure = endBpmChange.measureTime + (endBeat - endBpmChange.beatTime) / endBpmChange.beatsPerMeasure;
 
 		if (maxBeat > endBeat)
@@ -452,13 +452,13 @@ class CharterGridSeperatorBase extends FlxSprite
 	{
 		// for time signatures that start mid step
 		timeSignatureChangeGaps.splice(0, timeSignatureChangeGaps.length);
-		for (i => change in Conductor.bpmChangeMap)
+		for (i => change in Conductor.instance.bpmChangeMap)
 		{
 			if (change.stepTime >= minStep && change.stepTime <= maxStep)
 			{
 				// get step while ignoring the current change
-				var index:Int = CoolUtil.boundInt(i - 1, 0, Conductor.bpmChangeMap.length - 1);
-				var step:Float = Conductor.getTimeWithBPMInSteps(change.songTime, index, Conductor.getTimeWithIndexInBPM(change.songTime, index));
+				var index:Int = CoolUtil.boundInt(i - 1, 0, Conductor.instance.bpmChangeMap.length - 1);
+				var step:Float = Conductor.instance.getTimeWithBPMInSteps(change.songTime, index, Conductor.instance.getTimeWithIndexInBPM(change.songTime, index));
 
 				if (Math.ceil(step) - step > 0 && (step - Math.floor(step)) > FlxMath.EPSILON)
 				{ // mid step change
@@ -473,12 +473,12 @@ class CharterGridSeperatorBase extends FlxSprite
 		beatStepTimes.splice(0, beatStepTimes.length);
 		for (i in Math.floor(minBeat)...Math.ceil(maxBeat))
 		{
-			beatStepTimes.push(Conductor.getTimeInSteps(Conductor.getBeatsInTime(i)));
+			beatStepTimes.push(Conductor.instance.getTimeInSteps(Conductor.instance.getBeatsInTime(i)));
 		}
 		measureStepTimes.splice(0, measureStepTimes.length);
 		for (i in Math.floor(minMeasure)...Math.ceil(maxMeasure))
 		{
-			measureStepTimes.push(Conductor.getTimeInSteps(Conductor.getMeasuresInTime(i)));
+			measureStepTimes.push(Conductor.instance.getTimeInSteps(Conductor.instance.getMeasuresInTime(i)));
 		}
 	}
 

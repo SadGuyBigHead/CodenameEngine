@@ -15,6 +15,7 @@ import modchart.macro.ArrowEffectsUtil.getEffects;
 import modchart.macro.ArrowEffectsUtil.getAppearances;
 import modchart.macro.ArrowEffectsUtil.getScrolls;
 import funkin.game.PlayState;
+import funkin.backend.system.Conductor;
 
 #if !modchart_debug
 @:fileXml('tags="haxe,release"')
@@ -28,7 +29,7 @@ final class ArrowEffects extends FlxBasic
 	public static final ROWS_PER_BEAT = 48;
 
 	public var position:NotePositionMetrics;
-	public var conductor(get, never):DaveConductor;
+	public var conductor:Conductor;
 
 	public var playerStates:Vector<PlayerState>;
 	public var effectData:Vector<PerPlayerData>;
@@ -46,9 +47,10 @@ final class ArrowEffects extends FlxBasic
 
 	var localRandom = new FlxRandom(0);
 
-	public function new(position:NotePositionMetrics, players:Int)
+	public function new(position:NotePositionMetrics, players:Int, ?conductor:Conductor)
 	{
 		super();
+		this.conductor = conductor ?? Conductor.instance;
 		this.position = position;
 		this.players = players;
 		playerStates = new Vector<PlayerState>(players, true, [for (i in 0...players) new PlayerState(i, new PlayField(i, this))]);
@@ -131,7 +133,7 @@ final class ArrowEffects extends FlxBasic
 				case ModTimerType_Default, ModTimerType_Game:
 					playerState.timer += elapsed;
 				case ModTimerType_Beat:
-					playerState.timer = conductor.currentBeatTime;
+					playerState.timer = conductor.curBeatFloat;
 				case ModTimerType_Song:
 					playerState.timer = conductor.songPosition / 1000;
 			}
@@ -242,7 +244,7 @@ final class ArrowEffects extends FlxBasic
 
 		if (playerState.fTimeSpacing != 1.0)
 		{
-			final fSongBeat = conductor.currentBeatTime;
+			final fSongBeat = conductor.curBeatFloat;
 			final fBeatsUntilStep = (fNoteBeat - fSongBeat) + playerState.fScrolls(SCROLL_CENTERED_PATH);
 			final fYOffsetBeatSpacing = fBeatsUntilStep * ARROW_SPACING;
 			fYOffset += fYOffsetBeatSpacing * (1 - playerState.fTimeSpacing);
@@ -250,7 +252,7 @@ final class ArrowEffects extends FlxBasic
 
 		if (playerState.fTimeSpacing != 0.0)
 		{
-			final fMsUntilStep = .45 * (fNoteMs - DaveConductor.instance.songPosition) + playerState.fScrolls(SCROLL_CENTERED_PATH);
+			final fMsUntilStep = .45 * (fNoteMs - Conductor.instance.songPosition) + playerState.fScrolls(SCROLL_CENTERED_PATH);
 			fYOffset += fMsUntilStep * playerState.fTimeSpacing;
 		}
 
@@ -298,7 +300,7 @@ final class ArrowEffects extends FlxBasic
 		var fScrollSpeed = playerState.fScrollSpeed * playerState.xmod;
 		if (playerState.fRandomSpeed != 0 && !bAbsolute)
 		{
-			localRandom.currentSeed = FlxG.random.currentSeed + (Std.int(conductor.currentBeatTime * ROWS_PER_BEAT) << 8) + (iCol * 100);
+			localRandom.currentSeed = FlxG.random.currentSeed + (Std.int(conductor.curBeatFloat * ROWS_PER_BEAT) << 8) + (iCol * 100);
 
 			final fRandom = localRandom.float(0, 10); // idk
 			fScrollSpeed *= FlxMath.remapToRange(fRandom, 0, 1, 1, playerState.fRandomSpeed + 1);
@@ -564,7 +566,7 @@ final class ArrowEffects extends FlxBasic
 
 		if (effects(EFFECT_CONFUSION) != 0)
 		{
-			var fConfRotation = conductor.currentBeatTime;
+			var fConfRotation = conductor.curBeatFloat;
 			fConfRotation *= effects(EFFECT_CONFUSION);
 			fConfRotation = mod(fConfRotation, 2 * Math.PI);
 			fConfRotation *= -FlxAngle.TO_DEG;
@@ -584,7 +586,7 @@ final class ArrowEffects extends FlxBasic
 
 		if (effects(EFFECT_CONFUSION_X) != 0)
 		{
-			var fConfRotation = conductor.currentBeatTime;
+			var fConfRotation = conductor.curBeatFloat;
 			fConfRotation *= effects(EFFECT_CONFUSION_X);
 			fConfRotation = mod(fConfRotation, 2 * Math.PI);
 			fConfRotation *= -FlxAngle.TO_DEG;
@@ -604,7 +606,7 @@ final class ArrowEffects extends FlxBasic
 
 		if (effects(EFFECT_CONFUSION_Y) != 0)
 		{
-			var fConfRotation = conductor.currentBeatTime;
+			var fConfRotation = conductor.curBeatFloat;
 			fConfRotation *= effects(EFFECT_CONFUSION_Y);
 			fConfRotation = mod(fConfRotation, 2 * Math.PI);
 			fConfRotation *= -FlxAngle.TO_DEG;
@@ -765,7 +767,7 @@ final class ArrowEffects extends FlxBasic
 
 	public function getBrightness(playerState:PlayerState, fNoteBeat:Float):Float
 	{
-		final fSongBeat = conductor.currentBeatTime;
+		final fSongBeat = conductor.curBeatFloat;
 		final fBeatsUntilStep = fNoteBeat - fSongBeat;
 
 		final fBrightness = FlxMath.remapToRange(fBeatsUntilStep, 0, -1, 1, 0);
@@ -1161,10 +1163,10 @@ final class ArrowEffects extends FlxBasic
 		return Math.PI * (y_offset + (1.0 * offset)) / (ARROW_SIZE + (period * ARROW_SIZE));
 	}
 
-	function updateBeat(dimension:Int, data:PerPlayerData, position:DaveConductor, beat_offset:Float, beat_mult:Float)
+	function updateBeat(dimension:Int, data:PerPlayerData, position:Conductor, beat_offset:Float, beat_mult:Float)
 	{
 		final fAccelTime = .2, fTotalTime = .5;
-		var fBeat = ((position.currentBeatTime + fAccelTime + beat_offset) * (beat_mult + 1));
+		var fBeat = ((position.curBeatFloat + fAccelTime + beat_offset) * (beat_mult + 1));
 
 		final bEvenBeat = (Std.int(fBeat) % 2) != 0;
 
@@ -1291,11 +1293,6 @@ final class ArrowEffects extends FlxBasic
 		{
 			playerStates[player].mods.get(mod).value = value;
 		}
-	}
-
-	inline function get_conductor():DaveConductor
-	{
-		return DaveConductor.instance;
 	}
 }
 

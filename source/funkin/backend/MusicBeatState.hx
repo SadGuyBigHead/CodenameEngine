@@ -23,6 +23,13 @@ class MusicBeatState extends FlxState implements IBeatCancellableReceiver
 	private var lastBeat:Float = 0;
 	private var lastStep:Float = 0;
 
+	public var conductor(get, default):Conductor;
+
+	function get_conductor()
+	{
+		return this.conductor ?? Conductor.instance;
+	}
+
 	/**
 	 * Dummy sprite used to cache graphics to GPU.
 	 */
@@ -69,25 +76,25 @@ class MusicBeatState extends FlxState implements IBeatCancellableReceiver
 	public var songPos(get, never):Float;
 
 	inline function get_curStep():Int
-		return Conductor.curStep;
+		return conductor.curStep;
 
 	inline function get_curBeat():Int
-		return Conductor.curBeat;
+		return conductor.curBeat;
 
 	inline function get_curMeasure():Int
-		return Conductor.curMeasure;
+		return conductor.curMeasure;
 
 	inline function get_curStepFloat():Float
-		return Conductor.curStepFloat;
+		return conductor.curStepFloat;
 
 	inline function get_curBeatFloat():Float
-		return Conductor.curBeatFloat;
+		return conductor.curBeatFloat;
 
 	inline function get_curMeasureFloat():Float
-		return Conductor.curMeasureFloat;
+		return conductor.curMeasureFloat;
 
 	inline function get_songPos():Float
-		return Conductor.songPosition;
+		return conductor.songPosition;
 
 	/**
 	 * Game Controls. (All players / Solo)

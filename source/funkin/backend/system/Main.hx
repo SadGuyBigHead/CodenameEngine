@@ -131,7 +131,7 @@ class Main extends Sprite
 		FlxG.fixedTimestep = false;
 		FlxG.scaleMode = scaleMode = new FunkinRatioScaleMode();
 
-		Conductor.init();
+		Conductor.init(); // A conductor is made before this is called in `GlobalScript` actually, but its nice to have this here anyways
 		EventManager.init();
 		FlxG.signals.focusGained.add(onFocus);
 		FlxG.signals.preStateSwitch.add(onStateSwitch);

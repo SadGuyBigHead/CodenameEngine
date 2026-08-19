@@ -58,14 +58,14 @@ class CharterWaveformHandler extends FlxBasic
 				{
 					var gridY:Float = (y * (waveData.width * 3)) + (x * 3) + color;
 
-					var startTime:Float = Conductor.getTimeForStep(gridY / 40);
+					var startTime:Float = Conductor.instance.getTimeForStep(gridY / 40);
 					if (startTime > sound.length)
 						if (color == 0)
 							break;
 						else
 							continue;
 
-					var endTime:Float = Conductor.getTimeForStep((gridY + 1) / 40);
+					var endTime:Float = Conductor.instance.getTimeForStep((gridY + 1) / 40);
 					if (endTime > sound.length)
 						if (color == 0)
 							break;
