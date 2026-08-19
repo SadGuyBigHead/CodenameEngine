@@ -27,6 +27,14 @@ using flixel.util.FlxColorTransformUtil;
 
 /**
  * Sorta lazy thing to draw notes and stuff instead of the main guys
+ * 
+ * Broken things:
+ * - holds that go backwards go crazy
+ * - holds with appearance mods only fade nicely on enter and snap when becoming not white idk just try it and see for yourself
+ * - gotta adjust fade distance its just bad right now
+ * - centering holds is just kinda annoying and random
+ * - spiralholds is buggy and rotates around the top of a note instead of the middle
+ * - adding onto that having holds starting at the center should be done better in general i think??
  */
 #if !modchart_debug
 @:fileXml('tags="haxe,release"')
@@ -296,7 +304,7 @@ final class NoteRenderer extends flixel.FlxBasic
 
 			if (note.__distance > strumLine.drawDistanceMax)
 				break;
-			else if (note.sustainLength <= 0 || note.held && mods.conductor.songPosition > note.endTime)
+			else if (note.hold.invalid || note.sustainLength <= 0 || note.held && mods.conductor.songPosition > note.endTime)
 				continue;
 			final hold = note.hold;
 
@@ -331,11 +339,14 @@ final class NoteRenderer extends flixel.FlxBasic
 				frame.frame.bottom = 0;
 				// frame.uv.top = FlxMath.lerp(h.body.uv.top, h.body.uv.bottom, ratio);
 
-				frame.prepareMatrix(matrix, FlxFrameAngle.ANGLE_0, false, false);
-				matrix.translate(-frame.frame.width * .5, .0);
-				matrix.scale(hold.scale, hold.scale);
-				matrix.translate(note.x + hold.offset.x, startY + note.strum.y + hold.offset.y);
-				drawItem.addQuad(frame, matrix, note.colorTransform);
+				// temoparaorely offset the stored matrix
+				final x:Float = note.x;
+				final y:Float = startY + note.strum.y;
+				hold.bodyMatrix.tx += x;
+				hold.bodyMatrix.ty += y;
+				drawItem.addQuad(frame, hold.bodyMatrix, note.colorTransform);
+				hold.bodyMatrix.tx -= x;
+				hold.bodyMatrix.ty -= y;
 				for (_ in 0...FlxDrawQuadsItem.VERTICES_PER_QUAD)
 					pushRGBHueColor(null, 0, drawItem);
 			}
@@ -358,11 +369,15 @@ final class NoteRenderer extends flixel.FlxBasic
 
 				if (frame.frame.height > .0)
 				{
-					frame.prepareMatrix(matrix, FlxFrameAngle.ANGLE_0, false, false);
-					matrix.translate(-frame.frame.width * .5, .0);
-					matrix.scale(hold.scale, hold.scale);
-					matrix.translate(note.x + hold.offset.x, capY + note.strum.y + hold.offset.y);
-					drawItem.addQuad(frame, matrix, note.colorTransform);
+					// temoparaorely offset the stored matrix
+					final x:Float = note.x;
+					final y:Float = capY + note.strum.y;
+					hold.capMatrix.tx += x;
+					hold.capMatrix.ty += y;
+					drawItem.addQuad(frame, hold.capMatrix, note.colorTransform);
+					hold.capMatrix.tx -= x;
+					hold.capMatrix.ty -= y;
+
 					for (_ in 0...FlxDrawQuadsItem.VERTICES_PER_QUAD)
 						pushRGBHueColor(null, 0, drawItem);
 				}
@@ -395,7 +410,7 @@ final class NoteRenderer extends flixel.FlxBasic
 
 			if (note.__distance > strumLine.drawDistanceMax)
 				break;
-			else if (note.sustainLength <= 0 || note.held && mods.conductor.songPosition > note.endTime)
+			else if (note.hold.invalid || note.sustainLength <= 0 || note.held && mods.conductor.songPosition > note.endTime)
 				continue;
 			final hold = note.hold;
 			final clip = note.held;
@@ -427,7 +442,6 @@ final class NoteRenderer extends flixel.FlxBasic
 
 			modYOffset = startYOffset;
 
-			var i = 0;
 			// the stupid version
 			inline function drawPart(segments:Float, cap:Bool)
 			{
@@ -511,7 +525,7 @@ final class NoteRenderer extends flixel.FlxBasic
 					}
 
 					// if we don't have a last position (cause we just started) then make one
-					if (i == .0 && !cap)
+					if (i == .0 && (!drawBody || !cap))
 					{
 						getArrowEffectsPos(pn, startBeat, startMs, note.noteData, false, false, cap ? null : startYOffset);
 						v3.copyFrom(modPos); // just copy it for 0 holds :)

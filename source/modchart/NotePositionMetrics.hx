@@ -6,7 +6,7 @@ class NotePositionMetrics
 
 	public static final defaultReceptorArrowsYReverse:Int = 400;
 
-	public static final defaultFadeDistY:Int = 60;
+	public static final defaultFadeDistY:Int = 120;
 
 	public static final defaultPlayFieldX:Int = 195;
 

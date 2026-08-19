@@ -328,6 +328,11 @@ class Note extends FlxSprite
 
 class HoldNote implements IFlxDestroyable
 {
+	/**
+	 * Set to true if like we cant draw this
+	 */
+	public var invalid:Bool;
+
 	public var graphic:FlxGraphic;
 	public var holdFrames:HoldFrames;
 
@@ -362,6 +367,18 @@ class HoldNote implements IFlxDestroyable
 
 	public var offset:FlxPoint = FlxPoint.get();
 
+	// just to not have people making mods go crazy if they have like the perfect noteskin
+	public var randomOffset(default, set):Float;
+
+	function set_randomOffset(randomOffset:Float)
+	{
+		this.randomOffset = randomOffset;
+		updateMatrix();
+		return randomOffset;
+	}
+
+	var originalNoteSize:FlxPoint = FlxPoint.get();
+
 	public function new(note:Note)
 	{
 		init(note);
@@ -369,6 +386,12 @@ class HoldNote implements IFlxDestroyable
 
 	public function init(note:Note)
 	{
+		if (note == null)
+		{
+			invalid = true;
+			return;
+		}
+
 		this.note = note;
 
 		// cause i want to do note pooling later
@@ -378,9 +401,14 @@ class HoldNote implements IFlxDestroyable
 			return;
 		}
 		final holdFrames = PlayState.instance.noteRenderer.graphics.getHoldFrames(note);
-		scale = note.scale.x;
 		body = holdFrames.getHoldFrame(note.noteData, false);
 		cap = holdFrames.getHoldFrame(note.noteData, true);
+		validate();
+
+		if (invalid)
+			return;
+
+		scale = note.scale.x;
 		graphic = body.parent;
 		startBeat = note.beatTime;
 		startMs = note.strumTime;
@@ -389,22 +417,33 @@ class HoldNote implements IFlxDestroyable
 		column = note.noteData;
 		antialiasing = note.antialiasing;
 
-		bodyWidth = body.sourceSize.x * note.scale.x;
+		bodyWidth = body.frame.width * note.scale.x;
 		bodyHalfWidth = bodyWidth * .5;
-		bodyHeight = body.sourceSize.y * note.scale.y;
+		bodyHeight = body.frame.height * note.scale.y;
 
-		capWidth = cap.sourceSize.x * note.scale.x;
+		capWidth = cap.frame.width * note.scale.x;
 		capHalfWidth = bodyWidth * .5;
-		capHeight = cap.sourceSize.y * note.scale.y;
+		capHeight = cap.frame.height * note.scale.y;
+		
+		originalNoteSize.set(note.width, note.height);
 
-		offset.set(Note.swagWidth * .5, Note.swagWidth * .5);
+		// random magic number to make it look more right even if its technically wrong
+		randomOffset = 1.25;
+	}
 
-		body.prepareMatrix(bodyMatrix, FlxFrameAngle.ANGLE_0, false, false);
+	// updateMatrices!!! but who cares
+	function updateMatrix()
+	{
+		offset.set(randomOffset, note.height * .5);
+		// wtf?
+		offset.x -= originalNoteSize.x - note.frameWidth;
+
+		bodyMatrix.identity();
 		bodyMatrix.translate(-bodyHalfWidth, 0);
 		bodyMatrix.scale(scale, scale);
 		bodyMatrix.translate(offset.x, offset.y);
 		
-		cap.prepareMatrix(capMatrix, FlxFrameAngle.ANGLE_0, false, false);
+		capMatrix.identity();
 		capMatrix.translate(-capHalfWidth, 0);
 		capMatrix.scale(scale, scale);
 		capMatrix.translate(offset.x, offset.y);
@@ -416,10 +455,18 @@ class HoldNote implements IFlxDestroyable
 		cap = null;
 	}
 
+	function validate()
+	{
+		if (body == null || cap == null)
+			invalid = true;
+	}
+
 	public function destroy()
 	{
 		holdFrames = null;
 		note = null;
 		offset = FlxDestroyUtil.put(offset);
+		originalNoteSize = FlxDestroyUtil.put(originalNoteSize);
+		bodyMatrix = capMatrix = null;
 	}
 }
