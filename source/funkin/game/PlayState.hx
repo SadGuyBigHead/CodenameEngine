@@ -37,6 +37,8 @@ import funkin.backend.week.WeekData;
 import funkin.savedata.FunkinSave;
 import haxe.io.Path;
 
+using util.SoundUtil;
+
 using StringTools;
 
 @:access(flixel.text.FlxText.FlxTextFormatRange)
@@ -681,9 +683,6 @@ class PlayState extends MusicBeatState
 	@:noCompletion @:dox(hide) private var _endSongCalled:Bool = false;
 
 	@:noCompletion @:dox(hide) private static var _ONE_ARG:Array<Dynamic> = [null];
-
-	@:dox(hide)
-	var __vocalSyncTimer:Float = 1;
 
 	private function get_accuracy():Float
 	{
@@ -1526,7 +1525,7 @@ class PlayState extends MusicBeatState
 
 		var vocalsPath = Paths.voices(SONG.meta.name, difficulty, SONG.meta.vocalsSuffix);
 		if (SONG.meta.needsVoices && Assets.exists(vocalsPath))
-			vocals = FlxG.sound.load(Options.streamedVocals ? Assets.getMusic(vocalsPath) : vocalsPath);
+			vocals = FlxG.sound.load(Assets.getMusic(vocalsPath));
 		else
 			vocals = new FlxSound();
 
@@ -1632,9 +1631,19 @@ class PlayState extends MusicBeatState
 
 		if (!inst.playing)
 			inst.play(true, time);
-		vocals.play(true, time);
+		if (inst.getSourceTime() < vocals.length)
+		{
+			vocals.play();
+			vocals.setSourceTime(inst.getSourceTime());
+		}
 		for (strumLine in strumLines.members)
-			strumLine.vocals.play(true, time);
+		{
+			if (inst.getSourceTime() < strumLine.vocals.length)
+			{
+				strumLine.vocals.play();
+				strumLine.vocals.setSourceTime(inst.getSourceTime());
+			}
+		}
 
 		gameAndCharsCall("onVocalsResync");
 	}
@@ -1825,15 +1834,13 @@ class PlayState extends MusicBeatState
 				startSong();
 			}
 		}
-		else if (FlxG.sound.music != null && (__vocalSyncTimer -= elapsed) < 0)
+		else if (FlxG.sound.music != null)
 		{
-			__vocalSyncTimer = 1;
-
-			final instTime = FlxG.sound.music.getActualTime();
-			var isOffsync:Bool = vocals.loaded && Math.abs(instTime - vocals.getActualTime()) > 12;
+			final instTime = FlxG.sound.music.getSourceTime();
+			var isOffsync:Bool = vocals.loaded && Math.abs(instTime - vocals.getSourceTime()) > 1;
 			if (!isOffsync)
 				for (strumLine in strumLines.members)
-					if ((isOffsync = strumLine.vocals.loaded && Math.abs(instTime - strumLine.vocals.getActualTime()) > 12))
+					if ((isOffsync = strumLine.vocals.loaded && Math.abs(instTime - strumLine.vocals.getSourceTime()) > 1))
 						break;
 
 			if (isOffsync)
