@@ -22,7 +22,6 @@ class GameplayOptions extends TreeMenuScreen
 		add(new SliderOption(getNameID('volumeSFX'), getDescID('volumeSFX'), 0, 1, 1, 5, 'volumeSFX'));
 
 		add(new Separator());
-		add(new TextOption('optionsMenu.advanced', 'optionsTree.gameplay.advanced-desc', ' >', () -> parent.addMenu(new AdvancedGameplayOptions())));
 	}
 
 	private function __changeAutoPause()
@@ -74,16 +73,5 @@ class GameplayOptions extends TreeMenuScreen
 
 		FlxG.camera.zoom = 1;
 		FlxG.sound.music.volume = 1;
-	}
-}
-
-class AdvancedGameplayOptions extends TreeMenuScreen
-{
-	public function new()
-	{
-		super('optionsMenu.advanced', 'optionsTree.gameplay.advanced-desc', 'GameplayOptions.Advanced.');
-
-		add(new Checkbox(getNameID('streamedMusic'), getDescID('streamedMusic'), 'streamedMusic'));
-		add(new Checkbox(getNameID('streamedVocals'), getDescID('streamedVocals'), 'streamedVocals'));
 	}
 }

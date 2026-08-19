@@ -186,7 +186,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 		this.holdCovers = new HoldCoverGroup();
 
 		var v = Paths.voices(PlayState.SONG.meta.name, PlayState.difficulty, vocalPrefix);
-		vocals = vocalPrefix != "" ? FlxG.sound.load(Options.streamedVocals ? Assets.getMusic(v) : v) : new FlxSound();
+		vocals = vocalPrefix != "" ? FlxG.sound.load(Assets.getMusic(v)) : new FlxSound();
 		vocals.persist = false;
 	}
 
