@@ -78,7 +78,7 @@ final class NoteRenderer extends flixel.FlxBasic
 	var modSkew = FlxPoint.get();
 	var modColor = FlxColor.WHITE;
 	var modGlow = 0.0;
-	var modDark = 0.0;
+	var modDark = 1.0;
 	var modYOffset = 0.0;
 
 	// holds
