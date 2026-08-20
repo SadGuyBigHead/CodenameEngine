@@ -271,7 +271,7 @@ class CharterEvent extends UISliceSprite implements ICharterSelectable
 						num.active = false;
 						num;
 					});
-					if (Conductor.invalidEvents.contains(event))
+					if (Conductor.instance.invalidEvents.contains(event))
 						generateEventIconWarning(group);
 					return group;
 				}
@@ -286,7 +286,7 @@ class CharterEvent extends UISliceSprite implements ICharterSelectable
 						group.members[0].y -= 2;
 						generateEventIconNumbers(group, event.params[0], 3);
 					}
-					if (Conductor.invalidEvents.contains(event))
+					if (Conductor.instance.invalidEvents.contains(event))
 						generateEventIconWarning(group);
 					return group;
 				}
@@ -304,7 +304,7 @@ class CharterEvent extends UISliceSprite implements ICharterSelectable
 						group.members[0].y -= 2;
 						generateEventIconNumbers(group, event.params[0], 3);
 					}
-					if (Conductor.invalidEvents.contains(event))
+					if (Conductor.instance.invalidEvents.contains(event))
 						generateEventIconWarning(group);
 					return group;
 				}

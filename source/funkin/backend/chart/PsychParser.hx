@@ -48,7 +48,7 @@ class PsychParser
 		base.stage = chart.stage;
 
 		for (section in base.notes)
-			section.sectionBeats = Conductor.beatsPerMeasure;
+			section.sectionBeats = Conductor.instance.beatsPerMeasure;
 
 		for (strumLine in chart.strumLines)
 			if (strumLine.type == ADDITIONAL && base.gfVersion == null)
@@ -57,7 +57,7 @@ class PsychParser
 		for (strumLine in chart.strumLines)
 			for (note in strumLine.notes)
 			{
-				var section:Int = Math.floor(Conductor.getStepForTime(note.time) / Conductor.getMeasureLength());
+				var section:Int = Math.floor(Conductor.instance.getStepForTime(note.time) / Conductor.instance.getMeasureLength());
 				var swagSection:SwagSection = base.notes[section];
 
 				if (section >= 0 && section < base.notes.length)
@@ -122,13 +122,13 @@ class PsychParser
 							}
 						]);
 					case "Scroll Speed Change":
-						var eventStep:Float = Conductor.getStepForTime(event.time);
+						var eventStep:Float = Conductor.instance.getStepForTime(event.time);
 						psychEvents.push([
 							"Change Scroll Speed",
 							FlxMath.roundDecimal(event.params[1] / chart.scrollSpeed, 2), // SCROLL SPEED MULTIPLIER
 							FlxMath.roundDecimal( // TIME
 								event.params[0] ? // IS TWEENED?
-									(Conductor.getTimeForStep(eventStep + event.params[2]) - Conductor.getTimeForStep(eventStep)) / 1000 : 0, 2)
+									(Conductor.instance.getTimeForStep(eventStep + event.params[2]) - Conductor.instance.getTimeForStep(eventStep)) / 1000 : 0, 2)
 						]);
 					default:
 						// TODO: allow custom formats in event.json

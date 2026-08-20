@@ -1,5 +1,6 @@
 package dave.timeline;
 
+import funkin.backend.system.Conductor;
 import flixel.util.FlxSort;
 
 /**
@@ -11,7 +12,7 @@ class Timeline extends flixel.FlxBasic
 
 	static var garbage:Vector<TimelineEvent> = new Vector<TimelineEvent>();
 
-	var conductor:DaveConductor;
+	var conductor:Conductor;
 
 	public static function sortByBeat(a:TimelineEvent, b:TimelineEvent):Int
 	{
@@ -20,7 +21,7 @@ class Timeline extends flixel.FlxBasic
 
 	public function new()
 	{
-		this.conductor = DaveConductor.instance;
+		this.conductor = Conductor.instance;
 		super();
 	}
 
@@ -59,7 +60,7 @@ class Timeline extends flixel.FlxBasic
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		run(conductor.currentBeatTime);
+		run(conductor.curBeatFloat);
 	}
 
 	public function run(beat:Float)

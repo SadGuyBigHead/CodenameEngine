@@ -22,14 +22,13 @@ class GameplayOptions extends TreeMenuScreen
 		add(new SliderOption(getNameID('volumeSFX'), getDescID('volumeSFX'), 0, 1, 1, 5, 'volumeSFX'));
 
 		add(new Separator());
-		add(new TextOption('optionsMenu.advanced', 'optionsTree.gameplay.advanced-desc', ' >', () -> parent.addMenu(new AdvancedGameplayOptions())));
 	}
 
 	private function __changeAutoPause()
 		FlxG.autoPause = Options.autoPause;
 
 	private function __changeOffset(offset:Float)
-		Conductor.songOffset = offset;
+		Conductor.instance.songOffset = offset;
 
 	private function __changeVolumeMusic(value:Float)
 		FlxG.sound.defaultMusicGroup.volume = value;
@@ -44,13 +43,13 @@ class GameplayOptions extends TreeMenuScreen
 
 		if (offsetSetting.selected)
 		{
-			if (__lastBeat != Conductor.curBeat)
+			if (__lastBeat != Conductor.instance.curBeat)
 			{
 				FlxG.camera.zoom += 0.03;
-				__lastBeat = Conductor.curBeat;
+				__lastBeat = Conductor.instance.curBeat;
 			}
 
-			var beat = Math.floor(Conductor.getTimeInBeats(FlxG.sound.music.time));
+			var beat = Math.floor(Conductor.instance.getTimeInBeats(FlxG.sound.music.time));
 			if (__lastSongBeat != beat)
 			{
 				__metronome.replay();
@@ -74,16 +73,5 @@ class GameplayOptions extends TreeMenuScreen
 
 		FlxG.camera.zoom = 1;
 		FlxG.sound.music.volume = 1;
-	}
-}
-
-class AdvancedGameplayOptions extends TreeMenuScreen
-{
-	public function new()
-	{
-		super('optionsMenu.advanced', 'optionsTree.gameplay.advanced-desc', 'GameplayOptions.Advanced.');
-
-		add(new Checkbox(getNameID('streamedMusic'), getDescID('streamedMusic'), 'streamedMusic'));
-		add(new Checkbox(getNameID('streamedVocals'), getDescID('streamedVocals'), 'streamedVocals'));
 	}
 }

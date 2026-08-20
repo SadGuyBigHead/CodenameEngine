@@ -61,7 +61,7 @@ class CharterEventScreen extends UISubstateWindow
 		eventsList.addButton.callback = () -> openSubState(new CharterEventTypeSelection(function(eventName)
 		{
 			events.push({
-				time: Conductor.getTimeForStep(chartEvent.step),
+				time: Conductor.instance.getTimeForStep(chartEvent.step),
 				params: [],
 				name: eventName
 			});

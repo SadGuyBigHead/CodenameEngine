@@ -537,7 +537,7 @@ final class CoolUtil
 	@:noUsing public static function playMusic(path:String, Persist:Bool = false, Volume:Float = 1, Looped:Bool = true, DefaultBPM:Float = 102,
 			?Group:FlxSoundGroup)
 	{
-		Conductor.reset();
+		Conductor.instance.reset();
 		if (FlxG.sound.music == null || !FlxG.sound.music.exists)
 			FlxG.sound.music = new FlxSound();
 		else if (FlxG.sound.music.active)
@@ -568,10 +568,10 @@ final class CoolUtil
 			}
 
 			var bpm:Float = Std.parseFloat(musicData["BPM"]).getDefault(DefaultBPM);
-			Conductor.changeBPM(bpm, beatsPerMeasure, Math.floor(stepsPerBeat));
+			Conductor.instance.changeBPM(bpm, beatsPerMeasure, Math.floor(stepsPerBeat));
 		}
 		else
-			Conductor.changeBPM(DefaultBPM);
+			Conductor.instance.changeBPM(DefaultBPM);
 
 		FlxG.sound.music.play();
 	}

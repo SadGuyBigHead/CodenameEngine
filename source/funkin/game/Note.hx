@@ -168,10 +168,10 @@ class Note extends FlxSprite
 		y -= 2000;
 
 		this.strumTime = noteData.time.getDefault(0);
-		this.beatTime = dave.DaveConductor.instance.getTimeInBeats(this.strumTime);
+		this.beatTime = Conductor.instance.getTimeInBeats(this.strumTime);
 		endTime = this.strumTime + noteData.sLen;
 		sustainLength = noteData.sLen;
-		this.beatEndTime = dave.DaveConductor.instance.getTimeInBeats(endTime);
+		this.beatEndTime = Conductor.instance.getTimeInBeats(endTime);
 		this.noteData = noteData.id.getDefault(0);
 
 		var customType = Paths.image('game/notes/${this.noteType}');

@@ -87,7 +87,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		FlxG.camera.target = camFollow;
 
 		lossSFX = FlxG.sound.play(Paths.sound(lossSFXName));
-		Conductor.changeBPM(gameOverSongBPM);
+		Conductor.instance.changeBPM(gameOverSongBPM);
 		cancelConductorUpdate = true;
 
 		DiscordUtil.call("onGameOver", []);

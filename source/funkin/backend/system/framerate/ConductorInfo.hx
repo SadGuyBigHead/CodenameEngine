@@ -15,12 +15,12 @@ class ConductorInfo extends FramerateCategory
 			return;
 
 		var buf = new StringBuf();
-		StringMacro.addLine(buf, 'Current Song Position: ${Math.floor(Conductor.songPosition * 1000) / 1000}');
-		StringMacro.addLine(buf, '\n - ${Conductor.curBeat} beats');
-		StringMacro.addLine(buf, '\n - ${Conductor.curStep} steps');
-		StringMacro.addLine(buf, '\n - ${Conductor.curMeasure} measures');
-		StringMacro.addLine(buf, '\nCurrent BPM: ${Conductor.bpm}');
-		StringMacro.addLine(buf, '\nTime Signature: ${Conductor.beatsPerMeasure}/${Conductor.denominator}');
+		StringMacro.addLine(buf, 'Current Song Position: ${Math.floor(Conductor.instance.songPosition * 1000) / 1000}');
+		StringMacro.addLine(buf, '\n - ${Conductor.instance.curBeat} beats');
+		StringMacro.addLine(buf, '\n - ${Conductor.instance.curStep} steps');
+		StringMacro.addLine(buf, '\n - ${Conductor.instance.curMeasure} measures');
+		StringMacro.addLine(buf, '\nCurrent BPM: ${Conductor.instance.bpm}');
+		StringMacro.addLine(buf, '\nTime Signature: ${Conductor.instance.beatsPerMeasure}/${Conductor.instance.denominator}');
 		_text = buf.toString();
 
 		this.text.text = _text;

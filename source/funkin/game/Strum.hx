@@ -174,7 +174,7 @@ class Strum extends FlxSprite
 		super.update(elapsed);
 		if (cpu)
 		{
-			if (lastHit + (Conductor.crochet * 0.5) < Conductor.songPosition && getAnim() == "confirm")
+			if (lastHit + (Conductor.instance.crochet * 0.5) < Conductor.instance.songPosition && getAnim() == "confirm")
 			{
 				playAnim("static");
 			}
@@ -230,7 +230,7 @@ class Strum extends FlxSprite
 
 	public inline function getDistance(note:Note, ?time:Float)
 	{
-		return (((time ?? note.strumTime) - Conductor.songPosition) * 0.45 * getScrollSpeed(note));
+		return (((time ?? note.strumTime) - Conductor.instance.songPosition) * 0.45 * getScrollSpeed(note));
 	}
 
 	private inline function updateNotePos(daNote:Note)

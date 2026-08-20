@@ -89,7 +89,7 @@ class CharterEventScreenNew extends MusicBeatSubstate
 			openSubState(new CharterEventTypeSelection(function(eventName)
 			{
 				events.push({
-					time: Conductor.getTimeForStep(chartEvent.step),
+					time: Conductor.instance.getTimeForStep(chartEvent.step),
 					params: [],
 					name: eventName
 				});

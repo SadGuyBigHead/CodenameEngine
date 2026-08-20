@@ -23,7 +23,7 @@ class CharterNoteGroup extends FlxTypedGroup<CharterNote>
 		var oldCur = __currentlyLooping;
 		__currentlyLooping = true;
 
-		var curStep = Conductor.curStepFloat;
+		var curStep = Conductor.instance.curStepFloat;
 		if (!FlxG.sound.music.playing)
 			curStep = Charter.instance.gridBackdrops.conductorSprY / 40;
 

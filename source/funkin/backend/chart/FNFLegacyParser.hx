@@ -150,7 +150,7 @@ class FNFLegacyParser
 		for (strumLine in chart.strumLines)
 			for (note in strumLine.notes)
 			{
-				var section:Int = Math.floor(Conductor.getStepForTime(note.time) / Conductor.getMeasureLength());
+				var section:Int = Math.floor(Conductor.instance.getStepForTime(note.time) / Conductor.instance.getMeasureLength());
 				var swagSection:SwagSection = base.notes[section];
 				if (section > 0 && section < base.notes.length)
 				{
@@ -204,7 +204,7 @@ class FNFLegacyParser
 	{
 		var events:Array<ChartEvent> = [for (event in chart.events) Reflect.copy(event)];
 
-		var measures:Float = Conductor.getMeasuresLength();
+		var measures:Float = Conductor.instance.getMeasuresLength();
 		var sections:Int = Math.floor(measures) + (measures % 1 > 0 ? 1 : 0);
 
 		var notes:Array<SwagSection> = cast new haxe.ds.Vector<SwagSection>(sections);
@@ -212,7 +212,7 @@ class FNFLegacyParser
 		{
 			var baseSection:SwagSection = {
 				sectionNotes: [],
-				lengthInSteps: Std.int(Conductor.getMeasureLength()),
+				lengthInSteps: Std.int(Conductor.instance.getMeasureLength()),
 				mustHitSection: notes[section - 1] != null ? notes[section - 1].mustHitSection : false,
 				bpm: notes[section - 1] != null ? notes[section - 1].bpm : chart.meta.bpm,
 				changeBPM: false,
@@ -220,7 +220,7 @@ class FNFLegacyParser
 				sectionBeats: notes[section - 1] != null ? notes[section - 1].sectionBeats : chart.meta.beatsPerMeasure.getDefault(4)
 			};
 
-			var sectionEndTime:Float = Conductor.getTimeForStep(Conductor.getMeasureLength() * (section + 1));
+			var sectionEndTime:Float = Conductor.instance.getTimeForStep(Conductor.instance.getMeasureLength() * (section + 1));
 			while (events.length > 0 && events[0].time < sectionEndTime)
 			{
 				var event:ChartEvent = events.shift();

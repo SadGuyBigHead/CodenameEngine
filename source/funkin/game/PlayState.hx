@@ -37,6 +37,8 @@ import funkin.backend.week.WeekData;
 import funkin.savedata.FunkinSave;
 import haxe.io.Path;
 
+using util.SoundUtil;
+
 using StringTools;
 
 @:access(flixel.text.FlxText.FlxTextFormatRange)
@@ -682,9 +684,6 @@ class PlayState extends MusicBeatState
 
 	@:noCompletion @:dox(hide) private static var _ONE_ARG:Array<Dynamic> = [null];
 
-	@:dox(hide)
-	var __vocalSyncTimer:Float = 1;
-
 	private function get_accuracy():Float
 	{
 		if (accuracyPressedNotes <= 0)
@@ -869,7 +868,7 @@ class PlayState extends MusicBeatState
 
 		scrollSpeed = SONG.scrollSpeed;
 
-		Conductor.setupSong(SONG);
+		Conductor.instance.setupSong(SONG);
 
 		detailsText = isStoryMode ? ("Story Mode: " + storyWeek.name) : "Freeplay";
 
@@ -1328,13 +1327,13 @@ class PlayState extends MusicBeatState
 		}
 
 		startedCountdown = true;
-		Conductor.songPosition = 0;
-		Conductor.songPosition -= Conductor.crochet * introLength - Conductor.songOffset;
+		Conductor.instance.songPosition = 0;
+		Conductor.instance.songPosition -= Conductor.instance.crochet * introLength - Conductor.instance.songOffset;
 
 		if (introLength > 0)
 		{
 			var swagCounter:Int = 0;
-			startTimer = new FlxTimer().start(Conductor.crochet / 1000, (tmr:FlxTimer) ->
+			startTimer = new FlxTimer().start(Conductor.instance.crochet / 1000, (tmr:FlxTimer) ->
 			{
 				countdown(swagCounter++);
 			}, introLength);
@@ -1376,7 +1375,7 @@ class PlayState extends MusicBeatState
 				sprite.antialiasing = event.antialiasing;
 				add(sprite);
 
-				tween = FlxTween.tween(sprite, {y: sprite.y + 100, alpha: 0}, Conductor.crochet / 1000, {
+				tween = FlxTween.tween(sprite, {y: sprite.y + 100, alpha: 0}, Conductor.instance.crochet / 1000, {
 					ease: FlxEase.cubeInOut,
 					onComplete: function(twn:FlxTween)
 					{
@@ -1526,7 +1525,7 @@ class PlayState extends MusicBeatState
 
 		var vocalsPath = Paths.voices(SONG.meta.name, difficulty, SONG.meta.vocalsSuffix);
 		if (SONG.meta.needsVoices && Assets.exists(vocalsPath))
-			vocals = FlxG.sound.load(Options.streamedVocals ? Assets.getMusic(vocalsPath) : vocalsPath);
+			vocals = FlxG.sound.load(Assets.getMusic(vocalsPath));
 		else
 			vocals = new FlxSound();
 
@@ -1628,13 +1627,23 @@ class PlayState extends MusicBeatState
 	@:dox(hide)
 	inline function resyncVocals():Void
 	{
-		final time = Conductor.songPosition + Conductor.songOffset;
+		final time = Conductor.instance.songPosition + Conductor.instance.songOffset;
 
 		if (!inst.playing)
 			inst.play(true, time);
-		vocals.play(true, time);
+		if (inst.getSourceTime() < vocals.length)
+		{
+			vocals.play();
+			vocals.setSourceTime(inst.getSourceTime());
+		}
 		for (strumLine in strumLines.members)
-			strumLine.vocals.play(true, time);
+		{
+			if (inst.getSourceTime() < strumLine.vocals.length)
+			{
+				strumLine.vocals.play();
+				strumLine.vocals.setSourceTime(inst.getSourceTime());
+			}
+		}
 
 		gameAndCharsCall("onVocalsResync");
 	}
@@ -1792,7 +1801,7 @@ class PlayState extends MusicBeatState
 
 		if (Options.camZoomOnBeat && camZooming)
 		{
-			var beat = Conductor.getBeats(camZoomingEvery, camZoomingInterval, camZoomingOffset);
+			var beat = Conductor.instance.getBeats(camZoomingEvery, camZoomingInterval, camZoomingOffset);
 			if (camZoomingLastBeat != beat)
 			{
 				camZoomingLastBeat = beat;
@@ -1819,28 +1828,26 @@ class PlayState extends MusicBeatState
 
 		if (startingSong)
 		{
-			if (startedCountdown && (Conductor.songPosition += Conductor.songOffset + elapsed * 1000) >= 0)
+			if (startedCountdown && (Conductor.instance.songPosition += Conductor.instance.songOffset + elapsed * 1000) >= 0)
 			{
-				Conductor.songPosition = Conductor.songOffset;
+				Conductor.instance.songPosition = Conductor.instance.songOffset;
 				startSong();
 			}
 		}
-		else if (FlxG.sound.music != null && (__vocalSyncTimer -= elapsed) < 0)
+		else if (FlxG.sound.music != null)
 		{
-			__vocalSyncTimer = 1;
-
-			final instTime = FlxG.sound.music.getActualTime();
-			var isOffsync:Bool = vocals.loaded && Math.abs(instTime - vocals.getActualTime()) > 12;
+			final instTime = FlxG.sound.music.getSourceTime();
+			var isOffsync:Bool = vocals.loaded && Math.abs(instTime - vocals.getSourceTime()) > 1;
 			if (!isOffsync)
 				for (strumLine in strumLines.members)
-					if ((isOffsync = strumLine.vocals.loaded && Math.abs(instTime - strumLine.vocals.getActualTime()) > 12))
+					if ((isOffsync = strumLine.vocals.loaded && Math.abs(instTime - strumLine.vocals.getSourceTime()) > 1))
 						break;
 
 			if (isOffsync)
 				resyncVocals();
 		}
 
-		while (events.length > 0 && events.last().time <= Conductor.songPosition)
+		while (events.length > 0 && events.last().time <= Conductor.instance.songPosition)
 			executeEvent(events.pop());
 
 		if (controls.PAUSE && startedCountdown && canPause)
@@ -2011,7 +2018,7 @@ class PlayState extends MusicBeatState
 						FlxG.camera.followEnabled = false;
 						eventsTween.set("cameraMovement",
 							FlxTween.tween(FlxG.camera.scroll, {x: camFollow.x - FlxG.camera.width * 0.5, y: camFollow.y - FlxG.camera.height * 0.5},
-								(Conductor.stepCrochet / 1000) * (event.params[2] == null ? 4 : event.params[2]), {
+								(Conductor.instance.stepCrochet / 1000) * (event.params[2] == null ? 4 : event.params[2]), {
 									ease: CoolUtil.flxeaseFromString(event.params[3], event.params[4]),
 									onComplete: (_) -> FlxG.camera.followEnabled = oldFollow
 								}));
@@ -2039,7 +2046,7 @@ class PlayState extends MusicBeatState
 					FlxG.camera.followEnabled = false;
 					eventsTween.set("cameraMovement",
 						FlxTween.tween(FlxG.camera.scroll, {x: camFollow.x - FlxG.camera.width * 0.5, y: camFollow.y - FlxG.camera.height * 0.5},
-							(Conductor.stepCrochet / 1000) * (event.params[3] == null ? 4 : event.params[3]), {
+							(Conductor.instance.stepCrochet / 1000) * (event.params[3] == null ? 4 : event.params[3]), {
 								ease: CoolUtil.flxeaseFromString(event.params[4], event.params[5]),
 								onComplete: (_) -> FlxG.camera.followEnabled = oldFollow
 							}));
@@ -2087,7 +2094,7 @@ class PlayState extends MusicBeatState
 						defaultCamZoom = finalZoom;
 				}
 				else
-					eventsTween.set(name, FlxTween.tween(cam, {zoom: finalZoom}, (Conductor.stepCrochet / 1000) * event.params[3], {
+					eventsTween.set(name, FlxTween.tween(cam, {zoom: finalZoom}, (Conductor.instance.stepCrochet / 1000) * event.params[3], {
 						ease: CoolUtil.flxeaseFromString(event.params[4], event.params[5]),
 						onUpdate: function(_)
 						{
@@ -2120,12 +2127,12 @@ class PlayState extends MusicBeatState
 				var camera:FlxCamera = event.params[3] == "camHUD" ? camHUD : camGame;
 
 				if (event.params[0]) // reversed
-					camera.fade(event.params[1], (Conductor.stepCrochet / 1000) * event.params[2], false, () ->
+					camera.fade(event.params[1], (Conductor.instance.stepCrochet / 1000) * event.params[2], false, () ->
 					{
 						camera._fxFadeAlpha = 0;
 					}, true);
 				else // Not Reversed
-					camera.flash(event.params[1], (Conductor.stepCrochet / 1000) * event.params[2], null, true);
+					camera.flash(event.params[1], (Conductor.instance.stepCrochet / 1000) * event.params[2], null, true);
 			case "BPM Change": // automatically handled by conductor
 			case "Scroll Speed Change":
 				var tween = eventsTween.get("scrollSpeedTween");
@@ -2140,7 +2147,7 @@ class PlayState extends MusicBeatState
 					scrollSpeed = finalScroll;
 				else
 					eventsTween.set("scrollSpeedTween",
-						FlxTween.tween(this, {scrollSpeed: finalScroll}, (Conductor.stepCrochet / 1000) * event.params[2],
+						FlxTween.tween(this, {scrollSpeed: finalScroll}, (Conductor.instance.stepCrochet / 1000) * event.params[2],
 							{ease: CoolUtil.flxeaseFromString(event.params[3], event.params[4])}));
 			case "Alt Animation Toggle":
 				var strLine = strumLines.members[event.params[2]];
@@ -2411,7 +2418,7 @@ class PlayState extends MusicBeatState
 
 		note.wasGoodHit = true;
 
-		var noteDiff = Math.abs(Conductor.songPosition - note.strumTime), rating:Rating;
+		var noteDiff = Math.abs(Conductor.instance.songPosition - note.strumTime), rating:Rating;
 		if (!Flags.USE_LEGACY_TIMING)
 			rating = ratingManager.judgeNote(noteDiff);
 		else
@@ -2532,7 +2539,7 @@ class PlayState extends MusicBeatState
 	{
 		var event:RatingsShowEvent = EventManager.get(RatingsShowEvent)
 			.recycle(comboGroup.recycleLoop(FlxSprite), null, null, null, null, 0.7, true, "game/score/", "", 550,
-				FlxPoint.get(FlxG.random.int(0, 10), FlxG.random.int(140, 175)), 0.2, (Conductor.crochet * 0.001), true, false, false, true, null,
+				FlxPoint.get(FlxG.random.int(0, 10), FlxG.random.int(140, 175)), 0.2, (Conductor.instance.crochet * 0.001), true, false, false, true, null,
 				FlxPoint.get(comboGroup.x + -40, comboGroup.y + -60), true, myRating, null);
 		gameAndCharsEvent("onRatingsShown", event);
 
@@ -2583,7 +2590,7 @@ class PlayState extends MusicBeatState
 		{
 			var event:RatingsShowEvent = EventManager.get(RatingsShowEvent)
 				.recycle(null, null, comboGroup.recycleLoop(FlxSprite), null, null, 0.7, true, "game/score/", "", 600,
-					FlxPoint.get(FlxG.random.int(0, 10), 150), 0.2, (Conductor.crochet * 0.001), false,
+					FlxPoint.get(FlxG.random.int(0, 10), 150), 0.2, (Conductor.instance.crochet * 0.001), false,
 					false, evt != null && evt.displayCombo != null ? evt.displayCombo : defaultDisplayCombo, true, null, FlxPoint.get(comboGroup.x,
 						comboGroup.y),
 					true, null, null);
@@ -2640,7 +2647,7 @@ class PlayState extends MusicBeatState
 			{
 				var event:RatingsShowEvent = EventManager.get(RatingsShowEvent)
 					.recycle(null, comboGroup.recycleLoop(FlxSprite), null, 0.5, true, null, null, "game/score/", "", FlxG.random.int(200, 300),
-						FlxPoint.get(FlxG.random.float(-5, 5), FlxG.random.int(140, 160)), 0.2, (Conductor.crochet * 0.002), false, true, false, true, 43,
+						FlxPoint.get(FlxG.random.float(-5, 5), FlxG.random.int(140, 160)), 0.2, (Conductor.instance.crochet * 0.002), false, true, false, true, 43,
 						FlxPoint.get(comboGroup.x - 90, comboGroup.y + 80), true, null, null);
 				gameAndCharsEvent("onRatingsShown", event);
 
@@ -2713,13 +2720,13 @@ class PlayState extends MusicBeatState
 			if (event.countScore)
 				songScore += note.deltaScoreProgress * note.holdScore;
 
-			final distance = note.strumTime + note.sustainLength - Conductor.songPosition;
-			if (distance - Conductor.stepCrochet > .0 && !event.animCancelled && (!strumLine.tapChordPriority || strumLine.justStepped))
+			final distance = note.strumTime + note.sustainLength - Conductor.instance.songPosition;
+			if (distance - Conductor.instance.stepCrochet > .0 && !event.animCancelled && (!strumLine.tapChordPriority || strumLine.justStepped))
 				for (char in event.characters)
 					if (char != null)
 					{
 						final loop = strumLine.justStepped
-							&& (distance * strumLine.sustainSingSpeed) > (Conductor.stepCrochet * 1.5 * strumLine.sustainSingMin);
+							&& (distance * strumLine.sustainSingSpeed) > (Conductor.instance.stepCrochet * 1.5 * strumLine.sustainSingMin);
 						char.playSingAnim(event.direction, event.animSuffix, SING, event.forceAnim);
 						if (loop)
 							char.animation.curAnim.curFrame = 0;

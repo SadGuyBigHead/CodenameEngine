@@ -186,7 +186,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 		this.holdCovers = new HoldCoverGroup();
 
 		var v = Paths.voices(PlayState.SONG.meta.name, PlayState.difficulty, vocalPrefix);
-		vocals = vocalPrefix != "" ? FlxG.sound.load(Options.streamedVocals ? Assets.getMusic(v) : v) : new FlxSound();
+		vocals = vocalPrefix != "" ? FlxG.sound.load(Assets.getMusic(v)) : new FlxSound();
 		vocals.persist = false;
 	}
 
@@ -255,7 +255,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 	**/
 	public inline function updateNotes()
 	{
-		__updateNote_songPos = Conductor.songPosition;
+		__updateNote_songPos = Conductor.instance.songPosition;
 		if (__updateNote_event == null)
 			__updateNote_event = PlayState.instance.__updateNote_event;
 		notes.forEach(updateNote);
@@ -384,7 +384,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 	public function updateInput(id:Int = 0)
 	{
 		justStepped = false;
-		final holdSingStep = Math.floor(Conductor.curStepFloat * sustainSingSpeed);
+		final holdSingStep = Math.floor(Conductor.instance.curStepFloat * sustainSingSpeed);
 		if (lastStep != holdSingStep)
 		{
 			justStepped = true;

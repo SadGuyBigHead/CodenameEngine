@@ -44,8 +44,6 @@ class Options
 	public static var framerate:Int = 120;
 	public static var gpuOnlyBitmaps:Bool = #if (mac || web) false #else true #end; // causes issues on mac and web
 	public static var language = "en"; // default to english, Flags.DEFAULT_LANGUAGE should not modify this
-	public static var streamedMusic:Bool = true;
-	public static var streamedVocals:Bool = true;
 	public static var quality:Int = 1;
 	public static var allowConfigWarning:Bool = true;
 
@@ -240,7 +238,6 @@ class Options
 		applyKeybinds();
 		applyQuality();
 
-		flixel.sound.FlxSoundData.allowStreaming = streamedMusic;
 		FlxG.sound.defaultMusicGroup.volume = volumeMusic;
 		FlxG.autoPause = autoPause;
 		if (FlxG.updateFramerate < framerate)

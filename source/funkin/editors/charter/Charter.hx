@@ -502,7 +502,7 @@ class Charter extends UIState
 		scrollBar.onChange = function(v)
 		{
 			if (!FlxG.sound.music.playing)
-				Conductor.songPosition = Conductor.getTimeForStep(v) + Conductor.songOffset;
+				Conductor.instance.songPosition = Conductor.instance.getTimeForStep(v) + Conductor.instance.songOffset;
 		};
 		uiGroup.add(scrollBar);
 
@@ -648,7 +648,7 @@ class Charter extends UIState
 			__resetStatics();
 		}
 
-		Conductor.setupSong(PlayState.SONG);
+		Conductor.instance.setupSong(PlayState.SONG);
 		noteTypes = PlayState.SONG.noteTypes;
 
 		FlxG.sound.setMusic(FlxG.sound.load(Paths.inst(__song, __diff, PlayState.SONG.meta.instSuffix)));
@@ -678,8 +678,8 @@ class Charter extends UIState
 			for (note in strL.notes)
 			{
 				var n = new CharterNote();
-				var t = Conductor.getStepForTime(note.time);
-				n.updatePos(t, note.id, Conductor.getStepForTime(note.time + note.sLen) - t, note.type, strumLines.members[i]);
+				var t = Conductor.instance.getStepForTime(note.time);
+				n.updatePos(t, note.id, Conductor.instance.getStepForTime(note.time + note.sLen) - t, note.type, strumLines.members[i]);
 				notesGroup.members[notesCreated++] = n;
 			}
 		notesGroup.sortNotes();
@@ -698,14 +698,14 @@ class Charter extends UIState
 					if (lastRightEvents != null && lastRightTime == e.time)
 						lastRightEvents.events.push(e);
 					else
-						rightEventsGroup.add(lastRightEvents = new CharterEvent(Conductor.getStepForTime(lastRightTime = e.time), [e], e.global));
+						rightEventsGroup.add(lastRightEvents = new CharterEvent(Conductor.instance.getStepForTime(lastRightTime = e.time), [e], e.global));
 				}
 				else
 				{
 					if (lastLeftEvents != null && lastLeftTime == e.time)
 						lastLeftEvents.events.push(e);
 					else
-						leftEventsGroup.add(lastLeftEvents = new CharterEvent(Conductor.getStepForTime(lastLeftTime = e.time), [e], e.global));
+						leftEventsGroup.add(lastLeftEvents = new CharterEvent(Conductor.instance.getStepForTime(lastLeftTime = e.time), [e], e.global));
 				}
 			}
 
@@ -740,7 +740,7 @@ class Charter extends UIState
 	{
 		// refreshes everything dependant on BPM, and BPM changes
 		var length = FlxG.sound.music.getDefault(vocals).length;
-		scrollBar.length = __endStep = Conductor.getStepForTime(length);
+		scrollBar.length = __endStep = Conductor.instance.getStepForTime(length);
 
 		gridBackdrops.bottomLimitY = __endStep * 40;
 		leftEventsBackdrop.bottomSeparator.y = rightEventsBackdrop.bottomSeparator.y = gridBackdrops.bottomLimitY - 2;
@@ -1485,8 +1485,8 @@ class Charter extends UIState
 			for (note in strL.notes)
 			{
 				var n = new CharterNote();
-				var t = Conductor.getStepForTime(note.time);
-				n.updatePos(t, note.id, Conductor.getStepForTime(note.time + note.sLen) - t, note.type, cStr);
+				var t = Conductor.instance.getStepForTime(note.time);
+				n.updatePos(t, note.id, Conductor.instance.getStepForTime(note.time + note.sLen) - t, note.type, cStr);
 				notesGroup.add(n);
 			}
 			createSelection(toBeCreated, false);
@@ -1678,7 +1678,7 @@ class Charter extends UIState
 		super.update(elapsed);
 
 		scrollBar.size = (FlxG.height / 40 / charterCamera.zoom);
-		scrollBar.start = Conductor.curStepFloat - (scrollBar.size / 2);
+		scrollBar.start = Conductor.instance.curStepFloat - (scrollBar.size / 2);
 
 		if (gridBackdrops.strumlinesAmount != strumLines.members.length)
 			updateDisplaySprites();
@@ -1686,7 +1686,7 @@ class Charter extends UIState
 		// TODO: canTypeText in case an ui input element is focused
 		if (true)
 		{
-			__crochet = ((60 / Conductor.bpm) * 1000);
+			__crochet = ((60 / Conductor.instance.bpm) * 1000);
 
 			if (FlxG.keys.justPressed.ANY
 				&& !strumLines.isDragging
@@ -1711,7 +1711,7 @@ class Charter extends UIState
 					{
 						if (!FlxG.sound.music.playing)
 						{
-							Conductor.songPosition -= (__crochet * FlxG.mouse.wheel) - Conductor.songOffset;
+							Conductor.instance.songPosition -= (__crochet * FlxG.mouse.wheel) - Conductor.instance.songOffset;
 						}
 					}
 				}
@@ -1719,9 +1719,9 @@ class Charter extends UIState
 		}
 
 		var songLength = FlxG.sound.music.getDefault(vocals).length;
-		Conductor.songPosition = CoolUtil.bound(Conductor.songPosition + Conductor.songOffset, 0, songLength);
+		Conductor.instance.songPosition = CoolUtil.bound(Conductor.instance.songPosition + Conductor.instance.songOffset, 0, songLength);
 
-		if (Conductor.songPosition >= songLength - Conductor.songOffset)
+		if (Conductor.instance.songPosition >= songLength - Conductor.instance.songOffset)
 		{
 			FlxG.sound.music.pause();
 			vocals.pause();
@@ -1729,18 +1729,18 @@ class Charter extends UIState
 				strumLine.vocals.pause();
 		}
 
-		var curChange = Conductor.curChange;
+		var curChange = Conductor.instance.curChange;
 		songPosInfo.text = [
 			// no need to translate the time text since it has no text only numbers
-			'${CoolUtil.timeToStr(Conductor.songPosition)} / ${CoolUtil.timeToStr(songLength)}',
+			'${CoolUtil.timeToStr(Conductor.instance.songPosition)} / ${CoolUtil.timeToStr(songLength)}',
 			SONGPOSINFO_STEP.format([curStep]),
 			SONGPOSINFO_BEAT.format([curBeat]),
 			SONGPOSINFO_MEASURE.format([curMeasure]),
 			SONGPOSINFO_BPM.format([
 				(curChange != null && curChange.continuous && curChange.endSongTime > songPos)
-				? FlxMath.roundDecimal(Conductor.bpm, 3) : Conductor.bpm
+				? FlxMath.roundDecimal(Conductor.instance.bpm, 3) : Conductor.instance.bpm
 			]),
-			SONGPOSINFO_TIMESIGNATURE.format([Conductor.beatsPerMeasure, Conductor.denominator])
+			SONGPOSINFO_TIMESIGNATURE.format([Conductor.instance.beatsPerMeasure, Conductor.instance.denominator])
 		].join("\n");
 
 		if (charterCamera.zoom != (charterCamera.zoom = lerp(charterCamera.zoom, __camZoom, __firstFrame ? 1 : 0.125)))
@@ -2282,13 +2282,13 @@ class Charter extends UIState
 		playtestChart(0, false);
 
 	inline function _chart_playtest_here(_)
-		playtestChart(Conductor.songPosition, false, true);
+		playtestChart(Conductor.instance.songPosition, false, true);
 
 	inline function _chart_playtest_opponent(_)
 		playtestChart(0, true);
 
 	inline function _chart_playtest_opponent_here(_)
-		playtestChart(Conductor.songPosition, true, true);
+		playtestChart(Conductor.instance.songPosition, true, true);
 
 	function _chart_enablescripts(t)
 	{
@@ -2303,7 +2303,7 @@ class Charter extends UIState
 
 	function _playback_play(_)
 	{
-		if (Conductor.songPosition >= FlxG.sound.music.getDefault(vocals).length - Conductor.songOffset)
+		if (Conductor.instance.songPosition >= FlxG.sound.music.getDefault(vocals).length - Conductor.instance.songOffset)
 			return;
 
 		if (FlxG.sound.music.playing)
@@ -2315,7 +2315,7 @@ class Charter extends UIState
 		}
 		else
 		{
-			FlxG.sound.music.play(true, Conductor.songPosition + Conductor.songOffset);
+			FlxG.sound.music.play(true, Conductor.instance.songPosition + Conductor.instance.songOffset);
 			vocals.play(true, FlxG.sound.music.getActualTime());
 			for (strumLine in strumLines.members)
 			{
@@ -2369,49 +2369,49 @@ class Charter extends UIState
 	{
 		if (FlxG.sound.music.playing)
 			return;
-		Conductor.songPosition -= (Conductor.beatsPerMeasure * __crochet);
+		Conductor.instance.songPosition -= (Conductor.instance.beatsPerMeasure * __crochet);
 	}
 
 	function _playback_forward(_)
 	{
 		if (FlxG.sound.music.playing)
 			return;
-		Conductor.songPosition += (Conductor.beatsPerMeasure * __crochet);
+		Conductor.instance.songPosition += (Conductor.instance.beatsPerMeasure * __crochet);
 	}
 
 	function _playback_section_start(_)
 	{
 		if (FlxG.sound.music.playing)
 			return;
-		Conductor.songPosition = (Conductor.beatsPerMeasure * (60000 / Conductor.bpm)) * curMeasure;
+		Conductor.instance.songPosition = (Conductor.instance.beatsPerMeasure * (60000 / Conductor.instance.bpm)) * curMeasure;
 	}
 
 	function _playback_back_step(_)
 	{
 		if (FlxG.sound.music.playing)
 			return;
-		Conductor.songPosition -= Conductor.stepCrochet;
+		Conductor.instance.songPosition -= Conductor.instance.stepCrochet;
 	}
 
 	function _playback_forward_step(_)
 	{
 		if (FlxG.sound.music.playing)
 			return;
-		Conductor.songPosition += Conductor.stepCrochet;
+		Conductor.instance.songPosition += Conductor.instance.stepCrochet;
 	}
 
 	function _song_start(_)
 	{
 		if (FlxG.sound.music.playing)
 			return;
-		Conductor.songPosition = 0;
+		Conductor.instance.songPosition = 0;
 	}
 
 	function _song_end(_)
 	{
 		if (FlxG.sound.music.playing)
 			return;
-		Conductor.songPosition = FlxG.sound.music.length;
+		Conductor.instance.songPosition = FlxG.sound.music.length;
 	}
 
 	function _opponent_camera_add(_)
@@ -2427,7 +2427,7 @@ class Charter extends UIState
 			{
 				name: name,
 				params: params,
-				time: Conductor.getTimeForStep(step)
+				time: Conductor.instance.getTimeForStep(step)
 			}
 		], shouldGlobal);
 
@@ -2606,7 +2606,7 @@ class Charter extends UIState
 					label: goToBookmark.format([b.name]),
 					onSelect: function(_)
 					{
-						Conductor.songPosition = Conductor.getTimeForStep(b.time);
+						Conductor.instance.songPosition = Conductor.instance.getTimeForStep(b.time);
 					}
 				});
 			}
@@ -2805,8 +2805,8 @@ class Charter extends UIState
 	{
 		selection = [
 			for (note in notesGroup.members)
-				if (note.step > Conductor.curMeasure * Conductor.getMeasureLength()
-					&& note.step < (Conductor.curMeasure + 1) * Conductor.getMeasureLength()) note
+				if (note.step > Conductor.instance.curMeasure * Conductor.instance.getMeasureLength()
+					&& note.step < (Conductor.instance.curMeasure + 1) * Conductor.instance.getMeasureLength()) note
 		];
 	}
 
@@ -2973,7 +2973,7 @@ class Charter extends UIState
 	{
 		buildChart();
 		startHere = here;
-		startTime = Conductor.songPosition;
+		startTime = Conductor.instance.songPosition;
 		PlayState.opponentMode = opponentMode;
 		PlayState.chartingMode = true;
 		FlxG.switchState(new PlayState());
@@ -2981,11 +2981,11 @@ class Charter extends UIState
 
 	public inline function buildNote(note:CharterNote):ChartNote
 	{
-		var time = Conductor.getTimeForStep(note.step);
+		var time = Conductor.instance.getTimeForStep(note.step);
 		return {
 			type: note.type,
 			time: time,
-			sLen: Conductor.getTimeForStep(note.step + note.susLength) - time,
+			sLen: Conductor.instance.getTimeForStep(note.step + note.susLength) - time,
 			id: note.id
 		};
 	}
@@ -3025,7 +3025,7 @@ class Charter extends UIState
 		for (e in events)
 			for (event in e.events)
 			{
-				event.time = Conductor.getTimeForStep(e.step);
+				event.time = Conductor.instance.getTimeForStep(e.step);
 				PlayState.SONG.events.push(event);
 			}
 	}
@@ -3034,7 +3034,7 @@ class Charter extends UIState
 	{
 		leftEventsGroup.sortEvents();
 		rightEventsGroup.sortEvents();
-		Conductor.mapCharterBPMChanges(PlayState.SONG);
+		Conductor.instance.mapCharterBPMChanges(PlayState.SONG);
 		buildEvents();
 
 		for (e in leftEventsGroup.members)
@@ -3190,7 +3190,7 @@ class Charter extends UIState
 	@:noCompletion public function __updatePlaytestInfo()
 	{
 		playtestInfo = {
-			songPosition: Conductor.songPosition,
+			songPosition: Conductor.instance.songPosition,
 			playbackSpeed: playBackSlider.value,
 			quantSelected: quant,
 			noteTypeSelected: noteType,
@@ -3206,7 +3206,7 @@ class Charter extends UIState
 		if (playtestInfo == null)
 			return;
 
-		Conductor.songPosition = playtestInfo.songPosition;
+		Conductor.instance.songPosition = playtestInfo.songPosition;
 		playBackSlider.value = playtestInfo.playbackSpeed;
 		quant = playtestInfo.quantSelected;
 		noteType = playtestInfo.noteTypeSelected;

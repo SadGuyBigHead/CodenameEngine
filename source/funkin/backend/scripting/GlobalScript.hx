@@ -27,8 +27,8 @@ class GlobalScript
 		ModsFolder.onModSwitch.add(onModSwitch);
 		#end
 
-		Conductor.onBeatHit.add(beatHit);
-		Conductor.onStepHit.add(stepHit);
+		Conductor.instance.onBeatHit.add(beatHit);
+		Conductor.instance.onStepHit.add(stepHit);
 
 		FlxG.signals.focusGained.add(function()
 		{
