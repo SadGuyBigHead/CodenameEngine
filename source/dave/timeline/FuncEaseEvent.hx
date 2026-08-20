@@ -32,6 +32,7 @@ class FuncEaseEvent extends TimelineEvent
 			func(FlxMath.lerp(beginPercent, endPercent, ease(t)));
 			return t >= 1;
 		}
+		
 		return false;
 	}
 }

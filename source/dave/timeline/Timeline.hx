@@ -32,22 +32,13 @@ class Timeline extends flixel.FlxBasic
 	 */
 	public function add(event:TimelineEvent):Timeline
 	{
-		// if (event.state != UPCOMING)
-		//	throw "Only upcoming events can be added";
-		// if (event._broken)
-		// {
-		//	event.destroy();
-		//	return this;
-		// }
 		events.push(event);
-		// event.pushed();
 		return this;
 	}
 
 	public function remove(event:TimelineEvent):Timeline
 	{
 		garbage.push(event);
-		// getEventArray(event.state).remove(event);
 		return this;
 	}
 
@@ -77,13 +68,13 @@ class Timeline extends flixel.FlxBasic
 				}
 				catch (e)
 				{
-					// log(['[HAXE ERROR] $e', e.stack, e.details()]);
 					trace("event ereror :(", e.stack, e.details());
 					ret = true;
 				}
 				#else
 				final ret = event.run(beat);
 				#end
+
 				if (ret)
 				{
 					garbage.push(event);
@@ -95,6 +86,7 @@ class Timeline extends flixel.FlxBasic
 				break;
 			}
 		}
+
 		clearGarbage();
 	}
 
@@ -117,9 +109,13 @@ class Timeline extends flixel.FlxBasic
 	{
 		if (func == null)
 		{
-			trace('[EREREROER] FUCUSDFSDFJSDF', func);
+			#if debug
+			trace('[Timeline] Func Null', func);
+			#end
+
 			return;
 		}
+
 		add(new FuncEvent(beat, func));
 	}
 
@@ -127,9 +123,13 @@ class Timeline extends flixel.FlxBasic
 	{
 		if (ease == null || func == null)
 		{
-			trace('[EREREROER] FUCUSDFSDFJSDF', ease, func);
+			#if debug
+			trace('[Timeline] Ease and/or Func Null', ease, func);
+			#end
+
 			return;
 		}
+
 		add(new FuncEaseEvent(beat, length, ease, beginPercent, endPercent, func));
 	}
 
@@ -137,16 +137,13 @@ class Timeline extends flixel.FlxBasic
 	{
 		if (func == null)
 		{
-			trace('[EREREROER] FUCUSDFSDFJSDF', func);
+			#if debug
+			trace('[Timeline] Func Null', func);
+			#end
+
 			return;
 		}
+
 		add(new PerframeEvent(beat, length, func));
 	}
-
-	// public function implementToHScript(hscript:HScript)
-	// {
-	//	hscript.set("func", func);
-	//	hscript.set("funcEase", funcEase);
-	//	hscript.set("perframe", perframe);
-	// }
 }

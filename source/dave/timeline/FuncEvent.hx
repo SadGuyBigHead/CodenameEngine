@@ -7,14 +7,11 @@ class FuncEvent extends TimelineEvent
 {
 	var func:Void->Void;
 
-	// var undoFunc:Void->Void;
-
-	public function new(beat:Float, func:Void->Void) // , ?undoFunc:Void->Void)
+	public function new(beat:Float, func:Void->Void)
 	{
 		super(beat);
 
 		this.func = func;
-		// this.undoFunc = undoFunc;
 	}
 
 	override function run(beat:Float)
@@ -24,6 +21,7 @@ class FuncEvent extends TimelineEvent
 			func();
 			return true;
 		}
+
 		return false;
 	}
 }

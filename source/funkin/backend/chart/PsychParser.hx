@@ -20,24 +20,35 @@ class PsychParser
 	public static function standardize(data:Dynamic, result:ChartData)
 	{
 		var sectionsData:Array<Dynamic> = Chart.cleanSongData(data).notes;
+
 		if (sectionsData == null)
+		{
 			return;
+		}
 
 		for (section in sectionsData)
+		{
 			for (note in cast(section.sectionNotes, Array<Dynamic>))
 			{
 				var gottaHitNote:Bool = section.mustHitSection == (note[1] >= 4);
+
 				note[1] = (note[1] % 4) + (gottaHitNote ? 4 : 0);
 
 				if (note[3] != null && Std.isOfType(note[3], String))
+				{
 					note[3] = Chart.addNoteType(result, note[3]);
+				}
 			}
+		}
 	}
 
 	public static function parse(data:Dynamic, result:ChartData)
 	{
 		if (Chart.detectChartFormat(data) == PSYCH_NEW)
+		{
 			standardize(data, result);
+		}
+
 		FNFLegacyParser.parse(data, result);
 	}
 
@@ -48,13 +59,20 @@ class PsychParser
 		base.stage = chart.stage;
 
 		for (section in base.notes)
+		{
 			section.sectionBeats = Conductor.instance.beatsPerMeasure;
+		}
 
 		for (strumLine in chart.strumLines)
+		{
 			if (strumLine.type == ADDITIONAL && base.gfVersion == null)
+			{
 				base.gfVersion = strumLine.characters.getDefault(["gf"])[0];
+			}
+		}
 
 		for (strumLine in chart.strumLines)
+		{
 			for (note in strumLine.notes)
 			{
 				var section:Int = Math.floor(Conductor.instance.getStepForTime(note.time) / Conductor.instance.getMeasureLength());
@@ -71,21 +89,30 @@ class PsychParser
 
 					if ((swagSection.mustHitSection && strumLine.type == OPPONENT)
 						|| (!swagSection.mustHitSection && strumLine.type == PLAYER))
+					{
 						sectionNote[1] += 4;
+					}
+
 					swagSection.sectionNotes.push(sectionNote);
 				}
 			}
+		}
 
 		var groupedEvents:Array<Array<ChartEvent>> = [];
 		var __last:Array<ChartEvent> = null;
 		var __lastTime:Float = Math.NaN;
+
 		for (e in [for (event in chart.events) Reflect.copy(event)])
 		{
 			if (e == null || ignoreEvents.contains(e.name))
+			{
 				continue;
+			}
 
 			if (__last != null && __lastTime == e.time)
+			{
 				__last.push(e);
+			}
 			else
 			{
 				__last = [e];
@@ -95,10 +122,13 @@ class PsychParser
 		}
 
 		base.events = [];
+
 		for (events in groupedEvents)
 		{
 			var psychEvents:Array<Dynamic> = [];
+
 			for (event in events)
+			{
 				switch (event.name)
 				{
 					case "Add Camera Zoom":
@@ -128,7 +158,8 @@ class PsychParser
 							FlxMath.roundDecimal(event.params[1] / chart.scrollSpeed, 2), // SCROLL SPEED MULTIPLIER
 							FlxMath.roundDecimal( // TIME
 								event.params[0] ? // IS TWEENED?
-									(Conductor.instance.getTimeForStep(eventStep + event.params[2]) - Conductor.instance.getTimeForStep(eventStep)) / 1000 : 0, 2)
+									(Conductor.instance.getTimeForStep(eventStep + event.params[2])
+										- Conductor.instance.getTimeForStep(eventStep)) / 1000 : 0, 2)
 						]);
 					default:
 						// TODO: allow custom formats in event.json
@@ -140,13 +171,21 @@ class PsychParser
 						psychEvents.push([event.name, val1, val2]);
 				}
 
-			for (psychEvent in psychEvents)
-				for (i in 1...3) // Turn both vals into strings
-					if (!(psychEvent[i] is String))
-						psychEvent[i] = Std.string(psychEvent[i]);
+				for (psychEvent in psychEvents)
+				{
+					for (i in 1...3) // Turn both vals into strings
+					{
+						if (!(psychEvent[i] is String))
+						{
+							psychEvent[i] = Std.string(psychEvent[i]);
+						}
+					}
+				}
 
-			base.events.push([events[0].time, psychEvents]);
+				base.events.push([events[0].time, psychEvents]);
+			}
 		}
+
 		return {song: base};
 	}
 }

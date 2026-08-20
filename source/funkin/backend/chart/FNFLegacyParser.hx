@@ -18,19 +18,23 @@ class FNFLegacyParser
 		result.stage = data.stage;
 
 		var p2isGF:Bool = false;
+
 		result.strumLines.push({
 			characters: [data.player2],
 			type: 0,
 			position: (p2isGF = data.player2.startsWith("gf")) ? "girlfriend" : "dad",
 			notes: []
 		});
+
 		result.strumLines.push({
 			characters: [data.player1],
 			type: 1,
 			position: "boyfriend",
 			notes: []
 		});
+
 		var gfName = data.gf != null ? data.gf : (data.gfVersion != null ? data.gfVersion : (data.player3 != null ? data.player3 : "gf"));
+
 		if (!p2isGF && gfName != "none")
 		{
 			result.strumLines.push({
@@ -53,12 +57,13 @@ class FNFLegacyParser
 		var curCrochet:Float = ((60 / curBPM) * 1000);
 
 		if (data.notes != null)
+		{
 			for (section in data.notes)
 			{
 				if (section == null)
 				{
 					curTime += curCrochet * beatsPerMeasure;
-					continue; // Yoshi Engine charts crash fix
+					continue;
 				}
 
 				var newBeatsPerMeasure:Float = section.sectionBeats != null ? section.sectionBeats : data.beatsPerMeasure.getDefault(4); // Default to 4 if sectionBeats is null or undefined (oops :3)
@@ -84,7 +89,10 @@ class FNFLegacyParser
 				}
 
 				if (section.altAnim == null)
+				{
 					section.altAnim = false;
+				}
+
 				if (altAnims != (altAnims = section.altAnim))
 				{
 					result.events.push({
@@ -95,10 +103,13 @@ class FNFLegacyParser
 				}
 
 				if (section.sectionNotes != null)
+				{
 					for (note in section.sectionNotes)
 					{
 						if (note[1] < 0)
+						{
 							continue;
+						}
 
 						var daStrumTime:Float = note[0];
 						var daNoteData:Int = Std.int(note[1] % 8);
@@ -108,14 +119,20 @@ class FNFLegacyParser
 						if (note.length > 2)
 						{
 							if (note[3] is Int && data.noteTypes != null)
+							{
 								daNoteType = Chart.addNoteType(result, data.noteTypes[Std.int(note[3]) - 1]);
+							}
 							else if (note[3] is String)
+							{
 								daNoteType = Chart.addNoteType(result, note[3]);
+							}
 						}
 						else
 						{
 							if (data.noteTypes != null)
+							{
 								daNoteType = Chart.addNoteType(result, data.noteTypes[daNoteType - 1]);
+							}
 						}
 
 						result.strumLines[gottaHitNote ? 1 : 0].notes.push({
@@ -125,6 +142,7 @@ class FNFLegacyParser
 							sLen: note[2]
 						});
 					}
+				}
 
 				if (section.changeBPM && section.bpm != curBPM)
 				{
@@ -139,6 +157,7 @@ class FNFLegacyParser
 
 				curTime += curCrochet * beatsPerMeasure;
 			}
+		}
 	}
 
 	// have conductor set up BEFORE you run this :D -lunar
@@ -148,10 +167,12 @@ class FNFLegacyParser
 		base.notes = __convertToSwagSections(chart);
 
 		for (strumLine in chart.strumLines)
+		{
 			for (note in strumLine.notes)
 			{
 				var section:Int = Math.floor(Conductor.instance.getStepForTime(note.time) / Conductor.instance.getMeasureLength());
 				var swagSection:SwagSection = base.notes[section];
+
 				if (section > 0 && section < base.notes.length)
 				{
 					var sectionNote:Array<Dynamic> = [
@@ -162,10 +183,14 @@ class FNFLegacyParser
 
 					if ((swagSection.mustHitSection && strumLine.type == OPPONENT)
 						|| (!swagSection.mustHitSection && strumLine.type == PLAYER))
+					{
 						sectionNote[1] += 4;
+					}
+
 					swagSection.sectionNotes.push(sectionNote);
 				}
 			}
+		}
 
 		return {song: base};
 	}
@@ -186,16 +211,22 @@ class FNFLegacyParser
 		};
 
 		for (strumLine in chart.strumLines)
+		{
 			switch (strumLine.type)
 			{
 				case OPPONENT:
 					if (base.player2 == null)
+					{
 						base.player2 = strumLine.characters.getDefault([Flags.DEFAULT_OPPONENT])[0];
+					}
 				case PLAYER:
 					if (base.player1 == null)
+					{
 						base.player1 = strumLine.characters.getDefault([Flags.DEFAULT_CHARACTER])[0];
+					}
 				case ADDITIONAL: // do nothing
 			}
+		}
 
 		return base;
 	}
@@ -208,6 +239,7 @@ class FNFLegacyParser
 		var sections:Int = Math.floor(measures) + (measures % 1 > 0 ? 1 : 0);
 
 		var notes:Array<SwagSection> = cast new haxe.ds.Vector<SwagSection>(sections);
+
 		for (section in 0...sections)
 		{
 			var baseSection:SwagSection = {
@@ -221,9 +253,11 @@ class FNFLegacyParser
 			};
 
 			var sectionEndTime:Float = Conductor.instance.getTimeForStep(Conductor.instance.getMeasureLength() * (section + 1));
+
 			while (events.length > 0 && events[0].time < sectionEndTime)
 			{
 				var event:ChartEvent = events.shift();
+
 				switch (event.name)
 				{
 					case "Camera Movement":
@@ -237,8 +271,10 @@ class FNFLegacyParser
 						baseSection.sectionBeats = event.params[0];
 				}
 			}
+
 			notes[section] = baseSection;
 		}
+
 		return notes;
 	}
 }

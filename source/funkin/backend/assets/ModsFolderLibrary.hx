@@ -6,7 +6,6 @@ import lime.graphics.Image;
 import lime.text.Font;
 import lime.utils.Bytes;
 #if MOD_SUPPORT
-import sys.FileStat;
 import sys.FileSystem;
 #end
 
@@ -17,7 +16,6 @@ class ModsFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 	public var basePath:String;
 	public var modName:String;
 	public var libName:String;
-	// public var useImageCache:Bool = true;
 	public var prefix = 'assets/';
 
 	public function new(basePath:String, libName:String, ?modName:String)
@@ -26,6 +24,7 @@ class ModsFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 		this.libName = libName;
 		this.prefix = 'assets/$libName/';
 		this.modName = modName == null ? libName : modName;
+
 		super();
 	}
 
@@ -47,48 +46,62 @@ class ModsFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 	public override function getAudioBuffer(id:String):AudioBuffer
 	{
 		if (!exists(id, "SOUND"))
+		{
 			return null;
+		}
+
 		var path = getAssetPath();
 		editedTimes[id] = FileSystem.stat(path).mtime.getTime();
-		var e = AudioBuffer.fromFile(path);
-		// LimeAssets.cache.audio.set('$libName:$id', e);
-		return e;
+
+		return AudioBuffer.fromFile(path);
 	}
 
 	public override function getBytes(id:String):Bytes
 	{
 		if (!exists(id, "BINARY"))
+		{
 			return null;
+		}
+
 		var path = getAssetPath();
 		editedTimes[id] = FileSystem.stat(path).mtime.getTime();
-		var e = Bytes.fromFile(path);
-		return e;
+
+		return Bytes.fromFile(path);
 	}
 
 	public override function getFont(id:String):Font
 	{
 		if (!exists(id, "FONT"))
+		{
 			return null;
+		}
+
 		var path = getAssetPath();
 		editedTimes[id] = FileSystem.stat(path).mtime.getTime();
+
 		return ModsFolder.registerFont(Font.fromFile(path));
 	}
 
 	public override function getImage(id:String):Image
 	{
 		if (!exists(id, "IMAGE"))
+		{
 			return null;
+		}
+
 		var path = getAssetPath();
 		editedTimes[id] = FileSystem.stat(path).mtime.getTime();
 
-		var e = Image.fromFile(path);
-		return e;
+		return Image.fromFile(path);
 	}
 
 	public override function getPath(id:String):String
 	{
 		if (!__parseAsset(id))
+		{
 			return null;
+		}
+
 		return getAssetPath();
 	}
 
@@ -101,29 +114,45 @@ class ModsFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 	public function __getFiles(folder:String, folders:Bool = false)
 	{
 		if (!folder.endsWith("/"))
+		{
 			folder += "/";
+		}
+
 		if (!__parseAsset(folder))
+		{
 			return [];
+		}
+
 		var path = getAssetPath();
+
 		try
 		{
 			var result:Array<String> = [];
+
 			for (e in FileSystem.readDirectory(path))
+			{
 				if (FileSystem.isDirectory('$path$e') == folders)
+				{
 					result.push(e);
+				}
+			}
+
 			return result;
 		}
 		catch (e)
 		{
-			// woops!!
 		}
+
 		return [];
 	}
 
 	public override function exists(asset:String, type:String):Bool
 	{
 		if (!__parseAsset(asset))
+		{
 			return false;
+		}
+
 		return FileSystem.exists(getAssetPath());
 	}
 
@@ -135,24 +164,21 @@ class ModsFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 	private function __isCacheValid(cache:Map<String, Dynamic>, asset:String, isLocalCache:Bool = false)
 	{
 		if (!editedTimes.exists(asset))
+		{
 			return false;
+		}
+
 		var editedTime = editedTimes[asset];
+
 		if (editedTime == null || editedTime < FileSystem.stat(getPath(asset)).mtime.getTime())
 		{
-			// destroy already existing to prevent memory leak!!!
-			/*var asset = cache[asset];
-				if (asset != null) {
-					switch(Type.getClass(asset)) {
-						case lime.graphics.Image:
-							trace("getting rid of image cause replaced");
-							cast(asset, lime.graphics.Image);
-					}
-			}*/
 			return false;
 		}
 
 		if (!isLocalCache)
+		{
 			asset = '$libName:$asset';
+		}
 
 		return cache.exists(asset) && cache[asset] != null;
 	}
@@ -160,20 +186,29 @@ class ModsFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 	private function __parseAsset(asset:String):Bool
 	{
 		if (!asset.startsWith(prefix))
+		{
 			return false;
+		}
+
 		_parsedAsset = asset.substr(prefix.length);
+
 		if (ModsFolder.useLibFile)
 		{
 			var file = new haxe.io.Path(_parsedAsset);
+
 			if (file.file.startsWith("LIB_"))
 			{
 				var library = file.file.substr(4);
+
 				if (library != modName)
+				{
 					return false;
+				}
 
 				_parsedAsset = file.dir + "." + file.ext;
 			}
 		}
+
 		return true;
 	}
 
@@ -189,10 +224,15 @@ class ModsFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 		for (file in FileSystem.readDirectory('$basePath/$folder'))
 		{
 			var fullPath = '$basePath/$folder/$file';
+
 			if (FileSystem.isDirectory(fullPath))
+			{
 				__listAppend(arr, '$folder$file/');
+			}
 			else
+			{
 				arr.push('$prefix$folder$file');
+			}
 		}
 	}
 	#end

@@ -29,6 +29,7 @@ class VSliceParser
 				stage: Flags.DEFAULT_STAGE,
 				codenameChart: true
 			};
+
 			parseChart(Reflect.field(chartData.notes, diff), metaData, chartData.events, base, resultMeta);
 			resultCharts.push({diffName: diff, chart: base});
 		}
@@ -44,6 +45,7 @@ class VSliceParser
 		result.stage = metadata.playData.stage;
 
 		var p2isGF:Bool = false;
+
 		result.strumLines.push({
 			characters: [metadata.playData.characters.opponent],
 			type: 0,
@@ -51,6 +53,7 @@ class VSliceParser
 			notes: [],
 			vocalsSuffix: '-${metadata.playData.characters.opponent}${resultMeta.vocalsSuffix != null ? resultMeta.vocalsSuffix : ""}'
 		});
+
 		result.strumLines.push({
 			characters: [metadata.playData.characters.player],
 			type: 1,
@@ -58,7 +61,9 @@ class VSliceParser
 			notes: [],
 			vocalsSuffix: '-${metadata.playData.characters.player}${resultMeta.vocalsSuffix != null ? resultMeta.vocalsSuffix : ""}'
 		});
+
 		var gfName = metadata.playData.characters.girlfriend;
+
 		if (!p2isGF && gfName != "none")
 		{
 			result.strumLines.push({
@@ -77,9 +82,12 @@ class VSliceParser
 		for (note in data)
 		{
 			var daNoteType:Null<Int> = null;
+
 			if (note.k != null)
-				daNoteType = Chart.addNoteType(result,
-					note.k == "alt" ? "Alt Anim Note" : note.k); // they hardcoded "alt" for converting old charts BUT THEN WHY THE HELL WOULD YOU CALL "MOM" THE NOTE KIND IN WEEK5 GRAHHH  - Nex
+			{
+				// they hardcoded "alt" for converting old charts BUT THEN WHY THE HELL WOULD YOU CALL "MOM" THE NOTE KIND IN WEEK 5 GRAHHH  - Nex
+				daNoteType = Chart.addNoteType(result, note.k == "alt" ? "Alt Anim Note" : note.k);
+			}
 
 			var daNoteData:Int = Std.int(note.d % 8);
 			var isMustHit:Bool = Math.floor(daNoteData / 4) == 0;
@@ -93,12 +101,15 @@ class VSliceParser
 		}
 
 		var curBPM = result.meta.bpm;
+
 		for (i in 1...timeChanges.length) // starting from 1 on purpose  - Nex
 		{
 			var curChange = timeChanges[i];
+
 			if (curBPM != curChange.bpm)
 			{
 				curBPM = curChange.bpm;
+
 				result.events.push({
 					time: curChange.t,
 					name: "BPM Change",
@@ -110,10 +121,12 @@ class VSliceParser
 		for (event in events)
 		{
 			var values = event.v;
+
 			switch (event.e)
 			{
 				case "FocusCamera":
 					var isPosOnly = false;
+
 					var arr:Array<Dynamic> = [
 						switch (values is Int ? values : values.char)
 						{
@@ -129,19 +142,24 @@ class VSliceParser
 								2;
 						}
 					];
+
 					if (values.ease != "CLASSIC" && values.ease != null)
 					{
 						if (values.ease == "INSTANT")
+						{
 							arr = arr.concat([false]);
+						}
 						else
 						{
 							var cneEase = parseEase(values.ease);
 							arr = arr.concat([true, values.duration == null ? 4 : values.duration, cneEase[0], cneEase[1]]);
 						}
 					}
+
 					if (isPosOnly || ((values.x != null && values.x != 0) || (values.y != null && values.y != 0)))
 					{
 						var useNull = arr.length <= 2;
+
 						result.events.push({
 							time: event.t,
 							name: "Camera Position",
@@ -156,12 +174,15 @@ class VSliceParser
 							]
 						});
 					}
+
 					if (!isPosOnly)
+					{
 						result.events.push({
 							time: event.t,
 							name: "Camera Movement",
 							params: arr
 						});
+					}
 				case "PlayAnimation":
 					result.events.push({
 						time: event.t,
@@ -173,7 +194,7 @@ class VSliceParser
 									1;
 								case 'dad' | 'opponent':
 									0;
-								default /*case 'girlfriend' | 'gf'*/:
+								default:
 									2; // usually the default should be the stage prop but we dont have that sooo  - Nex
 							},
 							values.anim,
@@ -182,6 +203,7 @@ class VSliceParser
 					});
 				case "ScrollSpeed":
 					var cneEase = values.ease == null || values.ease == "INSTANT" ? ["linear", null] : parseEase(values.ease);
+
 					result.events.push({
 						time: event.t,
 						name: "Scroll Speed Change", // we dont support the strumline value and also i will put the whole ease name into a single parameter since it works anyways  - Nex
@@ -205,6 +227,7 @@ class VSliceParser
 					});
 				case "ZoomCamera":
 					var cneEase = values.ease == null || values.ease == "INSTANT" ? ["linear", null] : parseEase(values.ease);
+
 					result.events.push({
 						time: event.t,
 						name: "Camera Zoom", // we dont support the direct mode since welp, its kind of useless here  - Nex
@@ -235,21 +258,36 @@ class VSliceParser
 		result.stepsPerBeat = firstTimeChange.d.getDefault(Flags.DEFAULT_STEPS_PER_BEAT);
 		result.displayName = songName;
 		result.difficulties = data.playData.difficulties.copy();
+
 		if (data.playData.songVariations != null)
+		{
 			result.variants = data.playData.songVariations.copy();
+		}
 
 		if (result.customValues == null)
+		{
 			result.customValues = {};
+		}
+
 		result.customValues.artist = data.artist;
+
 		if (data.charter != null)
+		{
 			result.customValues.charter = data.charter;
+		}
+
 		for (field in Reflect.fields(data.playData))
+		{
 			if (field != "difficulties" && field != "songVariations" && field != "characters" && field != "stage")
+			{
 				Reflect.setProperty(result.customValues, field, Reflect.getProperty(data.playData, field));
+			}
+		}
 	}
 
 	public static function encodeMeta(meta:ChartMetaData, ?chart:ChartData):SwagMetadata
 	{
+		var defTimeCh:Array<SwagTimeChange>;
 		var addVars:Dynamic = meta.customValues;
 		var defStage:String = addVars.stage != null ? addVars.stage : Flags.DEFAULT_STAGE;
 		var defChars:SwagCharactersList = addVars.characters != null ? addVars.characters : {
@@ -261,7 +299,6 @@ class VSliceParser
 			instrumental: '',
 			altInstrumentals: []
 		};
-		var defTimeCh:Array<SwagTimeChange>;
 
 		if (addVars.timeChanges != null && addVars.timeChanges.length > 0)
 		{
@@ -269,14 +306,18 @@ class VSliceParser
 			defTimeCh[0].bpm = meta.bpm;
 		}
 		else
+		{
 			defTimeCh = [{bpm: meta.bpm, t: -1}];
+		}
 
 		if (chart != null)
 		{
 			defStage = chart.stage;
 
 			var done:Array<Bool> = [false, false, false];
+
 			for (strumLine in chart.strumLines)
+			{
 				switch (strumLine.type)
 				{
 					case OPPONENT:
@@ -298,6 +339,7 @@ class VSliceParser
 							defChars.girlfriend = strumLine.characters.getDefault([defChars.girlfriend])[0];
 						}
 				}
+			}
 		}
 
 		var result:SwagMetadata = {
@@ -338,8 +380,13 @@ class VSliceParser
 	public static function parseEase(vsliceEase:String):Array<String>
 	{
 		for (key in ['InOut', 'In', 'Out'])
+		{
 			if (vsliceEase.endsWith(key))
+			{
 				return [vsliceEase.substr(0, vsliceEase.length - key.length), key];
+			}
+		}
+
 		return [vsliceEase];
 	}
 }

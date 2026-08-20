@@ -35,10 +35,13 @@ class ZipFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 		this.modName = (modName == null) ? libName : modName;
 
 		zip = SysZip.openFromFile(basePath);
+
 		for (entry in zip.entries)
 		{
 			if (entry.fileName.length < 0 || entry.fileName.endsWith("/"))
+			{
 				continue;
+			}
 
 			var name:String = entry.fileName.toLowerCase(); // calling .toLowerCase a million times is never the solution
 			lowerCaseAssets[name] = assets[name] = assets[entry.fileName] = entry;
@@ -52,8 +55,6 @@ class ZipFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 		// don't override default value of true if the file exists.
 		// by default `PRELOAD_VIDEOS` is true so you will never need to add this file, but in the case of it being false this is a backup method.
 		PRELOAD_VIDEOS = (!PRELOAD_VIDEOS) ? exists("assets/data/PRECACHE_VIDEOS", "TEXT") : PRELOAD_VIDEOS;
-
-		// if (PRELOAD_VIDEOS) precacheVideos(); // we do this in `MainState` now to handle for `Flags.VIDEO_EXT` :)
 	}
 
 	public function precacheVideos()
@@ -61,18 +62,29 @@ class ZipFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 		_videoExtensions = [Flags.VIDEO_EXT];
 
 		videoCacheRemap = [];
+
 		for (entry in zip.entries)
 		{
 			var name = entry.fileName.toLowerCase();
+
 			if (_videoExtensions.contains(Path.extension(name)))
+			{
 				getPath(prefix + name);
+			}
 		}
 
 		var count:Int = 0;
+
 		for (_ in videoCacheRemap.keys())
+		{
 			count++;
+		}
+
 		if (count <= 0)
+		{
 			return;
+		}
+
 		trace('Precached $count video${(count == 1) ? "" : "s"}');
 	}
 
@@ -83,14 +95,20 @@ class ZipFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 	public function getVideoRemap(originalPath:String):String
 	{
 		if (!_videoExtensions.contains(Path.extension(_parsedAsset)))
+		{
 			return originalPath;
+		}
+
 		if (videoCacheRemap.exists(originalPath))
+		{
 			return videoCacheRemap.get(originalPath);
+		}
 
 		// We adding the length of the string to counteract folder in folder naming duplicates.
 		var newPath = './.temp/${_parsedAsset.length}-zipvideo-${_parsedAsset.split("/").pop()}';
 		File.saveBytes(newPath, unzip(assets[_parsedAsset]));
 		videoCacheRemap.set(originalPath, newPath);
+
 		return newPath;
 	}
 
@@ -128,7 +146,10 @@ class ZipFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 	public override function getPath(id:String):String
 	{
 		if (!__parseAsset(id))
+		{
 			return null;
+		}
+
 		return getAssetPath();
 	}
 
@@ -138,38 +159,55 @@ class ZipFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 	public function __parseAsset(asset:String):Bool
 	{
 		if (!asset.startsWith(prefix))
+		{
 			return false;
+		}
+
 		_parsedAsset = asset.substr(prefix.length);
+
 		if (ModsFolder.useLibFile)
 		{
 			var file = new haxe.io.Path(_parsedAsset);
+
 			if (file.file.startsWith("LIB_"))
 			{
 				var library = file.file.substr(4);
+
 				if (library != modName)
+				{
 					return false;
+				}
 
 				_parsedAsset = file.dir + "." + file.ext;
 			}
 		}
 
 		_parsedAsset = _parsedAsset.toLowerCase();
+
 		if (nameMap.exists(_parsedAsset))
+		{
 			_parsedAsset = nameMap.get(_parsedAsset);
+		}
+
 		return true;
 	}
 
 	public function __isCacheValid(cache:Map<String, Dynamic>, asset:String, isLocal:Bool = false)
 	{
 		if (cache.exists(isLocal ? '$libName:$asset' : asset))
+		{
 			return true;
+		}
+
 		return false;
 	}
 
 	public override function exists(asset:String, type:String):Bool
 	{
 		if (!__parseAsset(asset))
+		{
 			return false;
+		}
 
 		return assets[_parsedAsset] != null;
 	}
@@ -183,9 +221,14 @@ class ZipFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 	public function getFiles(folder:String):Array<String>
 	{
 		if (!folder.endsWith("/"))
+		{
 			folder += "/";
+		}
+
 		if (!__parseAsset(folder))
+		{
 			return [];
+		}
 
 		var content:Array<String> = [];
 
@@ -197,21 +240,33 @@ class ZipFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 			if (k.toLowerCase().startsWith(checkPath))
 			{
 				if (nameMap.exists(k))
+				{
 					k = nameMap.get(k);
+				}
+
 				var fileName = k.substr(_parsedAsset.length);
+
 				if (!fileName.contains("/") && fileName.length > 0)
+				{
 					content.pushOnce(fileName);
+				}
 			}
 		}
+
 		return content;
 	}
 
 	public function getFolders(folder:String):Array<String>
 	{
 		if (!folder.endsWith("/"))
+		{
 			folder += "/";
+		}
+
 		if (!__parseAsset(folder))
+		{
 			return [];
+		}
 
 		var content:Array<String> = [];
 
@@ -223,9 +278,13 @@ class ZipFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 			if (k.toLowerCase().startsWith(checkPath))
 			{
 				if (nameMap.exists(k))
+				{
 					k = nameMap.get(k);
+				}
+
 				var fileName = k.substr(_parsedAsset.length);
 				var index = fileName.indexOf("/");
+
 				if (index != -1 && fileName.length > 0)
 				{
 					var s = fileName.substr(0, index);
@@ -233,6 +292,7 @@ class ZipFolderLibrary extends AssetLibrary implements IModsAssetLibrary
 				}
 			}
 		}
+
 		return content;
 	}
 

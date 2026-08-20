@@ -8,7 +8,7 @@ class TimelineEvent implements IFlxDestroyable
 {
 	public var beat:Float;
 
-	@:allow(apple.timeline)
+	@:allow(dave.timeline)
 	public var state(default, null):TimelineEventState = UPCOMING;
 
 	public function new(beat:Float)

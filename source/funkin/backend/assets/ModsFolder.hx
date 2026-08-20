@@ -62,10 +62,14 @@ class ModsFolder
 	public static function init()
 	{
 		Options.lastLoadedMod ??= "vsdaveandbambi";
+
 		if (!getModsList().contains(Options.lastLoadedMod))
 		{
 			if (Options.lastLoadedMod != null)
+			{
 				Logs.warn("Mod \"" + Options.lastLoadedMod + "\" not found in mods list, switching to DAVE game!");
+			}
+
 			Options.lastLoadedMod = "vsdaveandbambi";
 		}
 	}
@@ -77,18 +81,24 @@ class ModsFolder
 	public static function switchMod(mod:String)
 	{
 		Options.lastLoadedMod = currentModFolder = mod;
+
 		reloadMods();
+
 		if (mod == null)
 		{
 			mod = "(default)";
 		}
+
 		Logs.traceColored([Logs.logText('Switched to mod: '), Logs.logText(mod, GREEN)], VERBOSE);
 	}
 
 	public static function reloadMods()
 	{
 		if (!__firstTime)
+		{
 			FlxG.switchState(new MainState());
+		}
+
 		__firstTime = false;
 	}
 
@@ -103,7 +113,10 @@ class ModsFolder
 		for (ext in Flags.ALLOWED_ZIP_EXTENSIONS)
 		{
 			if (!FileSystem.exists('$path.$ext'))
+			{
 				continue;
+			}
+
 			return loadLibraryFromZip('$path'.toLowerCase(), '$path.$ext', force, modName);
 		}
 		return loadLibraryFromFolder('$path'.toLowerCase(), '$path', force, modName);
@@ -115,27 +128,37 @@ class ModsFolder
 	public static function getModsList(?sortingOptions:ModSortingOptions):Array<String>
 	{
 		var mods:Array<String> = [];
+
 		#if MOD_SUPPORT
 		// Mods directory does not exist yet, create it
 		if (!FileSystem.exists(modsPath))
+		{
 			FileSystem.createDirectory(modsPath);
+		}
 
 		final modsList:Array<String> = FileSystem.readDirectory(modsPath);
 
 		if (modsList == null || modsList.length <= 0)
+		{
 			return mods;
+		}
 
 		for (modFolder in modsList)
 		{
 			if (FileSystem.isDirectory(modsPath + modFolder))
+			{
 				mods.push(modFolder);
+			}
 			else if (Flags.ALLOWED_ZIP_EXTENSIONS.contains(Path.extension(modFolder)))
+			{
 				mods.push(Path.withoutExtension(modFolder));
+			}
 		}
 
 		if (sortingOptions != null)
 		{
 			var sortForge:StringBuf = new StringBuf();
+
 			for (i in mods)
 			{
 				sortForge.add(i);
@@ -149,9 +172,14 @@ class ModsFolder
 			final sortForgePure:String = sortForge.toString();
 
 			if (modsListSortCache.exists(sortForgePure))
+			{
 				mods = modsListSortCache.get(sortForgePure);
+			}
+
 			if (mods.length > 0 && mods[mods.length - 1] == null)
+			{
 				mods.pop();
+			}
 			else
 			{
 				ModSortingController.sort(sortingOptions, mods);
@@ -159,24 +187,31 @@ class ModsFolder
 			}
 		}
 		#end
+
 		return mods;
 	}
 
 	public static function getLoadedModsLibs(skipTranslated:Bool = false):Array<IModsAssetLibrary>
 	{
 		var libs = [];
+
 		for (i in Paths.assetsTree.libraries)
 		{
 			var l = AssetsLibraryList.getCleanLibrary(i);
+
 			#if TRANSLATIONS_SUPPORT
 			if (skipTranslated && (l is TranslatedAssetLibrary))
+			{
 				continue;
+			}
 			#end
-			// No need to check for it being a `ScriptedAssetLibrary`, if `ScriptedAssetLibrary` extends ModsFolderLibrary, which implements `IModsAssetLibrary`
-			// If you have to revert this change then uhhhhh wasn't me, trust 🙏
-			if (/*l is ScriptedAssetLibrary ||*/ l is IModsAssetLibrary)
+
+			if (l is IModsAssetLibrary)
+			{
 				libs.push(cast(l, IModsAssetLibrary));
+			}
 		}
+
 		return libs;
 	}
 
@@ -197,9 +232,11 @@ class ModsFolder
 	public static function registerFont(font:Font)
 	{
 		var openflFont = new OpenFLFont();
+
 		@:privateAccess
 		openflFont.__fromLimeFont(font);
 		OpenFLFont.registerFont(openflFont);
+
 		return font;
 	}
 
@@ -207,13 +244,16 @@ class ModsFolder
 	{
 		var openLib = prepareLibrary(libName, force);
 		lib.prefix = 'assets/';
+
 		@:privateAccess
 		openLib.__proxy = cast(lib, lime.utils.AssetLibrary);
+
 		if (tag != null)
 		{
 			openLib.tag = tag;
 			cast(lib, lime.utils.AssetLibrary).tag = tag;
 		}
+
 		return openLib;
 	}
 
@@ -259,12 +299,15 @@ class ModSortingController
 		switch (sortingOptions.mode)
 		{
 			case ModSortingMode.CLEAN:
-				{}
+				// Nothing
 			case ModSortingMode.ALPHABETICAL:
 				CoolUtil.sortAlphabetically(list);
 		}
+
 		if (sortingOptions.descending)
+		{
 			list.reverse();
+		}
 	}
 }
 

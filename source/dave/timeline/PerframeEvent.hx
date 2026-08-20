@@ -23,6 +23,7 @@ class PerframeEvent extends TimelineEvent
 			func(Math.min(beat + length, time));
 			return time >= beat + length;
 		}
+
 		return false;
 	}
 }

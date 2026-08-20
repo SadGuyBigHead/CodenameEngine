@@ -27,6 +27,7 @@ class EventsData
 		"Alt Animation Toggle",
 		"Play Animation"
 	];
+
 	public static var defaultEventsParams:Map<String, Array<EventParamInfo>> = [
 		"HScript Call" => [
 			{name: "Function Name", type: TString, defValue: "myFunc"},
@@ -246,25 +247,35 @@ class EventsData
 		eventsParams = defaultEventsParams.copy();
 
 		var hscriptInterp:Interp = new Interp();
+
 		hscriptInterp.variables.set("Bool", TBool);
+
 		hscriptInterp.variables.set("Int", function(?min:Int, ?max:Int, ?step:Float):EventParamType
 		{
 			return TInt(min, max, step);
 		});
+
 		hscriptInterp.variables.set("Float", function(?min:Float, ?max:Float, ?step:Float, ?precision:Int):EventParamType
 		{
 			return TFloat(min, max, step, precision);
 		});
+
 		hscriptInterp.variables.set("String", TString);
 		hscriptInterp.variables.set("StrumLine", TStrumLine);
 		hscriptInterp.variables.set("ColorWheel", TColorWheel);
+
 		hscriptInterp.variables.set("DropDown", Reflect.makeVarArgs(function(args:Array<Dynamic>):EventParamType
 		{
 			var flatArgs = CoolUtil.deepFlatten(args);
+
 			if (flatArgs.length == 0)
+			{
 				return TDropDown(["null"]);
+			}
+
 			return TDropDown([for (arg in flatArgs) Std.string(arg)]);
 		}));
+
 		hscriptInterp.variables.set("Character", TCharacter);
 		hscriptInterp.variables.set("Stage", TStage);
 
@@ -274,8 +285,12 @@ class EventsData
 		for (file in Paths.getFolderContent('data/events/', true, BOTH))
 		{
 			var ext = Path.extension(file);
+
 			if (ext != "json" && ext != "pack")
+			{
 				continue;
+			}
+
 			var eventName:String = CoolUtil.getFilename(file);
 			var fileTxt:String = Assets.getText(file);
 
@@ -287,7 +302,9 @@ class EventsData
 			}
 
 			if (fileTxt.trim() == "")
+			{
 				continue;
+			}
 
 			if (!eventsList.contains(eventName))
 			{
@@ -298,10 +315,14 @@ class EventsData
 			try
 			{
 				var data:EventInfoFile = cast Json.parse(fileTxt);
+
 				if (data == null || data.params == null)
+				{
 					continue;
+				}
 
 				var finalParams:Array<EventParamInfo> = [];
+
 				for (paramData in data.params)
 				{
 					try
@@ -319,6 +340,7 @@ class EventsData
 						finalParams.push(null);
 					}
 				}
+
 				eventsParams.set(eventName, finalParams);
 			}
 			catch (e)

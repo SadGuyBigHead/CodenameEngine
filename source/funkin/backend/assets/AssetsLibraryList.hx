@@ -13,49 +13,62 @@ class AssetsLibraryList extends AssetLibrary
 	public var libraries:Array<AssetLibrary> = [];
 	public var cleanLibraries(get, never):Array<AssetLibrary>;
 
-	function get_cleanLibraries():Array<AssetLibrary>
-	{
-		return [for (l in libraries) getCleanLibrary(l)];
-	}
-
-	public var rootDirectory:String = "./assets";
-
-	// is true if any library in `libraries` contains some kind of compressed library.
-	public var hasCompressedLibrary(get, never):Bool;
-
-	function get_hasCompressedLibrary():Bool
-	{
-		for (l in libraries)
-			if (getCleanLibrary(l).isCompressed)
-				return true;
-		return false;
-	}
-
 	@:allow(funkin.backend.system.Main)
 	@:allow(funkin.backend.system.MainState)
 	private var __defaultLibraries:Array<AssetLibrary> = [];
 
 	public var base:AssetLibrary;
 
+	var existsSpecificCacheLibrary:Map<AssetSource, Map<Null<String>, Map<String, AssetLibrary>>> = [];
+	var existsSpecificCacheTime:Map<AssetSource, Map<Null<String>, Map<String, Float>>> = [];
+
 	#if TRANSLATIONS_SUPPORT
 	public var transLib:TranslatedAssetLibrary;
 	#end
+
+	public var rootDirectory:String = "./assets";
+
+	// is true if any library in `libraries` contains some kind of compressed library.
+	public var hasCompressedLibrary(get, never):Bool;
+
+	function get_cleanLibraries():Array<AssetLibrary>
+	{
+		return [for (l in libraries) getCleanLibrary(l)];
+	}
+
+	function get_hasCompressedLibrary():Bool
+	{
+		for (l in libraries)
+		{
+			if (getCleanLibrary(l).isCompressed)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	public function removeLibrary(lib:AssetLibrary)
 	{
 		if (lib != null)
 		{
 			libraries.remove(lib);
+
 			#if TRANSLATIONS_SUPPORT
 			// TODO: improve this code
 			for (k => l in libraries)
 			{
 				if (l == null)
+				{
 					continue;
+				}
+
 				if (l is TranslatedAssetLibrary)
 				{
 					var tlib = cast(l, TranslatedAssetLibrary);
 					var lib:Dynamic = lib;
+
 					if (tlib.forLibrary == lib)
 					{
 						libraries.remove(tlib);
@@ -65,16 +78,16 @@ class AssetsLibraryList extends AssetLibrary
 			}
 			#end
 		}
+
 		return lib;
 	}
-
-	var existsSpecificCacheLibrary:Map<AssetSource, Map<Null<String>, Map<String, AssetLibrary>>> = [];
-	var existsSpecificCacheTime:Map<AssetSource, Map<Null<String>, Map<String, Float>>> = [];
 
 	public function existsSpecific(id:String, type:String, source:AssetSource = BOTH)
 	{
 		if (!id.startsWith("assets/") && existsSpecific('assets/$id', type, source))
+		{
 			return true;
+		}
 
 		// Prevent massive lags on repetitive usage, primarily with getting note sprite sheets in mania charts (usually 2k+ notes)
 		final time = haxe.Timer.stamp();
@@ -98,10 +111,13 @@ class AssetsLibraryList extends AssetLibrary
 		if (cacheTimePaths.exists(id))
 		{
 			final cacheSafeTime = cacheTimePaths.get(id) + 6, library = cacheLibraryPaths.get(id);
+
 			if (library != null)
 			{
 				if (time < cacheSafeTime)
+				{
 					return true;
+				}
 				else if (!shouldSkipLib(library, source) && library.exists(id, type))
 				{
 					cacheTimePaths.set(id, time);
@@ -121,7 +137,10 @@ class AssetsLibraryList extends AssetLibrary
 		for (library in libraries)
 		{
 			if (shouldSkipLib(library, source))
+			{
 				continue;
+			}
+
 			if (library.exists(id, type))
 			{
 				cacheLibraryPaths.set(id, library);
@@ -140,15 +159,21 @@ class AssetsLibraryList extends AssetLibrary
 		for (k => e in libraries)
 		{
 			if (shouldSkipLib(e, source))
+			{
 				continue;
+			}
 			@:privateAccess
 			if (e.exists(id, e.types.get(id)))
 			{
 				var path = e.getPath(id);
+
 				if (path != null)
+				{
 					return path;
+				}
 			}
 		}
+
 		return null;
 	}
 
@@ -158,10 +183,13 @@ class AssetsLibraryList extends AssetLibrary
 	public function getFiles(folder:String, source:AssetSource = BOTH):Array<String>
 	{
 		var content:Array<String> = [];
+
 		for (k => l in libraries)
 		{
 			if (shouldSkipLib(l, source))
+			{
 				continue;
+			}
 
 			l = getCleanLibrary(l);
 
@@ -170,21 +198,28 @@ class AssetsLibraryList extends AssetLibrary
 			if (l is IModsAssetLibrary)
 			{
 				var lib = cast(l, IModsAssetLibrary);
+
 				for (e in lib.getFiles(folder))
+				{
 					content.pushOnce(e);
+				}
 			}
 			#end
 		}
+
 		return content;
 	}
 
 	public function getFolders(folder:String, source:AssetSource = BOTH):Array<String>
 	{
 		var content:Array<String> = [];
+
 		for (k => l in libraries)
 		{
 			if (shouldSkipLib(l, source))
+			{
 				continue;
+			}
 
 			l = getCleanLibrary(l);
 
@@ -194,10 +229,13 @@ class AssetsLibraryList extends AssetLibrary
 			{
 				var lib = cast(l, IModsAssetLibrary);
 				for (e in lib.getFolders(folder))
+				{
 					content.pushOnce(e);
+				}
 			}
 			#end
 		}
+
 		return content;
 	}
 
@@ -213,20 +251,25 @@ class AssetsLibraryList extends AssetLibrary
 					return ass;
 				}
 			}
+
 			for (k => l in libraries)
 			{
 				if (shouldSkipLib(l, source))
+				{
 					continue;
+				}
 				@:privateAccess
 				if (l.exists(id, l.types.get(id)))
 				{
 					var asset = l.getAsset(id, type);
+
 					if (asset != null)
 					{
 						return asset;
 					}
 				}
 			}
+
 			return null;
 		}
 		catch (e)
@@ -234,13 +277,17 @@ class AssetsLibraryList extends AssetLibrary
 			// TODO: trace the error
 			throw e;
 		}
+
 		return null;
 	}
 
 	private function shouldSkipLib(lib:AssetLibrary, source:AssetSource)
 	{
 		if (source == BOTH || lib.tag == BOTH)
+		{
 			return false;
+		}
+
 		return source != lib.tag;
 	}
 
@@ -251,11 +298,15 @@ class AssetsLibraryList extends AssetLibrary
 	{
 		// idk if there's a more efficient way tbh, correct if u find better
 		var files:Map<String, Bool> = [];
+
 		for (k => l in libraries)
 		{
 			for (f in l.list(type))
+			{
 				files.set(f, false);
+			}
 		}
+
 		return [for (k => e in files) k];
 	}
 
@@ -267,10 +318,16 @@ class AssetsLibraryList extends AssetLibrary
 	public function new(?base:AssetLibrary)
 	{
 		super();
+
 		if (base == null)
+		{
 			(this.base = Assets.getLibrary("default")).tag = SOURCE;
+		}
 		else
+		{
 			this.base = base;
+		}
+
 		__defaultLibraries.push(this.base);
 
 		#if sys
@@ -289,7 +346,9 @@ class AssetsLibraryList extends AssetLibrary
 		#end
 
 		for (d in __defaultLibraries)
+		{
 			addLibrary(d);
+		}
 	}
 
 	#if sys
@@ -307,8 +366,12 @@ class AssetsLibraryList extends AssetLibrary
 	public function unloadLibraries()
 	{
 		for (l in libraries)
+		{
 			if (!__defaultLibraries.contains(l))
+			{
 				l.unload();
+			}
+		}
 	}
 
 	public function reset()
@@ -320,6 +383,7 @@ class AssetsLibraryList extends AssetLibrary
 			existsSpecificCacheLibrary[source]?.clear();
 			existsSpecificCacheTime[source]?.clear();
 		}
+
 		existsSpecificCacheLibrary.clear();
 		existsSpecificCacheTime.clear();
 
@@ -327,20 +391,29 @@ class AssetsLibraryList extends AssetLibrary
 
 		// adds default libraries in again
 		for (d in __defaultLibraries)
+		{
 			addLibrary(d);
+		}
 	}
 
 	public function addLibrary(lib:AssetLibrary, ?tag:AssetSource, ?addTransLib:Bool = true)
 	{
 		libraries.insert(0, lib);
+
 		if (tag != null)
+		{
 			lib.tag = tag;
+		}
 		else if (lib.tag == null)
+		{
 			lib.tag = MODS;
+		}
+
 		#if TRANSLATIONS_SUPPORT
 		if (addTransLib)
 		{
 			var cleanLib = getCleanLibrary(lib);
+
 			if (cleanLib != null && (cleanLib is IModsAssetLibrary))
 			{
 				var transLib = new TranslatedAssetLibrary(cast(cleanLib, IModsAssetLibrary));
@@ -349,19 +422,24 @@ class AssetsLibraryList extends AssetLibrary
 			}
 		}
 		#end
+
 		return lib;
 	}
 
 	public static function getCleanLibrary(e:AssetLibrary):AssetLibrary
 	{
 		var l = e;
+
 		if (l is openfl.utils.AssetLibrary)
 		{
 			var al = cast(l, openfl.utils.AssetLibrary);
 			@:privateAccess
 			if (al.__proxy != null)
+			{
 				l = al.__proxy;
+			}
 		}
+
 		return l;
 	}
 }

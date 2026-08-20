@@ -1,15 +1,8 @@
 package funkin.backend.assets;
 
-import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
-import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
-import flixel.graphics.frames.FlxFrame.FlxFrameType;
 import flixel.graphics.frames.FlxFramesCollection;
-import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
-import flixel.math.FlxRect;
-import flixel.util.FlxDestroyUtil;
-import flixel.util.FlxStringUtil;
 
 /**
  * Base class for all frame collections.
@@ -33,13 +26,19 @@ class MultiFramesCollection extends FlxFramesCollection
 	public static function findFrame(graphic:FlxGraphic, ?border:FlxPoint):MultiFramesCollection
 	{
 		if (border == null)
+		{
 			border = FlxPoint.weak();
+		}
 
 		var atlasFrames:Array<MultiFramesCollection> = cast graphic.getFramesCollections(USER("MULTI"));
 
 		for (atlas in atlasFrames)
+		{
 			if (atlas.border.equals(border))
+			{
 				return atlas;
+			}
+		}
 
 		return null;
 	}
@@ -47,7 +46,9 @@ class MultiFramesCollection extends FlxFramesCollection
 	public function addFrames(collection:FlxFramesCollection)
 	{
 		if (collection == null || collection.frames == null)
+		{
 			return;
+		}
 
 		collection.parent.incrementUseCount();
 		parentedFrames.push(collection);
@@ -69,10 +70,14 @@ class MultiFramesCollection extends FlxFramesCollection
 			for (collection in parentedFrames)
 			{
 				if (collection != null)
+				{
 					collection.parent.decrementUseCount();
+				}
 			}
+
 			parentedFrames = null;
 		}
+
 		super.destroy();
 	}
 }
