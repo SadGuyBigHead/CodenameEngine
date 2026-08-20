@@ -24,6 +24,7 @@ import flixel.group.FlxSpriteGroup;
 import funkin.game.PlayState;
 
 using flixel.util.FlxColorTransformUtil;
+using util.ColorTransformTools;
 
 /**
  * Sorta lazy thing to draw notes and stuff instead of the main guys
@@ -258,19 +259,15 @@ final class NoteRenderer extends flixel.FlxBasic
 			{
 				getArrowEffectsPos(pn, mods.conductor.curBeatFloat, mods.conductor.songPosition, col, true, false);
 
-				if (!isOnScreen(pn))
+				if (modDark <= 0.0 || !isOnScreen(pn))
 					continue;
 			}
-			// its invisible
-			// if (modDark == .0)
-			//	continue;
-			// update local matrix
-			// updateLocalMatrix(receptor.origin);
 
-			// apply darkness
-			// receptor.colorTransform.alphaMultiplier = modDark;
-
+			// apply colors
+			receptor.colorTransform.copyTo(ct);
+			receptor.colorTransform.alphaMultiplier *= modDark;
 			drawSprite(camera, pn, receptor, null);
+			ct.copyTo(receptor.colorTransform);
 		}
 	}
 
@@ -614,14 +611,8 @@ final class NoteRenderer extends flixel.FlxBasic
 				continue;
 			else if (isTooFar(pn))
 				break;
-			// its invisible
-			// if (modDark == .0)
-			//	continue;
-			// update local matrix
-			// updateLocalMatrix(receptor.origin);
 
 			// apply colors
-			// todo: fancy dark animation
 			var ofs:Float = note.__dark;
 			if (mods.active)
 			{
@@ -729,7 +720,7 @@ final class NoteRenderer extends flixel.FlxBasic
 			if (mods.active)
 			{
 				getArrowEffectsPos(pn, mods.conductor.curBeatFloat, mods.conductor.songPosition, splash.strum.ID, true, false);
-				if (!isOnScreen(pn))
+				if (modDark <= 0.0 || !isOnScreen(pn))
 					continue;
 			}
 			else
@@ -737,16 +728,11 @@ final class NoteRenderer extends flixel.FlxBasic
 				splash.setPosition(splash.strum.x, splash.strum.y);
 			}
 
-			// its invisible
-			// if (modDark == .0)
-			//	continue;
-			// update local matrix
-			// updateLocalMatrix(receptor.origin);
-
-			// apply darkness
-			// receptor.colorTransform.alphaMultiplier = modDark;
-
+			// apply colors
+			splash.colorTransform.copyTo(ct);
+			splash.colorTransform.alphaMultiplier *= modDark;
 			drawSprite(camera, pn, splash, null, SPLASH_HUES[splash.strum.ID]);
+			ct.copyTo(splash.colorTransform);
 		}
 	}
 
@@ -761,7 +747,7 @@ final class NoteRenderer extends flixel.FlxBasic
 			if (mods.active)
 			{
 				getArrowEffectsPos(pn, mods.conductor.curBeatFloat, mods.conductor.songPosition, cover.ID, true, false);
-				if (!isOnScreen(pn))
+				if (modDark <= 0.0 || !isOnScreen(pn))
 					continue;
 			}
 			else
@@ -778,7 +764,11 @@ final class NoteRenderer extends flixel.FlxBasic
 			// apply darkness
 			// receptor.colorTransform.alphaMultiplier = modDark;
 
+			// apply colors
+			cover.colorTransform.copyTo(ct);
+			cover.colorTransform.alphaMultiplier *= modDark;
 			drawSprite(camera, pn, cover);
+			ct.copyTo(cover.colorTransform);
 		}
 	}
 
