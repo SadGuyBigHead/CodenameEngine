@@ -194,6 +194,7 @@ class Main extends Sprite
 	private static function onStateSwitch()
 	{
 		scaleMode.resetSize();
+		dave.DaveBitmapText.fontCache.mapAsBye();
 	}
 
 	public static function onUpdate()
@@ -211,6 +212,7 @@ class Main extends Sprite
 		// does'nt clear bitmaps since flixel fork does it auto
 
 		MemoryUtil.clearMajor();
+		dave.DaveBitmapText.fontCache.clear();
 	}
 
 	public static var noCwdFix:Bool = false;

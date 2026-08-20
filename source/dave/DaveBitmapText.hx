@@ -85,11 +85,11 @@ class DaveBitmapText extends FlxBitmapText /* implements IDaveBitmapText */
 @:access(flixel.graphics.frames.FlxBitmapFont.size)
 class BitmapFontCache
 {
-	static final dontClear:Array<String> = ["consolas", //
-	];
+	static final dontClear:Array<String> = ["perep", "perep_outlined"];
 
 	var map:Map<String, FlxBitmapFont> = [];
 	var graphics:Map<String, FlxGraphic> = [];
+	var bye:Map<String, Bool> = [];
 
 	public function new()
 	{
@@ -97,8 +97,14 @@ class BitmapFontCache
 
 	public function get(id:String):FlxBitmapFont
 	{
+		bye.set(id, false);
 		if (map.exists(id))
-			return map.get(id);
+		{
+			final font = map.get(id);
+			@:privateAccess
+			if (font.frame != null && !graphics.get(id).isDestroyed)
+				return font;
+		}
 
 		var assetPath:String = Paths.font('bitmap/$id/$id.fnt');
 		if (!Assets.exists(assetPath))
@@ -126,7 +132,6 @@ class BitmapFontCache
 			return null;
 		}
 
-		graphic.persist = true;
 		graphics.set(id, graphic);
 
 		final font:FlxBitmapFont = FlxBitmapFont.fromAngelCode(graphicPath, assetPath);
@@ -137,13 +142,21 @@ class BitmapFontCache
 		return font;
 	}
 
+	public function mapAsBye():Void
+	{
+		for (id in map.keys())
+			bye.set(id, true);
+	}
+
 	public function clear():Void
 	{
 		for (id in map.keys())
 		{
-			if (!dontClear.contains(id))
+			final graphic = graphics.get(id);
+			if (graphic == null || !dontClear.contains(id) && bye.get(id))
 			{
-				graphics.get(id).destroy();
+				if (graphic != null)
+					FlxG.bitmap.remove(graphic);
 				graphics.remove(id);
 				map.remove(id);
 			}
