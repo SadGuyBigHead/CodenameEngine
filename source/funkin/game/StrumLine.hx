@@ -274,6 +274,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 		__updateNote_strum = members[daNote.noteData];
 		if (__updateNote_strum == null)
 			return;
+		final cpu = cpu || PlayState.instance.skipping;
 
 		__updateNote_event.recycle(daNote, FlxG.elapsed, __updateNote_strum);
 		onNoteUpdate.dispatch(__updateNote_event);
@@ -320,7 +321,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 	function __inputProcessHolds(note:Note):Bool
 	{
 		var strumID = note.strumID;
-		if (cpu || __pressed[strumID])
+		if (PlayState.instance.skipping || cpu || __pressed[strumID])
 		{
 			__heldTime[strumID] = __updateNote_songPos;
 		}
@@ -329,7 +330,6 @@ class StrumLine extends FlxTypedGroup<Strum>
 			final event = PlayState.instance.sustainMiss(this, note);
 			if (event.cancelled)
 				return false;
-			trace("it waslet go so we LET GO");
 			return true;
 		}
 		note.updateScoreProgress(__updateNote_songPos);
@@ -392,7 +392,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 		}
 		updateNotes();
 
-		if (cpu)
+		if (cpu || PlayState.instance.skipping)
 		{
 			updateHeldNotes();
 			return;

@@ -23,11 +23,18 @@ class MusicBeatState extends FlxState implements IBeatCancellableReceiver
 	private var lastBeat:Float = 0;
 	private var lastStep:Float = 0;
 
-	public var conductor(get, default):Conductor;
+	public var conductor(get, set):Conductor;
 
-	function get_conductor()
+	var _conductor:Conductor;
+
+	inline function get_conductor()
 	{
-		return this.conductor ?? Conductor.instance;
+		return _conductor ?? Conductor.instance;
+	}
+
+	inline function set_conductor(conductor:Conductor)
+	{
+		return _conductor = conductor;
 	}
 
 	/**

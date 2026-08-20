@@ -1,5 +1,6 @@
 package funkin.editors.ui;
 
+import flixel.util.typeLimit.OneOfTwo;
 import flixel.math.FlxRect;
 import flixel.sound.FlxSound;
 import flixel.ui.FlxBar;
@@ -14,7 +15,6 @@ using flixel.util.FlxSpriteUtil;
 class UIAudioPlayer extends UIButton
 {
 	public var sound:FlxSound;
-	public var bytes:Bytes;
 
 	public var playingSprite:FlxSprite;
 	public var timeText:UIText;
@@ -27,9 +27,12 @@ class UIAudioPlayer extends UIButton
 	public var volumeBar:FlxBar;
 	public var volumeBarSpr:UISprite;
 
-	public function new(x:Float, y:Float, bytes:Bytes)
+	public function new(x:Float, y:Float, ?soundSource:OneOfTwo<FlxSound, Bytes>)
 	{
-		sound = FlxG.sound.load(Sound.fromAudioBuffer(AudioBuffer.fromBytes(bytes)));
+		if (soundSource is Bytes)
+			sound = FlxG.sound.load(Sound.fromAudioBuffer(AudioBuffer.fromBytes(cast soundSource)));
+		else
+			sound = cast soundSource;
 
 		super(x, y, null, () ->
 		{
@@ -153,6 +156,5 @@ class UIAudioPlayer extends UIButton
 
 		sound.stop();
 		@:privateAccess sound.reset();
-		bytes = null;
 	}
 }

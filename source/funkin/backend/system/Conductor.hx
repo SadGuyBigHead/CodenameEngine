@@ -57,22 +57,20 @@ final class Conductor
 
 	static function get_instance():Conductor
 	{
-		_instance ??= new Conductor().__instanceInit();
+		_instance ??= new Conductor();
 		return _instance;
 	}
 
-	static function set_instance(instance:Conductor):Conductor
+	static inline function set_instance(instance:Conductor):Conductor
 	{
-		if (instance == null)
-			throw ":(";
-		_instance?.__instanceRemove();
-		return (_instance = instance).__instanceInit();
+		return _instance = instance;
 	}
 
 	public static function init()
 	{
-		if (_instance == null)
-			instance = new Conductor();
+		_instance ??= new Conductor();
+		FlxG.signals.preUpdate.add(() -> instance.update());
+		FlxG.signals.preStateCreate.add(onStateSwitch);
 	}
 
 	public var sound:FlxSound;
@@ -302,7 +300,7 @@ final class Conductor
 
 	public function setupSong(SONG:ChartData)
 	{
-		reset();
+		reset(this.sound);
 		mapBPMChanges(SONG);
 	}
 
@@ -469,29 +467,10 @@ final class Conductor
 
 	private var elapsed:Float;
 
-	private var __instanceDoneInit:Bool;
-	private function __instanceInit():Conductor
-	{
-		if (__instanceDoneInit)
-			return this;
-		FlxG.signals.preUpdate.add(update);
-		FlxG.signals.preStateCreate.add(onStateSwitch);
-		__instanceDoneInit = true;
-		return this;
-	}
-
-	private function __instanceRemove():Void
-	{
-		if (!__instanceDoneInit)
-			return;
-		FlxG.signals.preUpdate.remove(update);
-		FlxG.signals.preStateCreate.remove(onStateSwitch);
-	}
-
-	private function onStateSwitch(newState:FlxState)
+	private static function onStateSwitch(_:FlxState)
 	{
 		if (FlxG.sound.music == null)
-			reset();
+			instance.reset();
 	}
 
 	private function __updateSongPos(elapsed:Float)
@@ -510,11 +489,16 @@ final class Conductor
 	private var __updateBeat:Bool;
 	private var __updateMeasure:Bool;
 
+	@:allow(funkin.game.PlayState)
+	private var __locked:Bool;
+
 	/**
 	 * If this is `Conductor.instance` do not call this manually
 	 */
 	public function update()
 	{
+		if (__locked)
+			return;
 		if (FlxG.state == null)
 			return;
 		else

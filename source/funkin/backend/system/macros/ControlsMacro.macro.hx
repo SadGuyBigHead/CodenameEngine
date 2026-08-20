@@ -332,7 +332,7 @@ class ControlsMacro
 		var internalField:Field = {
 			name: internalName,
 			access: [APrivate],
-			kind: FVar(macro :FlxActionDigital, macro new FlxActionDigital($v{internalName})),
+			kind: FVar(macro :ControlsActionDigital, macro new ControlsActionDigital($v{internalName})),
 			pos: field.pos,
 			doc: null,
 			meta: []

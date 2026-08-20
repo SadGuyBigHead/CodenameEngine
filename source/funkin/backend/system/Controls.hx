@@ -53,6 +53,11 @@ enum KeyboardScheme
 @:build(funkin.backend.system.macros.ControlsMacro.build())
 class Controls extends FlxActionSet
 {
+	/**
+	 * Can use this to disable all controls
+	 */
+	public static var enabled:Bool = true;
+	
 	// Menus
 	#if !switch
 	@:rawGamepad([DPAD_UP, LEFT_STICK_DIGITAL_UP])
@@ -378,5 +383,16 @@ class Controls extends FlxActionSet
 	public inline function getPressed(name:String)
 	{
 		return ControlsUtil.getPressed(this, name);
+	}
+}
+
+/**
+ * Lets us disable this friend :)
+ */
+private final class ControlsActionDigital extends FlxActionDigital
+{
+	override function check()
+	{
+		return Controls.enabled && super.check();
 	}
 }

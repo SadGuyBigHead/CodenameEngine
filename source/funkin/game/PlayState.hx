@@ -35,10 +35,10 @@ import funkin.game.scoring.RatingManager.Rating;
 import funkin.menus.*;
 import funkin.backend.week.WeekData;
 import funkin.savedata.FunkinSave;
+import funkin.backend.system.Controls;
 import haxe.io.Path;
 
 using util.SoundUtil;
-
 using StringTools;
 
 @:access(flixel.text.FlxText.FlxTextFormatRange)
@@ -114,6 +114,22 @@ class PlayState extends MusicBeatState
 	 * Dave's timeline
 	 */
 	public var timeline:Timeline;
+
+	/**
+	 * If we using that dave scrubber
+	 */
+	public var skipping:Bool;
+
+	/**
+	 * Yeah ok
+	 */
+	var _skipRequest:Null<Float>;
+
+	/**
+	 * Yeah ok ok
+	 */
+	@:allow(dave.DaveScrubber)
+	var _scrubberRequest:Bool;
 
 	/**
 	 * Script Pack of all the scripts being ran.
@@ -835,6 +851,12 @@ class PlayState extends MusicBeatState
 		return event;
 	}
 
+	public function new(?time:Null<Float>, scriptsAllowed:Bool = true, ?scriptName:String)
+	{
+		super(scriptsAllowed, scriptName);
+		_skipRequest = time;
+	}
+
 	@:dox(hide) override public function create()
 	{
 		Note.__customNoteTypeExists = [];
@@ -1326,6 +1348,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		introLength = 0;
 		startedCountdown = true;
 		Conductor.instance.songPosition = 0;
 		Conductor.instance.songPosition -= Conductor.instance.crochet * introLength - Conductor.instance.songOffset;
@@ -1563,19 +1586,24 @@ class PlayState extends MusicBeatState
 
 		if (paused)
 		{
-			if (FlxG.sound.music != null)
-			{
-				for (strumLine in strumLines.members)
-					strumLine.vocals.pause();
-				FlxG.sound.music.pause();
-				vocals.pause();
-			}
+			pauseSound();
 
 			if (startTimer != null && !startTimer.finished)
 				startTimer.active = false;
 		}
 
 		super.openSubState(event.substate is FlxSubState ? cast event.substate : SubState);
+	}
+
+	function pauseSound()
+	{
+		if (FlxG.sound.music != null)
+		{
+			for (strumLine in strumLines.members)
+				strumLine.vocals.pause();
+			FlxG.sound.music.pause();
+			vocals.pause();
+		}
 	}
 
 	@:dox(hide)
@@ -1627,6 +1655,9 @@ class PlayState extends MusicBeatState
 	@:dox(hide)
 	inline function resyncVocals():Void
 	{
+		// don't if we are skipping
+		if (skipping)
+			return;
 		final time = Conductor.instance.songPosition + Conductor.instance.songOffset;
 
 		if (!inst.playing)
@@ -1885,10 +1916,27 @@ class PlayState extends MusicBeatState
 		if (generatedMusic && FlxG.keys.justPressed.ONE)
 			endSong();
 		#end
+		if (Options.devMode && !skipping && FlxG.keys.justPressed.SEVEN)
+			openDaveScrubber();
 
 		super.update(elapsed);
 
 		scripts.call("postUpdate", _ONE_ARG);
+
+		if (skipping)
+			return;
+
+		if (_skipRequest != null)
+		{
+			pauseSound();
+			skipTime(_skipRequest);
+			_skipRequest = null;
+		}
+		if (_scrubberRequest)
+		{
+			openDaveScrubber();
+			_scrubberRequest = false;
+		}
 	}
 
 	override function draw()
@@ -2647,8 +2695,8 @@ class PlayState extends MusicBeatState
 			{
 				var event:RatingsShowEvent = EventManager.get(RatingsShowEvent)
 					.recycle(null, comboGroup.recycleLoop(FlxSprite), null, 0.5, true, null, null, "game/score/", "", FlxG.random.int(200, 300),
-						FlxPoint.get(FlxG.random.float(-5, 5), FlxG.random.int(140, 160)), 0.2, (Conductor.instance.crochet * 0.002), false, true, false, true, 43,
-						FlxPoint.get(comboGroup.x - 90, comboGroup.y + 80), true, null, null);
+						FlxPoint.get(FlxG.random.float(-5, 5), FlxG.random.int(140, 160)), 0.2, (Conductor.instance.crochet * 0.002), false, true, false,
+						true, 43, FlxPoint.get(comboGroup.x - 90, comboGroup.y + 80), true, null, null);
 				gameAndCharsEvent("onRatingsShown", event);
 
 				if (event.cancelled || !event.displayNumbers)
@@ -2721,7 +2769,9 @@ class PlayState extends MusicBeatState
 				songScore += note.deltaScoreProgress * note.holdScore;
 
 			final distance = note.strumTime + note.sustainLength - Conductor.instance.songPosition;
-			if (distance - Conductor.instance.stepCrochet > .0 && !event.animCancelled && (!strumLine.tapChordPriority || strumLine.justStepped))
+			if (distance - Conductor.instance.stepCrochet > .0
+				&& !event.animCancelled
+				&& (!strumLine.tapChordPriority || strumLine.justStepped))
 				for (char in event.characters)
 					if (char != null)
 					{
@@ -2963,6 +3013,83 @@ class PlayState extends MusicBeatState
 	private inline static function get_campaignAccuracy()
 		return campaignAccuracyCount == 0 ? 0 : campaignAccuracyTotal / campaignAccuracyCount;
 	#end
+
+	@:allow(dave)
+	function openDaveScrubber()
+	{
+		persistentUpdate = false;
+		persistentDraw = true;
+		paused = true;
+		openSubState(new dave.DaveScrubber());
+	}
+
+	@:allow(dave)
+	function skipTime(time:Float)
+	{
+		if (skipping)
+			return;
+		skipping = true;
+
+		// so we update
+		if (paused)
+			persistentUpdate = true;
+
+		// disable controls
+		Controls.enabled = false;
+
+		// find how many frames we are doing
+		final diff = (time - Math.max(.0, conductor.songPosition)) / 1000;
+		var frames = diff / (1 / 60);
+		// don't
+		if (frames <= 0)
+			return;
+		//trace('simularting $frames frames');
+
+		// if we are in the countdown update until we are out of it
+		// todo: work with cutscenes?? i think this could loop forever if we get stuck in a cutscene that needs user input or a video idk
+		while (conductor.songPosition < .0)
+			fakeUpdate(1 / 60);
+
+		// do all frames
+		while (frames > 0)
+		{
+			frames--;
+			// when we have less than a frame left make sure to do that
+			final f = (frames < 0) ? frames : 1.0;
+			final elapsed = f * (1 / 60);
+			final elapsedMs = (f * 1000) * (1 / 60);
+			conductor.songPosition += elapsedMs; // cause this conductor is updated in preUpdate :)
+			@:privateAccess
+			FlxG.game.ticks += elapsedMs;
+			conductor.update();
+			fakeUpdate(elapsed);
+		}
+		Controls.enabled = true;
+		inst.time = conductor.songPosition = time;
+		//trace("we are at TIME", time);
+		// FlxG.sound.music.volume = vocals.volume = opponentVocals.volume = 1.0;
+		skipping = false;
+
+		// so we not not paused or not paused
+		if (paused)
+			persistentUpdate = false;
+		else
+			FlxG.cameras.active = FlxG.plugins.active = true;
+	}
+
+	function fakeUpdate(elapsed:Float):Void
+	{
+		@:privateAccess
+		{
+			FlxG.elapsed = elapsed;
+			FlxG.cameras.active = FlxG.plugins.active = true;
+			FlxG.sound.update(elapsed);
+			FlxG.plugins.update(elapsed);
+			FlxG.cameras.update(elapsed);
+			FlxG.cameras.active = FlxG.plugins.active = false;
+		}
+		tryUpdate(elapsed);
+	}
 
 	/**
 	 * Load a week into PlayState.

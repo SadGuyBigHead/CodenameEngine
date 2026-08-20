@@ -13,12 +13,12 @@ class ColorTransformTools
 		b.setOffsets(a.redOffset, a.greenOffset, a.blueOffset, a.alphaOffset);
 	}
 
-	public static function copyOffsetsFromColor(a:ColorTransform, color:FlxColor)
+	public static function setOffsetColor(a:ColorTransform, color:FlxColor)
 	{
 		a.setOffsets(color.red, color.green, color.blue, color.alpha);
 	}
 
-	public static function copyMultipliersFromColor(a:ColorTransform, color:FlxColor)
+	public static function setMultColor(a:ColorTransform, color:FlxColor)
 	{
 		a.setMultipliers(color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat);
 	}
