@@ -1348,7 +1348,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		introLength = 0;
 		startedCountdown = true;
 		Conductor.instance.songPosition = 0;
 		Conductor.instance.songPosition -= Conductor.instance.crochet * introLength - Conductor.instance.songOffset;
@@ -1358,6 +1357,8 @@ class PlayState extends MusicBeatState
 			var swagCounter:Int = 0;
 			startTimer = new FlxTimer().start(Conductor.instance.crochet / 1000, (tmr:FlxTimer) ->
 			{
+				if (Conductor.instance.songPosition >= 0)
+					return;
 				countdown(swagCounter++);
 			}, introLength);
 		}
@@ -1436,11 +1437,14 @@ class PlayState extends MusicBeatState
 
 		inst.onComplete = endSong;
 
-		var time = (chartingMode && Charter.startHere) ? Charter.startTime : 0;
-		for (strumLine in strumLines.members)
-			strumLine.vocals.play(true, time);
-		vocals.play(true, time);
-		inst.play(true, time);
+		if (!skipping)
+		{
+			var time = (chartingMode && Charter.startHere) ? Charter.startTime : 0;
+			for (strumLine in strumLines.members)
+				strumLine.vocals.play(true, time);
+			vocals.play(true, time);
+			inst.play(true, time);
+		}
 
 		updateDiscordPresence();
 
@@ -1928,7 +1932,6 @@ class PlayState extends MusicBeatState
 
 		if (_skipRequest != null)
 		{
-			pauseSound();
 			skipTime(_skipRequest);
 			_skipRequest = null;
 		}
@@ -3028,6 +3031,15 @@ class PlayState extends MusicBeatState
 	{
 		if (skipping)
 			return;
+		// find how many frames we are doing
+		final diff = (time - Math.max(.0, conductor.songPosition)) / 1000;
+		var frames = diff / (1 / 60);
+		// don't
+		if (frames <= 0)
+			return;
+		
+		pauseSound();
+		
 		skipping = true;
 
 		// so we update
@@ -3036,13 +3048,6 @@ class PlayState extends MusicBeatState
 
 		// disable controls
 		Controls.enabled = false;
-
-		// find how many frames we are doing
-		final diff = (time - Math.max(.0, conductor.songPosition)) / 1000;
-		var frames = diff / (1 / 60);
-		// don't
-		if (frames <= 0)
-			return;
 		//trace('simularting $frames frames');
 
 		// if we are in the countdown update until we are out of it
