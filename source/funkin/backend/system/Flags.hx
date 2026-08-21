@@ -128,9 +128,9 @@ class Flags
 	/**
 	 * Default background colors for songs or more without bg color
 	 */
-	public static var DEFAULT_COLOR:FlxColor = 0xFF9271FD;
+	public static var DEFAULT_COLOR:FlxColor = 0xFF1C70FF;
 
-	public static var DEFAULT_WEEK_COLOR:FlxColor = 0xFFF9CF51;
+	public static var DEFAULT_WEEK_COLOR:FlxColor = 0xFF1C70FF;
 	public static var DEFAULT_COOP_ALLOWED:Bool = false;
 	public static var DEFAULT_OPPONENT_MODE_ALLOWED:Bool = false;
 
@@ -202,7 +202,7 @@ class Flags
 	public static var DEFAULT_MUTE_VOCALS_ON_MISS:Bool = true;
 
 	public static var DEFAULT_MAX_HEALTH:Float = 2.0;
-	public static var DEFAULT_HEALTH:Null<Float> = null; // DEFAULT_MAX_HEALTH / 2.0;
+	public static var DEFAULT_HEALTH:Null<Float> = null;
 	public static var DEFAULT_ICONBOP:Bool = true;
 	public static var BOP_ICON_SCALE:Float = 1.2;
 	public static var ICON_DEFAULT_SCALE:Float = 1;

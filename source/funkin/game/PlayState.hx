@@ -2542,11 +2542,21 @@ class PlayState extends MusicBeatState
 
 			if (event.showRating || (event.showRating == null && event.player))
 			{
+				// clear combo graphics
+				for (comb in comboGroup.members)
+				{
+					if (comb != null)
+					{
+						comb.kill();
+					}
+				}
+
 				displayCombo(event);
 				displayRatingNumbers(event);
 				displayRating(event.rating, event);
 				ratingNum += 1;
 			}
+
 			if (event.player)
 				hits[rating.name] += 1;
 
@@ -2595,7 +2605,7 @@ class PlayState extends MusicBeatState
 		gameAndCharsEvent("onRatingsShown", event);
 
 		if (event.cancelled || !event.displayRating)
-		{ // TODO: Find a better way for this?
+		{
 			event.ratingSprite.kill();
 			return;
 		}
@@ -2608,13 +2618,16 @@ class PlayState extends MusicBeatState
 		var ratingScale:Float = hasEvent && evt.ratingScale != null ? evt.ratingScale : event.ratingScale;
 
 		var rating:FlxSprite = event.ratingSprite.loadAnimatedGraphic(Paths.image('${pre}${event.rating}${suf}'));
+
 		if (event.resetSprite)
 		{
 			CoolUtil.resetSprite(rating, event.position.x, event.position.y);
 		}
-		rating.acceleration.y = event.acceleration;
-		rating.velocity.y -= event.velocity.y;
-		rating.velocity.x -= event.velocity.x;
+
+		rating.color = FlxColor.WHITE;
+		rating.acceleration.y = event.acceleration * 0.45;
+		rating.velocity.y -= event.velocity.y * 0.45;
+		rating.velocity.x -= event.velocity.x * 0.2;
 		rating.scale.set(ratingScale, ratingScale);
 		rating.antialiasing = hasEvent && evt.ratingAntialiasing != null ? evt.ratingAntialiasing : event.ratingAntialiasing;
 		rating.updateHitbox();
@@ -2622,13 +2635,15 @@ class PlayState extends MusicBeatState
 		if (event.playTween)
 		{
 			event.tween = FlxTween.tween(rating, {alpha: 0}, event.tweenDuration, {
-				startDelay: event.startDelay,
+				startDelay: event.startDelay * 0.95,
 				onComplete: function(tween:FlxTween)
 				{
 					rating.kill();
-				}
+				},
+				ease: FlxEase.sineOut
 			});
 		}
+
 		gameAndCharsEvent("onPostRatingsShown", event);
 
 		event.velocity.put();
@@ -2661,13 +2676,16 @@ class PlayState extends MusicBeatState
 			var ratingScale:Float = hasEvent && evt.ratingScale != null ? evt.ratingScale : event.ratingScale;
 
 			var comboSpr:FlxSprite = event.comboSprite.loadAnimatedGraphic(Paths.image('${pre}combo${suf}'));
+
 			if (event.resetSprite)
 			{
 				CoolUtil.resetSprite(comboSpr, event.position.x, event.position.y);
 			}
-			comboSpr.acceleration.y = event.acceleration;
-			comboSpr.velocity.y -= event.velocity.y;
-			comboSpr.velocity.x += event.velocity.x;
+
+			comboSpr.color = FlxColor.WHITE;
+			comboSpr.acceleration.y = event.acceleration * 0.45;
+			comboSpr.velocity.y -= event.velocity.y * 0.45;
+			comboSpr.velocity.x += event.velocity.x * 0.2;
 			comboSpr.scale.set(ratingScale, ratingScale);
 			comboSpr.antialiasing = hasEvent && evt.ratingAntialiasing != null ? evt.ratingAntialiasing : event.ratingAntialiasing;
 			comboSpr.updateHitbox();
@@ -2679,9 +2697,11 @@ class PlayState extends MusicBeatState
 					{
 						comboSpr.kill();
 					},
-					startDelay: event.startDelay
+					startDelay: event.startDelay * 0.95,
+					ease: FlxEase.sineOut
 				});
 			}
+
 			gameAndCharsEvent("onPostRatingsShown", event);
 
 			event.velocity.put();
@@ -2703,7 +2723,7 @@ class PlayState extends MusicBeatState
 				gameAndCharsEvent("onRatingsShown", event);
 
 				if (event.cancelled || !event.displayNumbers)
-				{ // TODO: Find a better way for this?
+				{
 					event.numberSprite.kill();
 					continue;
 				}
@@ -2716,18 +2736,21 @@ class PlayState extends MusicBeatState
 				var numScale:Float = hasEvent && evt.numScale != null ? evt.numScale : event.numScale;
 
 				var numScore:FlxSprite = event.numberSprite.loadAnimatedGraphic(Paths.image('${pre}num${separatedScore.charAt(i)}${suf}'));
+
 				event.position.x += event.numSpacing * i;
+
 				if (event.resetSprite)
 				{
 					CoolUtil.resetSprite(numScore, event.position.x, event.position.y);
 				}
+
 				numScore.antialiasing = hasEvent && evt.numAntialiasing != null ? evt.numAntialiasing : event.numAntialiasing;
 				numScore.scale.set(numScale, numScale);
 				numScore.updateHitbox();
-
-				numScore.acceleration.y = event.acceleration;
-				numScore.velocity.y -= event.velocity.y;
-				numScore.velocity.x = event.velocity.x;
+				numScore.color = FlxColor.WHITE;
+				numScore.acceleration.y = event.acceleration * 0.45;
+				numScore.velocity.y -= event.velocity.y * 0.45;
+				numScore.velocity.x = event.velocity.x * 0.2;
 
 				if (event.playTween)
 				{
@@ -2736,7 +2759,8 @@ class PlayState extends MusicBeatState
 						{
 							numScore.kill();
 						},
-						startDelay: event.startDelay
+						startDelay: event.startDelay * 0.95,
+						ease: FlxEase.sineOut
 					});
 				}
 				gameAndCharsEvent("onPostRatingsShown", event);
@@ -3037,9 +3061,9 @@ class PlayState extends MusicBeatState
 		// don't
 		if (frames <= 0)
 			return;
-		
+
 		pauseSound();
-		
+
 		skipping = true;
 
 		// so we update
@@ -3048,7 +3072,7 @@ class PlayState extends MusicBeatState
 
 		// disable controls
 		Controls.enabled = false;
-		//trace('simularting $frames frames');
+		// trace('simularting $frames frames');
 
 		// if we are in the countdown update until we are out of it
 		// todo: work with cutscenes?? i think this could loop forever if we get stuck in a cutscene that needs user input or a video idk
@@ -3071,7 +3095,7 @@ class PlayState extends MusicBeatState
 		}
 		Controls.enabled = true;
 		inst.time = conductor.songPosition = time;
-		//trace("we are at TIME", time);
+		// trace("we are at TIME", time);
 		// FlxG.sound.music.volume = vocals.volume = opponentVocals.volume = 1.0;
 		skipping = false;
 
