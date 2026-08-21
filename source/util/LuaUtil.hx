@@ -24,6 +24,8 @@ class LuaUtil
 		trace('loading lua string');
 		if (file == null)
 			throw "Invalid (null) lua string";
+		else if (file.length <= 0)
+			file = "--"; // it yells at you when its not like this
 		final result = LuaL.dostring(lua, file);
 		final resultStr = Lua.tostring(lua, result);
 		if (resultStr != null && result != 0)
