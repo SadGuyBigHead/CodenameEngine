@@ -1,6 +1,5 @@
 package funkin.menus;
 
-import funkin.menus.charSelect.CharacterSelectMenu;
 import funkin.menus.ui.MenuBackground;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
@@ -212,15 +211,19 @@ class FreeplayState extends MusicBeatState
 			lerpScore = intendedScore;
 
 		var selectedAnotherSong:Bool = false;
-		if (canSelect) {
+		if (canSelect)
+		{
 			changeSelection((controls.UP_P ? -1 : 0) + (controls.DOWN_P ? 1 : 0) - FlxG.mouse.wheel);
 			changeDiff((controls.LEFT_P ? -1 : 0) + (controls.RIGHT_P ? 1 : 0));
 			changeCoopMode((controls.CHANGE_MODE ? 1 : 0)); // TODO: make this configurable
 			// putting it before so that its actually smooth
 
-			if (FlxG.mouse.justPressed && grpSongs != null) {
-				for (index => sprite in grpSongs.members) {
-					if (curSelected != index && FlxG.mouse.overlaps(sprite)) {
+			if (FlxG.mouse.justPressed && grpSongs != null)
+			{
+				for (index => sprite in grpSongs.members)
+				{
+					if (curSelected != index && FlxG.mouse.overlaps(sprite))
+					{
 						changeSelection(index - curSelected);
 						selectedAnotherSong = true;
 						break;
@@ -253,8 +256,11 @@ class FreeplayState extends MusicBeatState
 			convertChart();
 		#end
 
-		if ((controls.ACCEPT || (!selectedAnotherSong && FlxG.mouse.justPressed && grpSongs?.members[curSelected] != null
-			&& FlxG.mouse.overlaps(grpSongs.members[curSelected]))))
+		if ((controls.ACCEPT
+			|| (!selectedAnotherSong
+				&& FlxG.mouse.justPressed
+				&& grpSongs?.members[curSelected] != null
+				&& FlxG.mouse.overlaps(grpSongs.members[curSelected]))))
 		{
 			select();
 		}
@@ -304,14 +310,7 @@ class FreeplayState extends MusicBeatState
 
 		PlayState.loadSong(event.song, event.difficulty, event.variant, event.opponentMode, event.coopMode);
 
-		if (PlayState.SONG.meta.selectMode == 3)
-		{
-			FlxG.switchState(new PlayState());
-		}
-		else
-		{
-			FlxG.switchState(new CharacterSelectMenu(event.song, event.difficulty, event.variant));
-		}
+		FlxG.switchState(new PlayState());
 	}
 
 	public function convertChart()
@@ -517,20 +516,25 @@ class FreeplayState extends MusicBeatState
 class FreeplaySonglist
 {
 	public var songs:Array<ChartMetaData> = [];
+
 	public static final EXCLUDE_SUBFOLDERS:Array<String> = ['charts', 'scripts', 'song'];
 
 	public function new()
 	{
 	}
 
-	public static function isSubSongDirectory(subs:Array<String>):Bool {
-		for (i in EXCLUDE_SUBFOLDERS) {
-			if (subs.contains(i)) return false;
+	public static function isSubSongDirectory(subs:Array<String>):Bool
+	{
+		for (i in EXCLUDE_SUBFOLDERS)
+		{
+			if (subs.contains(i))
+				return false;
 		}
 		return true;
 	}
 
-	public function getSongsFromSource(source:funkin.backend.assets.AssetSource, useTxt:Bool = true, ?startDir:String = 'songs/', ?flatten:Bool = true) {
+	public function getSongsFromSource(source:funkin.backend.assets.AssetSource, useTxt:Bool = true, ?startDir:String = 'songs/', ?flatten:Bool = true)
+	{
 		var songsFound:Array<String> = null;
 		if (useTxt)
 		{
@@ -546,36 +550,47 @@ class FreeplaySonglist
 			}
 		}
 		// todo: make this better
-		if (songsFound == null) {
+		if (songsFound == null)
+		{
 			songsFound = [];
 			var songDirs = Paths.getFolderDirectories(startDir, false, source);
-			if (!flatten) {
-				for (i in songDirs) {
+			if (!flatten)
+			{
+				for (i in songDirs)
+				{
 					var subs = Paths.getFolderDirectories('$startDir$i', false, source);
 					songsFound.push(isSubSongDirectory(subs) ? '$i/' : i);
 				}
-			} else {
-				function poop(a:Array<Dynamic>, startDir:String) {
-					for (i in a) {
+			}
+			else
+			{
+				function poop(a:Array<Dynamic>, startDir:String)
+				{
+					for (i in a)
+					{
 						var subs = Paths.getFolderDirectories('$startDir$i', false, source);
-						if (isSubSongDirectory(subs)) poop(subs, '$startDir$i/');
-						else songsFound.push(startDir.substr('songs/'.length) + i);
+						if (isSubSongDirectory(subs))
+							poop(subs, '$startDir$i/');
+						else
+							songsFound.push(startDir.substr('songs/'.length) + i);
 					}
 				}
 				poop(songDirs, startDir);
 			}
 			// put folders at the top
-			songsFound = songsFound.filter(a -> a.endsWith('/'))
-				.concat(songsFound.filter(a -> !a.endsWith('/')));
+			songsFound = songsFound.filter(a -> a.endsWith('/')).concat(songsFound.filter(a -> !a.endsWith('/')));
 		}
-		if (songsFound.length > 0) {
-			for (s in songsFound) songs.push(Chart.loadChartMeta(startDir.substr('songs/'.length) + s, source == MODS));
+		if (songsFound.length > 0)
+		{
+			for (s in songsFound)
+				songs.push(Chart.loadChartMeta(startDir.substr('songs/'.length) + s, source == MODS));
 			return false;
 		}
 		return true;
 	}
 
-	public static function get(useTxt:Bool = true, ?startDir:String = 'songs/', ?flatten:Bool = true) {
+	public static function get(useTxt:Bool = true, ?startDir:String = 'songs/', ?flatten:Bool = true)
+	{
 		var songList = new FreeplaySonglist();
 
 		switch (Flags.SONGS_LIST_MOD_MODE)
