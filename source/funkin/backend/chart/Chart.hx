@@ -123,7 +123,7 @@ class Chart
 		data.setFieldDefault("beatsPerMeasure", Flags.DEFAULT_BEATS_PER_MEASURE);
 		data.setFieldDefault("stepsPerBeat", Flags.DEFAULT_STEPS_PER_BEAT);
 		data.setFieldDefault("icon", Flags.DEFAULT_HEALTH_ICON);
-		data.setFieldDefault("coopAllowed", Flags.DEFAULT_COOP_ALLOWED);
+		data.setFieldDefault("coopAllowed", false);
 		data.setFieldDefault("opponentModeAllowed", Flags.DEFAULT_OPPONENT_MODE_ALLOWED);
 		data.setFieldDefault("instSuffix", "");
 		data.setFieldDefault("vocalsSuffix", "");

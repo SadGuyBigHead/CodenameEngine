@@ -455,7 +455,7 @@ class FreeplayState extends MusicBeatState
 
 		changeDiff(0, true);
 
-		coopText.visible = curSong.coopAllowed || curSong.opponentModeAllowed;
+		coopText.visible = false;
 	}
 
 	function updateOptionsAlpha()
