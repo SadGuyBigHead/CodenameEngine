@@ -158,7 +158,8 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 	@:noCompletion var __baseFlipped:Bool = false;
 	@:noCompletion var isDanceLeftDanceRight:Bool = false;
 
-	override function update(elapsed:Float) {
+	override function update(elapsed:Float)
+	{
 		scripts.callOne("update", elapsed);
 
 		super.update(elapsed);
@@ -187,7 +188,8 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 
 		var event = EventManager.get(DanceEvent).recycle(danced);
 		scripts.event("onDance", event);
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		// shouting at me for some reason
 		if (isDanceLeftDanceRight)
@@ -196,7 +198,8 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 			playAnim('idle' + idleSuffix, DANCE);
 	}
 
-	public function tryDance() {
+	public function tryDance()
+	{
 		var event = EventManager.get(CancellableEvent);
 		event.recycleBase();
 		scripts.event("onTryDance", event);
@@ -223,7 +226,9 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 	 * Whenever the character should dance on beat or not.
 	 */
 	public var danceOnBeat:Bool = true;
-	public override function beatHit(curBeat:Int) {
+
+	public override function beatHit(curBeat:Int)
+	{
 		scripts.callOne("beatHit", curBeat);
 
 		if (skipNegativeBeats && curBeat < 0)
@@ -233,11 +238,13 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 			tryDance();
 	}
 
-	public override function measureHit(curMeasure:Int) {
+	public override function measureHit(curMeasure:Int)
+	{
 		scripts.callOne("measureHit", curMeasure);
 	}
 
-	public override function stepHit(curStep:Int) {
+	public override function stepHit(curStep:Int)
+	{
 		scripts.callOne("stepHit", curStep);
 	}
 
@@ -311,10 +318,18 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 		final missTint = lastAnimContext == MISS && singing;
 		if (missTint)
 		{
-			__storedShader = shader;
+			if (shader != __tintShader)
+			{
+				__storedShader = shader;
+			}
+
 			shader = __tintShader;
 			__tintShader.tintColor = missTintColor;
 			__tintShader.tintMix = missTintMix;
+		}
+		else if (shader != __storedShader)
+		{
+			shader = __storedShader;
 		}
 
 		var e = EventManager.get(DrawEvent).recycle();
@@ -340,7 +355,8 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 	{
 		var event = EventManager.get(DirectionAnimEvent).recycle(getSingAnim(direction, suffix), direction, suffix, Context, Reversed, Frame, Force);
 		scripts.event("onPlaySingAnim", event);
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		playSingAnimUnsafe(event.direction, hasAnimation(event.animName) ? event.suffix : "", event.context, event.force, event.reversed, event.frame);
 	}
@@ -350,7 +366,8 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 	{
 		var event = EventManager.get(DirectionAnimEvent).recycle(getSingAnim(direction, suffix), direction, suffix, Context, Reversed, Frame, Force);
 		scripts.event("playSingAnimUnsafe", event);
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		playAnim(event.animName, event.force, event.context, event.reversed, event.frame);
 		singing = true;
@@ -360,7 +377,8 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 	{
 		var event = EventManager.get(PlayAnimEvent).recycle(AnimName, Force, Reversed, Frame, Context);
 		scripts.event("onPlayAnim", event);
-		if (event.cancelled) return;
+		if (event.cancelled)
+			return;
 
 		super.playAnim(event.animName, event.force, event.context, event.reverse, event.startingFrame);
 
@@ -372,9 +390,14 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 	public inline function getCameraPosition()
 	{
 		var midpoint:FlxPoint = centeredCamera ? getMidpoint() : getPosition();
-		var event = EventManager.get(PointEvent).recycle(
-			midpoint.x + (isPlayer ? -100 : 150) + globalOffset.x + cameraOffset.x,
-			midpoint.y - 100 + globalOffset.y + cameraOffset.y);
+		var event = EventManager.get(PointEvent)
+			.recycle(midpoint.x
+				+ (isPlayer ? -100 : 150)
+				+ globalOffset.x
+				+ cameraOffset.x, midpoint.y
+				- 100
+				+ globalOffset.y
+				+ cameraOffset.y);
 		scripts.event("onGetCamPos", event);
 
 		midpoint.put();
@@ -620,9 +643,12 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 		if (defaultAimFPS != 24)
 			xml.set("defFps", Std.string(defaultAimFPS));
 
-		if (sprite != curCharacter && sprite != null) xml.set("sprite", sprite);
-		if (scale.x != 1) xml.set("scale", Std.string(FlxMath.roundDecimal(scale.x, 4)));
-		if (!antialiasing) xml.set("antialiasing", antialiasing == true ? "true" : "false");
+		if (sprite != curCharacter && sprite != null)
+			xml.set("sprite", sprite);
+		if (scale.x != 1)
+			xml.set("scale", Std.string(FlxMath.roundDecimal(scale.x, 4)));
+		if (!antialiasing)
+			xml.set("antialiasing", antialiasing == true ? "true" : "false");
 
 		if (isPlayer)
 			xml.set("isPlayer", isPlayer == true ? "true" : "false");
@@ -633,8 +659,8 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 				xml.set("postStageMatrixApply", postStageMatrixApply ? "true" : "false");
 		}
 
-		for(e in this.xml.elements)
-			if(e.name == "spritesheet" || e.name == "sheet") 
+		for (e in this.xml.elements)
+			if (e.name == "spritesheet" || e.name == "sheet")
 				xml.addChild(e.x);
 
 		var anims:Array<AnimData> = [];
@@ -791,27 +817,40 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 		return icon;
 	}
 
-	public static function getList(?mods:Bool = false, includeFolders:Bool = false, ?folder:String = null, ?recursive:Bool = false):Array<String> {
+	public static function getList(?mods:Bool = false, includeFolders:Bool = false, ?folder:String = null, ?recursive:Bool = false):Array<String>
+	{
 		final defaultFolder:String = 'data/characters/';
-		if (folder == null) folder = defaultFolder;
+		if (folder == null)
+			folder = defaultFolder;
 		var list:Array<String> = [];
-		if(includeFolders || recursive) {
-			for (path in Paths.getFolderDirectories(folder, true, mods ? MODS : BOTH)) {
-				if(!path.endsWith("/")) path += "/";
-				if (recursive) {
+		if (includeFolders || recursive)
+		{
+			for (path in Paths.getFolderDirectories(folder, true, mods ? MODS : BOTH))
+			{
+				if (!path.endsWith("/"))
+					path += "/";
+				if (recursive)
+				{
 					list = list.concat(Character.getList(mods, includeFolders, path, recursive));
-				} else {
+				}
+				else
+				{
 					list.push(path);
 				}
 			}
 		}
 		for (path in Paths.getFolderContent(folder, true, mods ? MODS : BOTH))
-			if (Path.extension(path) == "xml") {
-				if (recursive) {
+			if (Path.extension(path) == "xml")
+			{
+				if (recursive)
+				{
 					var file:String = folder + CoolUtil.getFilename(path);
-					if (file.startsWith(defaultFolder)) file = file.substr(defaultFolder.length);
+					if (file.startsWith(defaultFolder))
+						file = file.substr(defaultFolder.length);
 					list.push(file);
-				} else {
+				}
+				else
+				{
 					list.push(CoolUtil.getFilename(path));
 				}
 			}
