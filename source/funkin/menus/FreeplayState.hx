@@ -1,5 +1,6 @@
 package funkin.menus;
 
+import funkin.menus.ui.effects.ColorWaveEffect;
 import funkin.menus.ui.MenuBackground;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
@@ -7,7 +8,6 @@ import funkin.backend.chart.Chart;
 import funkin.backend.chart.ChartData.ChartMetaData;
 import funkin.backend.scripting.events.menu.MenuChangeEvent;
 import funkin.backend.scripting.events.menu.freeplay.*;
-import funkin.backend.system.Conductor;
 import funkin.game.HealthIcon;
 import funkin.savedata.FunkinSave;
 
@@ -38,7 +38,7 @@ class FreeplayState extends MusicBeatState
 	/**
 	 * Currently selected song
 	 */
-	public var curSelected:Int = 0;
+	public var curSelected:Int = 1;
 
 	/**
 	 * Currently selected difficulty
@@ -162,13 +162,17 @@ class FreeplayState extends MusicBeatState
 			if (Math.max(icon.width, icon.height) > 150)
 				icon.setUnstretchedGraphicSize(150, 150);
 
+			if (songs[i]._isHeader)
+			{
+				// songText.effects.push(new ColorWaveEffect(FlxColor.WHITE, FlxColor.GRAY, 30));
+				songText.scale.set(0.8, 0.8);
+				songText.updateHitbox();
+				icon.setUnstretchedGraphicSize(Std.int(150 * 0.75), Std.int(150 * 0.75));
+			}
+
 			// using a FlxGroup is too much fuss!
 			iconArray.push(icon);
 			add(icon);
-
-			// songText.x += 40;
-			// DON'T PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
-			// songText.screenCenter(X);
 		}
 
 		scoreText = new FlxText(FlxG.width * 0.7, 5, 0, "", 32);
@@ -439,6 +443,25 @@ class FreeplayState extends MusicBeatState
 			return;
 
 		curSelected = event.value;
+
+		if (songs[curSelected]._isHeader)
+		{
+			if (change < 0)
+			{
+				curSelected--;
+			}
+			else
+			{
+				curSelected++;
+			}
+
+			// hardcoding this because wrap didnt work somehow thanks
+			if (curSelected < 0)
+			{
+				curSelected = songs.length - 1;
+			}
+		}
+
 		if (event.playMenuSFX)
 			CoolUtil.playMenuSFX(SCROLL, 0.7);
 
@@ -480,6 +503,12 @@ class FreeplayState extends MusicBeatState
 
 			if (item.targetY == 0)
 				item.alpha = selectedAlpha;
+
+			if (songs[i]._isHeader)
+			{
+				item.alpha = 1;
+				iconArray[i].alpha = 1;
+			}
 		}
 	}
 
@@ -580,12 +609,31 @@ class FreeplaySonglist
 			// put folders at the top
 			songsFound = songsFound.filter(a -> a.endsWith('/')).concat(songsFound.filter(a -> !a.endsWith('/')));
 		}
+
 		if (songsFound.length > 0)
 		{
 			for (s in songsFound)
-				songs.push(Chart.loadChartMeta(startDir.substr('songs/'.length) + s, source == MODS));
+			{
+				if (s.toLowerCase().startsWith("header:"))
+				{
+					var sect = s.toLowerCase().substr(7);
+					songs.push({
+						_isHeader: true,
+						name: sect,
+						displayName: sect,
+						icon: sect + "-header",
+						difficulties: [""]
+					});
+				}
+				else
+				{
+					songs.push(Chart.loadChartMeta(startDir.substr('songs/'.length) + s, source == MODS));
+				}
+			}
+
 			return false;
 		}
+
 		return true;
 	}
 

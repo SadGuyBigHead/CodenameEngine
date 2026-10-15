@@ -41,6 +41,8 @@ typedef ChartMetaData =
 	public var ?instSuffix:String;
 	public var ?vocalsSuffix:String;
 	public var ?needsVoices:Bool;
+
+	public var ?_isHeader:Bool;
 }
 
 typedef ChartStrumLine =
