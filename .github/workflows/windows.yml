@@ -47,14 +47,14 @@ jobs:
       - name: Uploading artifact (executable)
         uses: actions/upload-artifact@v7
         with:
-          name: Codename Engine (Executable Only)
+          name: SGBH Codename (Executable Only)
           path: |
-            export/release/windows/bin/CodenameEngine.exe
+            export/release/windows/bin/VsDnB.exe
             export/release/windows/bin/lime.ndll
       - name: Uploading artifact (entire build)
         uses: actions/upload-artifact@v7
         with:
-          name: Codename Engine
+          name: SGBH Codename
           path: export/release/windows/bin
       # - name: Clearing already existing cache
       #   uses: actions/github-script@v9
@@ -84,7 +84,7 @@ jobs:
       #       .haxelib/
       #       export/release/windows/obj/
 
-# didnt compile debug in the same job or github would have said that job wasn't completed until debug was done too (debug uploads are not essential)
+  # didnt compile debug in the same job or github would have said that job wasn't completed until debug was done too (debug uploads are not essential)
   debug_build:
     name: Windows Debug Build
     permissions: write-all
@@ -123,7 +123,7 @@ jobs:
       - name: Uploading artifact (entire build)
         uses: actions/upload-artifact@v7
         with:
-          name: Codename Engine Debug
+          name: SGBH Codename Debug
           path: export/debug/windows/bin
       # - name: Clearing already existing cache
       #   uses: actions/github-script@v9
