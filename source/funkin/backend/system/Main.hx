@@ -14,7 +14,6 @@ import funkin.backend.assets.AssetsLibraryList;
 import funkin.backend.assets.ModsFolder;
 import funkin.backend.system.console.ConsoleUI;
 import funkin.backend.system.framerate.Framerate;
-import funkin.backend.system.framerate.SystemInfo;
 import funkin.backend.system.modules.*;
 import funkin.backend.utils.ThreadUtil;
 import funkin.editors.SaveWarning;
@@ -104,7 +103,6 @@ class Main extends Sprite
 
 		#if (!mobile && !web)
 		addChild(framerateSprite = new Framerate());
-		SystemInfo.init();
 		#end
 	}
 
@@ -286,7 +284,25 @@ class Main extends Sprite
 		#end
 
 		if (PlayerSettings.solo.controls.FPS_COUNTER && Options.fpsCounter)
-			Framerate.debugMode = (Framerate.debugMode + 1) % 3;
+		{
+			switch (Framerate.debugMode)
+			{
+				case HIDDEN:
+					Framerate.debugMode = BASIC;
+
+				case BASIC:
+					Framerate.debugMode = NORMAL;
+
+				case NORMAL:
+					Framerate.debugMode = ADVANCED;
+
+				case ADVANCED:
+					Framerate.debugMode = HIDDEN;
+			}
+		}
+
+		if (FlxG.keys.justPressed.F1)
+			Framerate.showDebugInfo = !Framerate.showDebugInfo;
 	}
 
 	private static function onStateSwitchPost()

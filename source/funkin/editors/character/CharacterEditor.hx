@@ -346,11 +346,7 @@ class CharacterEditor extends UIState
 		_view_focus_character(null);
 
 		if (Framerate.isLoaded)
-		{
-			Framerate.fpsCounter.alpha = 0.4;
-			Framerate.memoryCounter.alpha = 0.4;
-			Framerate.codenameBuildField.alpha = 0.4;
-		}
+			Framerate.instance.alpha = 0.4;
 
 		DiscordUtil.call("onEditorLoaded", ["Character Editor", __character]);
 	}
@@ -363,11 +359,7 @@ class CharacterEditor extends UIState
 
 		super.destroy();
 		if (Framerate.isLoaded)
-		{
-			Framerate.fpsCounter.alpha = 1;
-			Framerate.memoryCounter.alpha = 1;
-			Framerate.codenameBuildField.alpha = 1;
-		}
+			Framerate.instance.alpha = 1;
 	}
 
 	var _point:FlxPoint = new FlxPoint();

@@ -156,13 +156,11 @@ class MainState extends FlxState
 		Flags.load();
 		funkin.savedata.FunkinSave.init();
 
-		Framerate.fontName = Framerate.defaultFontName;
-
 		FlxG.mouse.load();
 		FlxG.mouse.useSystemCursor = true;
 
 		if (Framerate.isLoaded)
-			Framerate.instance.visible = Framerate.memoryCounter.visible = Framerate.codenameBuildField.visible = Framerate.fpsCounter.visible = true;
+			Framerate.instance.visible = true;
 
 		Main.refreshAssets();
 		TranslationUtil.findAllLanguages();
