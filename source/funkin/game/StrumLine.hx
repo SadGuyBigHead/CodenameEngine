@@ -149,6 +149,11 @@ class StrumLine extends FlxTypedGroup<Strum>
 	 */
 	public var justStepped:Bool;
 
+	/** 
+	 * are we shape mode
+	 */
+	public var shapeMode(default, set):Bool = false;
+
 	var lastStep:Int;
 
 	private function get_ghostTapping()
@@ -535,17 +540,29 @@ class StrumLine extends FlxTypedGroup<Strum>
 		if (!event.cancelled)
 		{
 			babyArrow.frames = Paths.getFrames(event.sprite);
-			babyArrow.animation.addByPrefix('green', 'arrowUP');
-			babyArrow.animation.addByPrefix('blue', 'arrowDOWN');
-			babyArrow.animation.addByPrefix('purple', 'arrowLEFT');
-			babyArrow.animation.addByPrefix('red', 'arrowRIGHT');
+			babyArrow.animation.addByPrefix('green', 'arrowUP', 24, true);
+			babyArrow.animation.addByPrefix('blue', 'arrowDOWN', 24, true);
+			babyArrow.animation.addByPrefix('purple', 'arrowLEFT', 24, true);
+			babyArrow.animation.addByPrefix('red', 'arrowRIGHT', 24, true);
+
+			babyArrow.animation.addByPrefix('green-shape', 'SHAPEarrowUP', 24, true);
+			babyArrow.animation.addByPrefix('blue-shape', 'SHAPEarrowDOWN', 24, true);
+			babyArrow.animation.addByPrefix('purple-shape', 'SHAPEarrowLEFT', 24, true);
+			babyArrow.animation.addByPrefix('red-shape', 'SHAPEarrowRIGHT', 24, true);
 
 			babyArrow.antialiasing = true;
 			babyArrow.setGraphicSize(Std.int((babyArrow.width * Flags.DEFAULT_NOTE_SCALE) * strumScale));
 
-			babyArrow.animation.addByPrefix('static', 'arrow${event.animPrefix.toUpperCase()}');
+			babyArrow.animation.addByPrefix('static', 'arrow${event.animPrefix.toUpperCase()}', 24, true);
 			babyArrow.animation.addByPrefix('pressed', '${event.animPrefix} press', 24, false);
 			babyArrow.animation.addByPrefix('confirm', '${event.animPrefix} confirm', 24, false);
+
+			babyArrow.animation.addByPrefix('static-shape', 'SHAPEarrow${event.animPrefix.toUpperCase()}', 24, true);
+			babyArrow.animation.addByPrefix('pressed-shape', 'SHAPE${event.animPrefix} press', 24, false);
+			babyArrow.animation.addByPrefix('confirm-shape', 'SHAPE${event.animPrefix} confirm', 24, false);
+
+			babyArrow.animation.addByIndices('into-shape', 'TRANSITIONarrow${event.animPrefix.toUpperCase()}', [0, 1, 2], '', 24, false);
+			babyArrow.animation.addByIndices('outof-shape', 'TRANSITIONarrow${event.animPrefix.toUpperCase()}', [2, 1, 0], '', 24, false);
 
 			final confirm = babyArrow.animation.getByName("confirm");
 			babyArrow.confirmLength = confirm.numFrames * (1 / confirm.frameRate) * 1000;
@@ -573,14 +590,17 @@ class StrumLine extends FlxTypedGroup<Strum>
 		return babyArrow;
 	}
 
-	public function resetStrumPositions() {
+	public function resetStrumPositions()
+	{
 		var spacing = (data.strumSpacing != null ? data.strumSpacing : 1);
 
-		for (i in 0...members.length) {
-			members[i].setPosition(
-				startingPos.x + (Note.swagWidth * strumScale * spacing * i),
-				startingPos.y + (Note.swagWidth * 0.5) - (Note.swagWidth * strumScale * 0.5)
-			);
+		for (i in 0...members.length)
+		{
+			members[i].setPosition(startingPos.x
+				+ (Note.swagWidth * strumScale * spacing * i),
+				startingPos.y
+				+ (Note.swagWidth * 0.5)
+				- (Note.swagWidth * strumScale * 0.5));
 		}
 	}
 
@@ -647,6 +667,16 @@ class StrumLine extends FlxTypedGroup<Strum>
 	private inline function get_altAnim():Bool
 	{
 		return animSuffix == defaultAnimSuffix;
+	}
+
+	private inline function set_shapeMode(b:Bool):Bool
+	{
+		for (i in members)
+		{
+			i.switchShapeMode(b);
+		}
+
+		return b;
 	}
 	#end
 }
