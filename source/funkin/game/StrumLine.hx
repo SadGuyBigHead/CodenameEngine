@@ -532,6 +532,8 @@ class StrumLine extends FlxTypedGroup<Strum>
 		if (PlayState.instance != null)
 			event = PlayState.instance.gameAndCharsEvent("onStrumCreation", event);
 
+		final skin = NoteSkin.get(event.sprite);
+
 		if (!event.cancelled)
 		{
 			babyArrow.frames = Paths.getFrames(event.sprite);
@@ -541,7 +543,8 @@ class StrumLine extends FlxTypedGroup<Strum>
 			babyArrow.animation.addByPrefix('red', 'arrowRIGHT');
 
 			babyArrow.antialiasing = true;
-			babyArrow.setGraphicSize(Std.int((babyArrow.width * Flags.DEFAULT_NOTE_SCALE) * strumScale));
+			final scale = Flags.DEFAULT_NOTE_SCALE * strumScale;
+			babyArrow.scale.set(scale, scale).scale(skin.scale);
 
 			babyArrow.animation.addByPrefix('static', 'arrow${event.animPrefix.toUpperCase()}');
 			babyArrow.animation.addByPrefix('pressed', '${event.animPrefix} press', 24, false);
@@ -565,7 +568,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 		babyArrow.playAnim('static');
 
 		insert(i, babyArrow);
-		holdCovers.insert(i, new HoldCover(i));
+		holdCovers.insert(i, new HoldCover(i, skin));
 
 		if (PlayState.instance != null)
 			PlayState.instance.gameAndCharsEvent("onPostStrumCreation", event);
