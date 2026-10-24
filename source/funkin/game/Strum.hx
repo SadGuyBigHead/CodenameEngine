@@ -1,7 +1,6 @@
 package funkin.game;
 
 import flixel.math.FlxPoint;
-import flixel.math.FlxAngle;
 import flixel.util.typeLimit.OneOfTwo;
 import funkin.backend.system.Conductor;
 
@@ -57,6 +56,8 @@ class Strum extends FlxSprite
 	public var updateNotesPosX:Bool = true;
 	public var updateNotesPosY:Bool = true;
 	public var extraCopyFields(default, set):Array<String> = [];
+
+	public var shapeMode:Bool = false;
 
 	@:noCompletion public var __cachedCopyFields:Array<Array<OneOfTwo<String, Int>>> = null;
 
@@ -172,11 +173,34 @@ class Strum extends FlxSprite
 	public override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+
 		if (cpu)
 		{
-			if (lastHit + (Conductor.instance.crochet * 0.5) < Conductor.instance.songPosition && getAnim() == "confirm")
+			if (lastHit + (Conductor.instance.crochet * 0.5) < Conductor.instance.songPosition && getAnim().startsWith("confirm"))
 			{
-				playAnim("static");
+				if (shapeMode)
+				{
+					playAnim("static-shape");
+				}
+				else
+				{
+					playAnim("static");
+				}
+			}
+		}
+
+		if (getAnim() == "outof-shape" || getAnim() == "into-shape")
+		{
+			if (animation.curAnim.finished)
+			{
+				if (shapeMode)
+				{
+					playAnim("static-shape");
+				}
+				else
+				{
+					playAnim("static");
+				}
 			}
 		}
 	}
@@ -253,17 +277,51 @@ class Strum extends FlxSprite
 	{
 		switch (getAnim())
 		{
-			case "confirm":
+			case "confirm" | "confirm-shape":
 				if (justReleased || !pressed)
-					playAnim("static");
-			case "pressed":
+				{
+					if (shapeMode)
+					{
+						playAnim("static-shape");
+					}
+					else
+					{
+						playAnim("static");
+					}
+				}
+			case "pressed" | "pressed-shape":
 				if (justReleased || !pressed)
-					playAnim("static");
-			case "static":
+				{
+					if (shapeMode)
+					{
+						playAnim("static-shape");
+					}
+					else
+					{
+						playAnim("static");
+					}
+				}
+			case "static" | "static-shape":
 				if (justPressed || pressed)
-					playAnim("pressed");
+				{
+					if (shapeMode)
+					{
+						playAnim("pressed-shape");
+					}
+					else
+					{
+						playAnim("pressed");
+					}
+				}
 			case null:
-				playAnim("static");
+				if (shapeMode)
+				{
+					playAnim("static-shape");
+				}
+				else
+				{
+					playAnim("static");
+				}
 		}
 	}
 
@@ -274,7 +332,14 @@ class Strum extends FlxSprite
 	public inline function press(time:Float)
 	{
 		lastHit = time;
-		playAnim("confirm");
+		if (shapeMode)
+		{
+			playAnim("confirm-shape");
+		}
+		else
+		{
+			playAnim("confirm");
+		}
 	}
 
 	/**
@@ -295,5 +360,24 @@ class Strum extends FlxSprite
 	public inline function getAnim()
 	{
 		return animation.name;
+	}
+
+	public function switchShapeMode(isShape:Bool)
+	{
+		if (isShape == shapeMode)
+		{
+			return;
+		}
+
+		shapeMode = isShape;
+
+		if (isShape)
+		{
+			playAnim("into-shape");
+		}
+		else
+		{
+			playAnim("outof-shape");
+		}
 	}
 }
