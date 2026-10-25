@@ -108,6 +108,8 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 		scripts.call("create");
 		buildCharacter(xml);
 		scripts.call("postCreate");
+
+		useRenderTexture = true;
 	}
 
 	@:noCompletion var __swappedLeftRightAnims:Bool = false;
