@@ -149,6 +149,8 @@
 
 	<haxelib name="linc_luajit" if="LUA_ALLOWED" />
 
+	<haxelib name="json2object" />
+
 	<!-- ____________________________ Source Settings ___________________________ -->
 
 	<!-- DO NO REMOVE THIS -->

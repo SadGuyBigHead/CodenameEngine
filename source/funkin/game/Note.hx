@@ -14,7 +14,7 @@ import flixel.math.FlxMatrix;
 using StringTools;
 
 @:allow(funkin.game.PlayState)
-class Note extends FlxSprite
+class Note extends StrumLineSprite
 {
 	public var player(get, never):Int;
 
@@ -175,10 +175,12 @@ class Note extends FlxSprite
 		this.noteData = noteData.id.getDefault(0);
 
 		var customType = Paths.image('game/notes/${this.noteType}');
+		var notePath = (this.noteType != null && customTypePathExists(customType)) ? 'game/notes/${this.noteType}' : 'game/notes/default';
+
 		var event = EventManager.get(NoteCreationEvent)
-			.recycle(this, strumID, this.noteType, noteTypeID, PlayState.instance.strumLines.members.indexOf(strumLine), mustPress,
-				(this.noteType != null && customTypePathExists(customType)) ? 'game/notes/${this.noteType}' : 'game/notes/default', @:privateAccess
+			.recycle(this, strumID, this.noteType, noteTypeID, PlayState.instance.strumLines.members.indexOf(strumLine), mustPress, notePath, @:privateAccess
 				strumLine.strumScale * Flags.DEFAULT_NOTE_SCALE, animSuffix);
+		final skin = NoteSkin.get(event.noteSprite);
 
 		if (PlayState.instance != null)
 			event = PlayState.instance.gameAndCharsEvent("onNoteCreation", event);
@@ -186,42 +188,20 @@ class Note extends FlxSprite
 		this.animSuffix = event.animSuffix;
 		if (!event.cancelled)
 		{
-			switch (event.noteType)
-			{
-				// case "My Custom Note Type": // hardcoding note types
-				default:
-					frames = Paths.getFrames(event.noteSprite);
+			frames = Paths.getFrames(event.noteSprite);
 
-					switch (event.strumID % 4)
-					{
-						case 0:
-							animation.addByPrefix('scroll', 'purple0');
-							animation.addByPrefix('hold', 'purple hold piece');
-							animation.addByPrefix("holdend", "pruple end hold");
-							if (animation.exists("holdend") != true) // null or false
-								animation.addByPrefix('holdend', 'purple hold end');
-						case 1:
-							animation.addByPrefix('scroll', 'blue0');
-							animation.addByPrefix('hold', 'blue hold piece');
-							animation.addByPrefix('holdend', 'blue hold end');
-						case 2:
-							animation.addByPrefix('scroll', 'green0');
-							animation.addByPrefix('hold', 'green hold piece');
-							animation.addByPrefix('holdend', 'green hold end');
-						case 3:
-							animation.addByPrefix('scroll', 'red0');
-							animation.addByPrefix('hold', 'red hold piece');
-							animation.addByPrefix('holdend', 'red hold end');
-					}
+			final anims = skin.arrows.anims[event.strumID % skin.arrows.anims.length];
 
-					scale.set(event.noteScale, event.noteScale);
-					antialiasing = true;
-			}
+			animation.addByPrefix("scroll", anims.scroll.name, anims.scroll.fps ?? 0);
+			animation.addByPrefix("hold", anims.holdBody.name, anims.holdBody.fps ?? 0);
+			animation.addByPrefix("holdend", anims.holdCap.name, anims.holdCap.fps ?? 0);
+			scale.set(event.noteScale, event.noteScale).scale(skin.scale); // skin scale always forced
+			antialiasing = true;
 		}
-
-		updateHitbox();
-
 		animation.play("scroll");
+		targetFrame = frame;
+		
+		centerSprite();
 
 		if (PlayState.instance != null)
 		{
@@ -260,16 +240,8 @@ class Note extends FlxSprite
 			__lastAngleCos = result.cos;
 		}
 
-		if (strum.width != __lastStrumW || strum.height != __lastStrumH)
-		{
-			__lastStrumW = strum.width;
-			__lastStrumH = strum.height;
-			__lastStrumHalfW = strum.width * 0.5;
-			__lastStrumHalfH = strum.height * 0.5;
-		}
-
-		x = -origin.x + offset.x + (__distance * __lastAngleCos) + strum.x + __lastStrumHalfW;
-		y = -origin.y + offset.y + (__distance * __lastAngleSin) + strum.y + __lastStrumHalfH;
+		x = (__distance * __lastAngleCos) + strum.x;
+		y = (__distance * __lastAngleSin) + strum.y;
 	}
 
 	public function updateScoreProgress(time:Float)
@@ -367,18 +339,6 @@ class HoldNote implements IFlxDestroyable
 
 	public var offset:FlxPoint = FlxPoint.get();
 
-	// just to not have people making mods go crazy if they have like the perfect noteskin
-	public var randomOffset(default, set):Float;
-
-	function set_randomOffset(randomOffset:Float)
-	{
-		this.randomOffset = randomOffset;
-		updateMatrix();
-		return randomOffset;
-	}
-
-	var originalNoteSize:FlxPoint = FlxPoint.get();
-
 	public function new(note:Note)
 	{
 		init(note);
@@ -424,29 +384,20 @@ class HoldNote implements IFlxDestroyable
 		capWidth = cap.frame.width * note.scale.x;
 		capHalfWidth = bodyWidth * .5;
 		capHeight = cap.frame.height * note.scale.y;
-		
-		originalNoteSize.set(note.width, note.height);
 
-		// random magic number to make it look more right even if its technically wrong
-		randomOffset = 1.25;
+		updateMatrix();
 	}
 
 	// updateMatrices!!! but who cares
 	function updateMatrix()
 	{
-		offset.set(randomOffset, note.height * .5);
-		// wtf?
-		offset.x -= originalNoteSize.x - note.frameWidth;
-
 		bodyMatrix.identity();
-		bodyMatrix.translate(-bodyHalfWidth, 0);
 		bodyMatrix.scale(scale, scale);
-		bodyMatrix.translate(offset.x, offset.y);
-		
+		bodyMatrix.translate(-bodyHalfWidth, 0);
+
 		capMatrix.identity();
-		capMatrix.translate(-capHalfWidth, 0);
 		capMatrix.scale(scale, scale);
-		capMatrix.translate(offset.x, offset.y);
+		capMatrix.translate(-capHalfWidth, 0);
 	}
 
 	function clear()
@@ -466,7 +417,6 @@ class HoldNote implements IFlxDestroyable
 		holdFrames = null;
 		note = null;
 		offset = FlxDestroyUtil.put(offset);
-		originalNoteSize = FlxDestroyUtil.put(originalNoteSize);
 		bodyMatrix = capMatrix = null;
 	}
 }

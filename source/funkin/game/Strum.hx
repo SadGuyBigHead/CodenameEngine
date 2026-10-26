@@ -4,7 +4,7 @@ import flixel.math.FlxPoint;
 import flixel.util.typeLimit.OneOfTwo;
 import funkin.backend.system.Conductor;
 
-class Strum extends FlxSprite
+class Strum extends StrumLineSprite
 {
 	/**
 	 * Extra data that can be added to the strum.
@@ -350,8 +350,7 @@ class Strum extends FlxSprite
 	public function playAnim(anim:String, force:Bool = true)
 	{
 		animation.play(anim, force);
-		centerOffsets();
-		centerOrigin();
+		centerSprite();
 	}
 
 	/**
@@ -379,5 +378,48 @@ class Strum extends FlxSprite
 		{
 			playAnim("outof-shape");
 		}
+	}
+
+	public function loadNoteSkin(noteSkin:NoteSkin)
+	{
+		frames = Paths.getFrames(noteSkin.id);
+		antialiasing = true;
+
+		final anims = noteSkin.receptors.anims[column % noteSkin.receptors.anims.length];
+		final normal = anims.normal;
+		final shape = anims.shape;
+
+		var doShape:Bool = false;
+		for (frame in frames.frames)
+		{
+			if (frame.name.startsWith(shape.staticAnim.name))
+			{
+				doShape = true;
+				break;
+			}
+		}
+
+		animation.addByPrefix("static", normal.staticAnim.name, normal.staticAnim.fps ?? 24, false);
+		animation.addByPrefix("pressed", normal.pressed.name, normal.pressed.fps ?? 24, false);
+		animation.addByPrefix("confirm", normal.confirm.name, normal.confirm.fps ?? 24, false);
+
+		if (doShape)
+		{
+			animation.addByPrefix("shape-static", shape.staticAnim.name, shape.staticAnim.fps ?? 24, false);
+			animation.addByPrefix("shape-pressed", shape.pressed.name, shape.pressed.fps ?? 24, false);
+			animation.addByPrefix("shape-confirm", shape.confirm.name, shape.confirm.fps ?? 24, false);
+
+			animation.addByPrefix("shape-transition", anims.transition.name, anims.transition.fps ?? 24, false);
+		}
+
+		final scale = Flags.DEFAULT_NOTE_SCALE * strumLine.strumScale;
+		this.scale.set(scale, scale).scale(noteSkin.scale);
+
+		final confirm = animation.getByName("confirm");
+		confirmLength = confirm.numFrames * (1 / confirm.frameRate) * 1000;
+
+		targetFrame = frames.frames[(animation.getByName("static")?.frames[0] ?? 0)];
+
+		centerSprite();
 	}
 }

@@ -1,6 +1,6 @@
 package modchart;
 
-import openfl.Vector;
+import dave.Vector;
 import modchart.ArrowEffects;
 
 // add later: this but to the noteskin metrics file as an instance or something
@@ -10,9 +10,9 @@ import modchart.ArrowEffects;
 #end
 final class ModConstants
 {
-	inline static function dimVec(v = .0)
+	inline static function dimVec(v = .0):Vector<Float>
 	{
-		return new Vector(num_dim, true, [v, v, v]);
+		return cast [v, v, v];
 	}
 
 	public static inline final FrameWidthEffectsPixelsPerSecond = 400;

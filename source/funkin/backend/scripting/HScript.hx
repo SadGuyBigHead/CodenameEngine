@@ -76,6 +76,7 @@ class HScript extends Script
 		#if GLOBAL_SCRIPT
 		funkin.backend.scripting.GlobalScript.call("onScriptCreated", [this, "hscript"]);
 		#end
+		trace("trying load", path);
 		loadFromString(code);
 	}
 

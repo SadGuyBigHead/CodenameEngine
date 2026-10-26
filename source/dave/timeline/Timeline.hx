@@ -8,9 +8,9 @@ import flixel.util.FlxSort;
  */
 class Timeline extends flixel.FlxBasic
 {
-	public var events:Vector<TimelineEvent> = new Vector<TimelineEvent>();
+	public var events:Vector<TimelineEvent> = new Vector<TimelineEvent>(0);
 
-	static var garbage:Vector<TimelineEvent> = new Vector<TimelineEvent>();
+	var _events:Array<TimelineEvent>;
 
 	var conductor:Conductor;
 
@@ -22,6 +22,7 @@ class Timeline extends flixel.FlxBasic
 	public function new()
 	{
 		this.conductor = Conductor.instance;
+		_events = cast events;
 		super();
 	}
 
@@ -32,19 +33,19 @@ class Timeline extends flixel.FlxBasic
 	 */
 	public function add(event:TimelineEvent):Timeline
 	{
-		events.push(event);
+		_events.push(event);
 		return this;
 	}
 
 	public function remove(event:TimelineEvent):Timeline
 	{
-		garbage.push(event);
+		_events.remove(event);
 		return this;
 	}
 
 	public function sort():Timeline
 	{
-		events.sort(sortByBeat);
+		haxe.ds.ArraySort.sort(_events, sortByBeat);
 		return this;
 	}
 
@@ -56,8 +57,11 @@ class Timeline extends flixel.FlxBasic
 
 	public function run(beat:Float)
 	{
-		for (event in events)
+		var i = 0;
+		var len = events.length;
+		while (i < len)
 		{
+			final event = events[i];
 			if (beat >= event.beat)
 			{
 				#if debug
@@ -77,25 +81,16 @@ class Timeline extends flixel.FlxBasic
 
 				if (ret)
 				{
-					garbage.push(event);
+					_events.splice(i, 1);
+					len--;
 					continue;
 				}
+				i++;
 			}
 			else
 			{
 				break;
 			}
-		}
-
-		clearGarbage();
-	}
-
-	inline function clearGarbage()
-	{
-		while (garbage.length > 0)
-		{
-			final event = garbage.shift();
-			events.removeAt(events.indexOf(event));
 		}
 	}
 

@@ -1054,3 +1054,7 @@ function confrad(d)
 	return math.rad(d) * 100
 end
 end
+
+function set_playfield_active(pn, active)
+	__set_playfield_active(pn - 1, active)
+end

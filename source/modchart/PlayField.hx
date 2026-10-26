@@ -33,12 +33,14 @@ class PlayField
 		return PlayState.instance.strumLines.members[player];
 	}
 
+	public var active:Bool;
+
 	public function new(player:Int, mods:ArrowEffects)
 	{
 		this.player = player;
 		final size = ArrowEffects.ARROW_SIZE * (strumLine.data.strumScale ?? 1.0) * (strumLine.data.strumSpacing ?? 1.0);
 		final lanes = strumLine.data.keyCount ?? 4;
-		final ofsY = (ArrowEffects.ARROW_SIZE * .5) - (ArrowEffects.ARROW_SIZE * (strumLine.data.strumScale ?? 1.0) * .5);
+		final ofsY = (ArrowEffects.ARROW_SIZE * .5);
 		pos.set(strumLine.startingPos.x + (size * (lanes * .5) * .5) + (size * .5), strumLine.startingPos.y + (mods.position.reverseOffset * .5) + ofsY);
 	}
 

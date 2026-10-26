@@ -1,6 +1,6 @@
 package funkin.game;
 
-class Splash extends FunkinSprite
+class Splash extends StrumLineSprite
 {
 	/**
 	 * The current splash strum

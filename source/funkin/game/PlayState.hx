@@ -476,7 +476,13 @@ class PlayState extends MusicBeatState
 	/**
 	 * Camera zoom at which the hud lerps to.
 	 */
-	public var defaultHudZoom:Float = Flags.DEFAULT_HUD_ZOOM;
+	public var defaultHudZoom(default, set):Float = Flags.DEFAULT_HUD_ZOOM;
+
+	function set_defaultHudZoom(v:Float):Float
+	{
+		trace("deprecated zooming hud is bad");
+		return 0;
+	}
 
 	/**
 	 * Speed at which the hud camera zoom lerps to.
@@ -1083,7 +1089,7 @@ class PlayState extends MusicBeatState
 		timeline = new Timeline();
 		add(timeline);
 
-		noteRenderer = new NoteRenderer(this);
+		noteRenderer = new NoteRenderer(this, SONG.meta?.modchart?.playerMult ?? 1);
 		insert(0, noteRenderer);
 
 		scripts.set("SONG", SONG);
@@ -1918,11 +1924,9 @@ class PlayState extends MusicBeatState
 			{
 				camZoomingMult = lerp(camZoomingMult, defaultZoom, camZoomLerp) - defaultZoom;
 				FlxG.camera.zoomMultiplier = camZoomingMult * camGameZoomMult + defaultZoom;
-				camHUD.zoomMultiplier = camZoomingMult * camHUDZoomMult + defaultZoom;
 				camZoomingMult += defaultZoom;
 			}
 			FlxG.camera.zoom = lerp(FlxG.camera.zoom, defaultCamZoom, camGameZoomLerp);
-			camHUD.zoom = lerp(camHUD.zoom, defaultHudZoom, camHUDZoomLerp);
 		}
 
 		// RESET = Quick Game Over Screen
@@ -2147,8 +2151,12 @@ class PlayState extends MusicBeatState
 							}));
 				}
 			case "Add Camera Zoom":
-				var camera:FlxCamera = event.params[1] == "camHUD" ? camHUD : camGame;
-				camera.zoom += event.params[0];
+				if (event.params[1] == "camHUD")
+				{
+					trace("stop");
+					return;
+				}
+				camGame.zoom += event.params[0];
 			case "Camera Bop":
 				if (Options.camZoomOnBeat)
 				{
@@ -2159,12 +2167,16 @@ class PlayState extends MusicBeatState
 					else
 					{
 						FlxG.camera.zoom += event.params[0] * camZoomingStrength;
-						camHUD.zoom += event.params[0] * camZoomingStrength;
 					}
 				}
 			case "Camera Zoom":
-				var cam = event.params[2] == "camHUD" ? camHUD : camGame;
-				var name = (event.params[2] == "camHUD" ? "camHUD" : "camGame") + ".zoom"; // avoiding having different values from these 2  - Nex
+				if (event.params[2] == "camHUD")
+				{
+					trace("no bro");
+					return;
+				}
+				var cam = camGame;
+				var name = "camGame.zoom"; // avoiding having different values from these 2  - Nex
 				var tween = eventsTween.get(name);
 				if (tween != null)
 					tween.cancel();
@@ -2176,35 +2188,15 @@ class PlayState extends MusicBeatState
 				if (event.params[0] == false)
 				{
 					cam.zoom = finalZoom;
-					if (cam == camHUD)
-						defaultHudZoom = finalZoom;
-					else
-						defaultCamZoom = finalZoom;
+					defaultCamZoom = finalZoom;
 				}
 				else if (event.params[4] == "CLASSIC")
-				{
-					if (cam == camHUD)
-						defaultHudZoom = finalZoom;
-					else
 						defaultCamZoom = finalZoom;
-				}
 				else
 					eventsTween.set(name, FlxTween.tween(cam, {zoom: finalZoom}, (Conductor.instance.stepCrochet / 1000) * event.params[3], {
 						ease: CoolUtil.flxeaseFromString(event.params[4], event.params[5]),
-						onUpdate: function(_)
-						{
-							if (cam == camHUD)
-								defaultHudZoom = cam.zoom;
-							else
-								defaultCamZoom = cam.zoom;
-						},
-						onComplete: _ ->
-						{
-							if (cam == camHUD)
-								defaultHudZoom = finalZoom;
-							else
-								defaultCamZoom = finalZoom;
-						}
+						onUpdate: _ -> defaultCamZoom = cam.zoom,
+						onComplete: _ -> defaultCamZoom = finalZoom,
 					}));
 			case "Camera Modulo Change":
 				camZoomingInterval = event.params[0];

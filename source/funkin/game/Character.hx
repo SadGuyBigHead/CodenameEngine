@@ -27,6 +27,7 @@ import openfl.geom.ColorTransform;
 import animate.FlxAnimateFrames;
 import flixel.system.FlxAssets.FlxShader;
 import funkin.backend.utils.CoolUtil;
+import funkin.backend.scripting.events.sprite.PlayAnimContext;
 
 using StringTools;
 
@@ -193,9 +194,9 @@ class Character extends FunkinSprite implements IBeatReceiver implements IOffset
 
 		// shouting at me for some reason
 		if (isDanceLeftDanceRight)
-			playAnim(((danced = !danced) ? 'danceLeft' : 'danceRight') + idleSuffix, DANCE);
+			playAnim(((danced = !danced) ? 'danceLeft' : 'danceRight') + idleSuffix, PlayAnimContext.DANCE);
 		else
-			playAnim('idle' + idleSuffix, DANCE);
+			playAnim('idle' + idleSuffix, PlayAnimContext.DANCE);
 	}
 
 	public function tryDance()

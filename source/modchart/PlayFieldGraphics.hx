@@ -81,7 +81,7 @@ class HoldFrames implements IFlxDestroyable
 				case 3:
 					"red hold end";
 				default: throw "poo";
-			}) + "0000";
+			});
 		}
 		else
 		{
@@ -96,7 +96,7 @@ class HoldFrames implements IFlxDestroyable
 				case 3:
 					"red hold piece";
 				default: throw "poo";
-			}) + "0000";
+			});
 		}
 	}
 
@@ -112,8 +112,16 @@ class HoldFrames implements IFlxDestroyable
 
 		for (i in 0...4)
 		{
-			final body = frames.getByName(getFrameName(i, false));
-			final cap = frames.getByName(getFrameName(i, true));
+			final bodyName = getFrameName(i, false);
+			final capName = getFrameName(i, true);
+			final body = frames.getByName(bodyName + "0000") ?? frames.getByName(bodyName);
+			var cap = frames.getByName(capName + "0000") ?? frames.getByName(capName);
+			// KILL PHANTOM ARCADE
+			if (cap == null && i == 0)
+				cap = frames.getByName("pruple end hold0000") ?? frames.getByName("pruple end hold");
+
+			if (body == null || cap == null)
+				throw 'Cant find frames for body/cap! (look: $bodyName, $capName)'; 
 
 			bodyFrames.push(body);
 			capFrames.push(cap);
