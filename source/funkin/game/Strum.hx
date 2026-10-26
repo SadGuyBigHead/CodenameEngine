@@ -57,7 +57,21 @@ class Strum extends StrumLineSprite
 	public var updateNotesPosY:Bool = true;
 	public var extraCopyFields(default, set):Array<String> = [];
 
-	public var shapeMode:Bool = false;
+	public var shapeMode(default, set):Bool = false;
+
+	public function set_shapeMode(isShape:Bool)
+	{
+		if (isShape == shapeMode)
+		{
+			return isShape;
+		}
+
+		shapeMode = isShape;
+
+		animation.play("shape-transition", true, !isShape);
+		centerSprite();
+		return isShape;
+	}
 
 	@:noCompletion public var __cachedCopyFields:Array<Array<OneOfTwo<String, Int>>> = null;
 
@@ -178,14 +192,7 @@ class Strum extends StrumLineSprite
 		{
 			if (lastHit + (Conductor.instance.crochet * 0.5) < Conductor.instance.songPosition && getAnim().startsWith("confirm"))
 			{
-				if (shapeMode)
-				{
-					playAnim("static-shape");
-				}
-				else
-				{
-					playAnim("static");
-				}
+				playAnim("static");
 			}
 		}
 
@@ -193,14 +200,7 @@ class Strum extends StrumLineSprite
 		{
 			if (animation.curAnim.finished)
 			{
-				if (shapeMode)
-				{
-					playAnim("static-shape");
-				}
-				else
-				{
-					playAnim("static");
-				}
+				playAnim("static");
 			}
 		}
 	}
@@ -275,53 +275,30 @@ class Strum extends StrumLineSprite
 	**/
 	public function updatePlayerInput(pressed:Bool, justPressed:Bool, justReleased:Bool)
 	{
-		switch (getAnim())
+		var anim:String = getAnim();
+		if (anim == "shape-transition")
+			anim = "static";
+		else
+			anim = anim.substr(shapeMode ? "shape-".length : 0);
+		switch anim
 		{
-			case "confirm" | "confirm-shape":
+			case "confirm":
 				if (justReleased || !pressed)
-				{
-					if (shapeMode)
-					{
-						playAnim("static-shape");
-					}
-					else
-					{
-						playAnim("static");
-					}
-				}
-			case "pressed" | "pressed-shape":
-				if (justReleased || !pressed)
-				{
-					if (shapeMode)
-					{
-						playAnim("static-shape");
-					}
-					else
-					{
-						playAnim("static");
-					}
-				}
-			case "static" | "static-shape":
-				if (justPressed || pressed)
-				{
-					if (shapeMode)
-					{
-						playAnim("pressed-shape");
-					}
-					else
-					{
-						playAnim("pressed");
-					}
-				}
-			case null:
-				if (shapeMode)
-				{
-					playAnim("static-shape");
-				}
-				else
 				{
 					playAnim("static");
 				}
+			case "pressed":
+				if (justReleased || !pressed)
+				{
+					playAnim("static");
+				}
+			case "static":
+				if (justPressed || pressed)
+				{
+					playAnim("pressed");
+				}
+			case null:
+				playAnim("static");
 		}
 	}
 
@@ -332,14 +309,7 @@ class Strum extends StrumLineSprite
 	public inline function press(time:Float)
 	{
 		lastHit = time;
-		if (shapeMode)
-		{
-			playAnim("confirm-shape");
-		}
-		else
-		{
-			playAnim("confirm");
-		}
+		playAnim("confirm");
 	}
 
 	/**
@@ -349,7 +319,8 @@ class Strum extends StrumLineSprite
 	**/
 	public function playAnim(anim:String, force:Bool = true)
 	{
-		animation.play(anim, force);
+		final animPrefix:String = shapeMode ? "shape-" : "";
+		animation.play(animPrefix + anim, force);
 		centerSprite();
 	}
 
@@ -359,25 +330,6 @@ class Strum extends StrumLineSprite
 	public inline function getAnim()
 	{
 		return animation.name;
-	}
-
-	public function switchShapeMode(isShape:Bool)
-	{
-		if (isShape == shapeMode)
-		{
-			return;
-		}
-
-		shapeMode = isShape;
-
-		if (isShape)
-		{
-			playAnim("into-shape");
-		}
-		else
-		{
-			playAnim("outof-shape");
-		}
 	}
 
 	public function loadNoteSkin(noteSkin:NoteSkin)

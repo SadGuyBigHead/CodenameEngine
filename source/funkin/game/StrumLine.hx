@@ -518,10 +518,8 @@ class StrumLine extends FlxTypedGroup<Strum>
 	{
 		if (animPrefix == null)
 			animPrefix = strumAnimPrefix[i % strumAnimPrefix.length];
-		var receptor:Strum = new Strum(startingPos.x
-			+ (Note.swagWidth * strumScale * (data.strumSpacing != null ? data.strumSpacing : 1) * i),
-			startingPos.y
-			+ (Note.swagWidth * 0.5));
+		var receptor:Strum = new Strum(startingPos.x + (Note.swagWidth * strumScale * (data.strumSpacing != null ? data.strumSpacing : 1) * i),
+			startingPos.y + (Note.swagWidth * 0.5));
 		receptor.ID = i;
 		receptor.strumLine = this;
 
@@ -647,9 +645,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 	private inline function set_shapeMode(b:Bool):Bool
 	{
 		for (i in members)
-		{
-			i.switchShapeMode(b);
-		}
+			i.shapeMode = b;
 
 		return b;
 	}
