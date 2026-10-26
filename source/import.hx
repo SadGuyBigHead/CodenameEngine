@@ -27,7 +27,6 @@ import funkin.Types;
 import funkin.menus.ui.Alphabet;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
-import openfl.Vector;
 import flixel.math.FlxPoint;
 import funkin.game.Note;
 

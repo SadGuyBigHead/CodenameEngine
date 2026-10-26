@@ -42,6 +42,8 @@ typedef ChartMetaData =
 	public var ?vocalsSuffix:String;
 	public var ?needsVoices:Bool;
 
+	public var ?modchart:ModchartMetaData;
+
 	public var ?_isHeader:Bool;
 }
 
@@ -101,4 +103,9 @@ enum abstract ChartStrumLineType(Int) from Int to Int
 	 * STRUMLINE IS MARKED AS ADDITIONAL - WILL BE PLAYED AS CPU EVEN IF OPPONENT MODE IS ENABLED
 	 */
 	var ADDITIONAL = 2;
+}
+
+typedef ModchartMetaData = 
+{
+	var ?playerMult:Int;
 }

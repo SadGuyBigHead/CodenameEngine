@@ -3,9 +3,9 @@ package modchart;
 import modchart.Modchart;
 import math.BezierUtil;
 import flixel.tweens.FlxEase;
-import math.MathUtil;
+import math.DaveMathUtil;
 import flixel.math.FlxRandom;
-import openfl.Vector;
+import dave.Vector;
 import flixel.math.FlxAngle;
 import modchart.Modchart;
 import modchart.ModConstants as C;
@@ -53,8 +53,8 @@ final class ArrowEffects extends FlxBasic
 		this.conductor = conductor ?? Conductor.instance;
 		this.position = position;
 		this.players = players;
-		playerStates = new Vector<PlayerState>(players, true, [for (i in 0...players) new PlayerState(i, new PlayField(i, this))]);
-		effectData = new Vector<PerPlayerData>(players, true, [for (i in 0...players) new PerPlayerData(i)]);
+		playerStates = cast [for (i in 0...players) new PlayerState(i, new PlayField(i, this))];
+		effectData = cast [for (i in 0...players) new PerPlayerData(i)];
 
 		// trace('with lpayers', players, playerStates);
 
@@ -75,8 +75,8 @@ final class ArrowEffects extends FlxBasic
 				width = 2;
 			for (col_id in 0...keyCount)
 			{
-				final start_col = MathUtil.boundInt(col_id - width, 0, max_player_col);
-				final end_col = MathUtil.boundInt(col_id + width, 0, max_player_col);
+				final start_col = DaveMathUtil.boundInt(col_id - width, 0, max_player_col);
+				final end_col = DaveMathUtil.boundInt(col_id + width, 0, max_player_col);
 				data.minTornado[dimension][col_id] = 9999.;
 				data.maxTornado[dimension][col_id] = -9999.;
 				for (i in start_col...end_col + 1)
@@ -1223,9 +1223,9 @@ final class ArrowEffects extends FlxBasic
 	function selectTanType(angle:Float, is_cosec:Bool)
 	{
 		if (is_cosec)
-			return fastCsc(angle);
+			return 1 / Math.sin(angle);
 		else
-			return fastTan(angle);
+			return Math.tan(angle);
 	}
 
 	// rage stuff or other stuff
@@ -1234,12 +1234,6 @@ final class ArrowEffects extends FlxBasic
 
 	static inline function quantize(f:Float, fRoundInterval:Float):Int
 		return Std.int(((f + fRoundInterval / 2) / fRoundInterval) * fRoundInterval);
-
-	static inline function fastCsc(x:Float)
-		return 1 / FlxMath.fastSin(x);
-
-	static inline function fastTan(x:Float)
-		return MathUtil.fastTan(x);
 
 	/**
 	 * Performs a modulo operation to calculate the remainder of `a` divided by `b`.
@@ -1336,8 +1330,8 @@ final class PlayerState
 		return _scrolls[i * MOD_LENGTH] + _scrolls[i * MOD_LENGTH + curr_dir];
 	}
 
-	public final bTurns = new Vector<Bool>(NUM_TURNS, true);
-	public final bTransforms = new Vector<Bool>(NUM_TURNS, true);
+	public final bTurns = new Vector<Bool>(NUM_TURNS);
+	public final bTransforms = new Vector<Bool>(NUM_TURNS);
 
 	public var timer:Float;
 
@@ -1368,7 +1362,7 @@ final class PlayerState
 
 	public var bCosecant:Bool;
 
-	public var modTimerType:ModTimerType = ModTimerType_Game;
+	public var modTimerType:ModTimerType = ModTimerType_Beat;
 
 	public var modTimerMult:Float;
 
@@ -1404,7 +1398,7 @@ final class PlayerState
 
 	inline function colVec():Vector<Float>
 	{
-		return new Vector<Float>(keyCount, true);
+		return new Vector<Float>(keyCount);
 	}
 
 	public var colDark:Vector<Float>;
@@ -1426,12 +1420,12 @@ final class PlayerState
 
 	public var auxes:Map<String, NodeModifier> = [];
 
-	public var nodes = new Vector<ModNode>();
+	public var nodes = new Array<ModNode>();
 
 	public var curr_dir:Int;
 
 	@:allow(modchart.Modchart)
-	var _allMods = new Vector<Modifier>();
+	var _allMods = new Array<Modifier>();
 
 	@:allow(modchart.ArrowEffects)
 	var lastTime:Float;
@@ -1451,17 +1445,17 @@ final class PlayerState
 		keyCount = playField.strumLine.data.keyCount ?? 4;
 		MOD_LENGTH = keyCount + 1;
 
-		_accels = new Vector<Float>(NUM_ACCELS * MOD_LENGTH, true);
-		_effects = new Vector<Float>(NUM_EFFECTS * MOD_LENGTH, true);
-		_appearances = new Vector<Float>(NUM_APPEARANCES * MOD_LENGTH, true);
-		_scrolls = new Vector<Float>(NUM_SCROLLS * MOD_LENGTH, true);
+		_accels = new Vector<Float>(NUM_ACCELS * MOD_LENGTH);
+		_effects = new Vector<Float>(NUM_EFFECTS * MOD_LENGTH);
+		_appearances = new Vector<Float>(NUM_APPEARANCES * MOD_LENGTH);
+		_scrolls = new Vector<Float>(NUM_SCROLLS * MOD_LENGTH);
 
 		splines = new ModSplineHandler(keyCount);
 
-		xOffset = new Vector<Float>(keyCount, true, [
+		xOffset = cast [
 			for (i in 0...keyCount)
 				((i - (keyCount / 2)) * ArrowEffects.ARROW_SIZE) + ArrowEffects.ARROW_SIZE_HALF
-		]);
+		];
 
 		colDark = colVec();
 
@@ -1634,7 +1628,7 @@ final class PlayerState
 
 enum abstract Accel(Int) from Int to Int
 {
-	static final _str:Vector<String> = new Vector<String>(NUM_ACCELS, true, [
+	static final _str:Vector<String> = cast [
 		for (i in 0...NUM_ACCELS)
 		{
 			switch (i : Accel)
@@ -1661,7 +1655,7 @@ enum abstract Accel(Int) from Int to Int
 					throw "Num Accels";
 			}
 		}
-	]);
+	];
 
 	var ACCEL_BOOST; /**< The arrows start slow, then zoom towards the targets. */
 
@@ -1687,7 +1681,7 @@ enum abstract Accel(Int) from Int to Int
 
 enum abstract Effect(Int) from Int to Int
 {
-	static final _str:Vector<String> = new Vector<String>(NUM_EFFECTS, true, [
+	static final _str:Vector<String> = cast [
 		for (i in 0...NUM_EFFECTS)
 		{
 			switch (i : Effect)
@@ -1954,7 +1948,7 @@ enum abstract Effect(Int) from Int to Int
 					throw "Num Effects";
 			}
 		}
-	]);
+	];
 
 	var EFFECT_DRUNK;
 	var EFFECT_DRUNK_SPEED;
@@ -2096,7 +2090,7 @@ enum abstract Effect(Int) from Int to Int
 
 enum abstract Appearance(Int) from Int to Int
 {
-	static final _str:Vector<String> = new Vector<String>(NUM_APPEARANCES, true, [
+	static final _str:Vector<String> = cast [
 		for (i in 0...NUM_APPEARANCES)
 		{
 			switch (i : Appearance)
@@ -2161,7 +2155,7 @@ enum abstract Appearance(Int) from Int to Int
 					throw "Num Appearances";
 			}
 		}
-	]);
+	];
 
 	// hidden
 	var APPEARANCE_HIDDEN; /**< The arrows disappear partway up. */
@@ -2235,7 +2229,7 @@ enum abstract Appearance(Int) from Int to Int
 
 enum abstract Turn(Int) from Int to Int
 {
-	static final _str:Vector<String> = new Vector<String>(NUM_TURNS, true, [
+	static final _str:Vector<String> = cast [
 		for (i in 0...NUM_TURNS)
 		{
 			switch (i : Turn)
@@ -2256,7 +2250,7 @@ enum abstract Turn(Int) from Int to Int
 					throw "Num Turns";
 			}
 		}
-	]);
+	];
 
 	var TURN_NONE;
 	var TURN_MIRROR;
@@ -2275,7 +2269,7 @@ enum abstract Turn(Int) from Int to Int
 
 enum abstract Transform(Int) from Int to Int
 {
-	static final _str:Vector<String> = new Vector<String>(NUM_TRANSFORMS, true, [
+	static final _str:Vector<String> = cast [
 		for (i in 0...NUM_TRANSFORMS)
 		{
 			switch (i : Transform)
@@ -2324,7 +2318,7 @@ enum abstract Transform(Int) from Int to Int
 					throw "Num Transforms";
 			}
 		}
-	]);
+	];
 
 	var TRANSFORM_NOHOLDS;
 	var TRANSFORM_HOLDSTOROLLS;
@@ -2357,7 +2351,7 @@ enum abstract Transform(Int) from Int to Int
 
 enum abstract Scroll(Int) from Int to Int
 {
-	static final _str:Vector<String> = new Vector<String>(NUM_SCROLLS, true, [
+	static final _str:Vector<String> = cast [
 		for (i in 0...NUM_SCROLLS)
 		{
 			switch (i : Scroll)
@@ -2378,7 +2372,7 @@ enum abstract Scroll(Int) from Int to Int
 					throw "Num Scrolls";
 			}
 		}
-	]);
+	];
 
 	var SCROLL_REVERSE;
 	var SCROLL_SPLIT;
@@ -2397,7 +2391,7 @@ enum abstract Scroll(Int) from Int to Int
 
 enum abstract ScoreDisplay(Int) from Int to Int
 {
-	static final _str:Vector<String> = new Vector<String>(NUM_SCOREDISPLAYS, true, [
+	static final _str:Vector<String> = cast [
 		for (i in 0...NUM_SCOREDISPLAYS)
 		{
 			switch (i : ScoreDisplay)
@@ -2412,7 +2406,7 @@ enum abstract ScoreDisplay(Int) from Int to Int
 					throw "Num Transforms";
 			}
 		}
-	]);
+	];
 
 	var SCORING_ADD;
 	var SCORING_SUBTRACT;
@@ -2463,22 +2457,24 @@ final class PerPlayerData
 	{
 		inline function colVec():Vector<Float>
 		{
-			return new Vector<Float>(PlayState.instance.strumLines.members[player].data.keyCount ?? 4, true);
+			return new Vector<Float>(PlayState.instance.strumLines.members[player].data.keyCount ?? 4);
 		}
 
 		inline function dimVec():Vector<Float>
 		{
-			return new Vector<Float>(num_dim, true);
+			return new Vector<Float>(num_dim);
 		}
 
 		// thank you haxe and openfl
-		minTornado = new Vector<Vector<Float>>();
-		maxTornado = new Vector<Vector<Float>>();
+		final minTornado = new Array<Vector<Float>>();
+		final maxTornado = new Array<Vector<Float>>();
 		for (_ in 0...num_dim)
 		{
 			minTornado.push(colVec());
 			maxTornado.push(colVec());
 		}
+		this.minTornado = cast minTornado;
+		this.maxTornado = cast maxTornado;
 
 		fInvertDistance = colVec();
 		tipsy_result = colVec();
@@ -2509,8 +2505,6 @@ final class PerPlayerData
 	public var fJimbleCos:Vector<Float>;
 	public var fJimbleTan:Vector<Float>;
 }
-
-typedef ModSplineVector = Vector<Vector<ModSplinePoint>>;
 
 #if !modchart_debug
 @:fileXml('tags="haxe,release"')
@@ -2550,7 +2544,7 @@ final class ModSplineValue
 {
 	static final SPLINE_LENGTH = 40;
 
-	public var col:ModSplineVector;
+	public var col:Vector<Vector<ModSplinePoint>>;
 	public var type:Float = .0;
 	public var offset:Vector<Float>;
 
@@ -2561,10 +2555,11 @@ final class ModSplineValue
 	public function new(keyCount:Int)
 	{
 		this.keyCount = keyCount;
-		offset = new Vector<Float>(keyCount, true);
-		col = new ModSplineVector();
+		offset = new Vector<Float>(keyCount);
+		final col = new Array<Vector<ModSplinePoint>>();
 		for (_ in 0...keyCount)
-			col.push(new Vector<ModSplinePoint>());
+			col.push(new Vector<ModSplinePoint>(SPLINE_LENGTH));
+		this.col = cast col;
 	}
 
 	public function set(which:Int, column:Int, percentage:Float, beat:Float, speed:Float)

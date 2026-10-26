@@ -343,7 +343,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 		if (!event.strumGlowCancelled)
 		{
 			// makes it feel kinda nicer like a transition sorta
-			if (endDist > note.strum.confirmLength * .5)
+			if (endDist > note.strum.confirmLength * .4)
 				note.strum.press(__updateNote_songPos);
 		}
 
@@ -518,18 +518,17 @@ class StrumLine extends FlxTypedGroup<Strum>
 	{
 		if (animPrefix == null)
 			animPrefix = strumAnimPrefix[i % strumAnimPrefix.length];
-		var babyArrow:Strum = new Strum(startingPos.x
+		var receptor:Strum = new Strum(startingPos.x
 			+ (Note.swagWidth * strumScale * (data.strumSpacing != null ? data.strumSpacing : 1) * i),
 			startingPos.y
-			+ (Note.swagWidth * 0.5)
-			- (Note.swagWidth * strumScale * 0.5));
-		babyArrow.ID = i;
-		babyArrow.strumLine = this;
+			+ (Note.swagWidth * 0.5));
+		receptor.ID = i;
+		receptor.strumLine = this;
 
 		if (data.scrollSpeed != null)
-			babyArrow.scrollSpeed = data.scrollSpeed;
+			receptor.scrollSpeed = data.scrollSpeed;
 
-		var event = EventManager.get(StrumCreationEvent).recycle(babyArrow, PlayState.instance.strumLines.members.indexOf(this), i, animPrefix);
+		var event = EventManager.get(StrumCreationEvent).recycle(receptor, PlayState.instance.strumLines.members.indexOf(this), i, animPrefix);
 		event.__doAnimation = playIntroAnimation == null ? (!MusicBeatState.skipTransIn
 			&& (PlayState.instance != null ? PlayState.instance.introLength > 0 : true)) : playIntroAnimation;
 		if (spritePath != null)
@@ -537,57 +536,33 @@ class StrumLine extends FlxTypedGroup<Strum>
 		if (PlayState.instance != null)
 			event = PlayState.instance.gameAndCharsEvent("onStrumCreation", event);
 
+		final skin = NoteSkin.get(event.sprite);
+
 		if (!event.cancelled)
 		{
-			babyArrow.frames = Paths.getFrames(event.sprite);
-			babyArrow.animation.addByPrefix('green', 'arrowUP', 24, true);
-			babyArrow.animation.addByPrefix('blue', 'arrowDOWN', 24, true);
-			babyArrow.animation.addByPrefix('purple', 'arrowLEFT', 24, true);
-			babyArrow.animation.addByPrefix('red', 'arrowRIGHT', 24, true);
-
-			babyArrow.animation.addByPrefix('green-shape', 'SHAPEarrowUP', 24, true);
-			babyArrow.animation.addByPrefix('blue-shape', 'SHAPEarrowDOWN', 24, true);
-			babyArrow.animation.addByPrefix('purple-shape', 'SHAPEarrowLEFT', 24, true);
-			babyArrow.animation.addByPrefix('red-shape', 'SHAPEarrowRIGHT', 24, true);
-
-			babyArrow.antialiasing = true;
-			babyArrow.setGraphicSize(Std.int((babyArrow.width * Flags.DEFAULT_NOTE_SCALE) * strumScale));
-
-			babyArrow.animation.addByPrefix('static', 'arrow${event.animPrefix.toUpperCase()}', 24, true);
-			babyArrow.animation.addByPrefix('pressed', '${event.animPrefix} press', 24, false);
-			babyArrow.animation.addByPrefix('confirm', '${event.animPrefix} confirm', 24, false);
-
-			babyArrow.animation.addByPrefix('static-shape', 'SHAPEarrow${event.animPrefix.toUpperCase()}', 24, true);
-			babyArrow.animation.addByPrefix('pressed-shape', 'SHAPE${event.animPrefix} press', 24, false);
-			babyArrow.animation.addByPrefix('confirm-shape', 'SHAPE${event.animPrefix} confirm', 24, false);
-
-			babyArrow.animation.addByIndices('into-shape', 'TRANSITIONarrow${event.animPrefix.toUpperCase()}', [0, 1, 2], '', 24, false);
-			babyArrow.animation.addByIndices('outof-shape', 'TRANSITIONarrow${event.animPrefix.toUpperCase()}', [2, 1, 0], '', 24, false);
-
-			final confirm = babyArrow.animation.getByName("confirm");
-			babyArrow.confirmLength = confirm.numFrames * (1 / confirm.frameRate) * 1000;
+			receptor.loadNoteSkin(skin);
 		}
 
-		babyArrow.cpu = cpu;
-		babyArrow.updateHitbox();
-		babyArrow.scrollFactor.set();
+		receptor.cpu = cpu;
+		receptor.updateHitbox();
+		receptor.scrollFactor.set();
 
 		if (event.__doAnimation)
 		{
-			babyArrow.y -= 10;
-			babyArrow.alpha = 0;
-			FlxTween.tween(babyArrow, {y: babyArrow.y + 10, alpha: 1}, 1,
+			receptor.y -= 10;
+			receptor.alpha = 0;
+			FlxTween.tween(receptor, {y: receptor.y + 10, alpha: 1}, 1,
 				{ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i * (4 / (data.keyCount != null ? data.keyCount : 4)))});
 		}
-		babyArrow.playAnim('static');
+		receptor.playAnim('static');
 
-		insert(i, babyArrow);
-		holdCovers.insert(i, new HoldCover(i));
+		insert(i, receptor);
+		holdCovers.insert(i, new HoldCover(i, skin));
 
 		if (PlayState.instance != null)
 			PlayState.instance.gameAndCharsEvent("onPostStrumCreation", event);
 
-		return babyArrow;
+		return receptor;
 	}
 
 	public function resetStrumPositions()
@@ -630,12 +605,12 @@ class StrumLine extends FlxTypedGroup<Strum>
 
 	public static inline function calculateStartingXPos(hudXRatio:Float, scale:Float, spacing:Float, keyCount:Int)
 	{
-		return (FlxG.width * hudXRatio) - ((Note.swagWidth * scale * ((keyCount / 2) - 0.5) * spacing) + Note.swagWidth * 0.5 * scale);
+		return (FlxG.width * hudXRatio) - ((Note.swagWidth * scale * ((keyCount / 2) - 0.5) * spacing) * scale);
 	}
 
 	public static inline function calculateStartingXPosFromInitialWidth(hudXRatio:Float, scale:Float, spacing:Float, keyCount:Int)
 	{
-		return (FlxG.initialWidth * hudXRatio) - ((Note.swagWidth * scale * ((keyCount / 2) - 0.5) * spacing) + Note.swagWidth * 0.5 * scale);
+		return (FlxG.initialWidth * hudXRatio) - ((Note.swagWidth * scale * ((keyCount / 2) - 0.5) * spacing) * scale);
 	}
 
 	/**

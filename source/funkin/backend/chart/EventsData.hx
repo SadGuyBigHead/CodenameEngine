@@ -128,13 +128,13 @@ class EventsData
 		],
 		"Add Camera Zoom" => [
 			{name: "Amount", type: TFloat(-10, 10, 0.01, 2), defValue: 0.05},
-			{name: "Camera", type: TDropDown(['camGame', 'camHUD']), defValue: "camGame"}
+			{name: "Camera", type: TDropDown(['camGame']), defValue: "camGame"}
 		],
 		"Camera Bop" => [{name: "Amount", type: TFloat(-10, 10, 0.1, 2), defValue: 0.1}],
 		"Camera Zoom" => [
 			{name: "Tween Zoom?", type: TBool, defValue: true},
 			{name: "New Zoom", type: TFloat(-10, 10, 0.01, 2), defValue: 1},
-			{name: "Camera", type: TDropDown(['camGame', 'camHUD']), defValue: "camGame"},
+			{name: "Camera", type: TDropDown(['camGame']), defValue: "camGame"},
 			{name: "Tween Time (Steps)", type: TFloat(0.25, 9999, 0.25, 2), defValue: 4},
 			{
 				name: "Tween Ease (ex: circ, quad, cube)",

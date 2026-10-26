@@ -4,7 +4,7 @@ import apple.*;
 import apple.timeline.*;
 import flixel.tweens.FlxEase.EaseFunction;
 import flixel.util.FlxDestroyUtil;
-import openfl.Vector;
+import dave.Vector;
 #if LUA_ALLOWED
 import llua.Lua;
 import llua.LuaL;
@@ -135,6 +135,8 @@ final class Modchart extends FlxBasic
 			lua.set("__mods", mods);
 			lua.set("players", parent.players);
 
+			lua.addCallback("__set_playfield_active", setPlayFieldActive);
+
 			_backend #if debug = #else ??= #end openfl.Assets.getText("assets/data/modchart/mod-backend.lua");
 			if (_backend == null)
 				throw "Mods backend not found.";
@@ -172,6 +174,11 @@ final class Modchart extends FlxBasic
 		}
 		for (playerState in parent.playerStates)
 			playerState.resetAll([]);
+	}
+
+	public function setPlayFieldActive(pn:Int, active:Bool)
+	{
+		parent.playerStates[pn].playField.active = active;
 	}
 
 	public function set(beat:Float, value:Float, id:String, player:Int = 0)
@@ -285,11 +292,11 @@ final class Modchart extends FlxBasic
 	}
 
 	// stupid idiot ways of doing this. whatever
-	public function definemod(name:String, percents:Array<Float>, mods:Array<String>)
+	public function definemod(name:String, percents:Array<Float>, modIds:Array<String>)
 	{
 		aux(name);
 		// safe guard for c++ exception
-		for (id in mods)
+		for (id in modIds)
 		{
 			for (plr in 0...parent.playerStates.length)
 			{
@@ -297,8 +304,8 @@ final class Modchart extends FlxBasic
 					aux(id);
 			}
 		}
-		final mods = new Vector(parent.playerStates.length * mods.length, true, [for (plr in 0...parent.playerStates.length) for (id in mods) getMod(id, plr)]);
-		final auxed = new Vector(parent.playerStates.length, true, [for (plr in 0...parent.playerStates.length) getMod(name, plr)]);
+		final mods:Vector<Modifier> = cast [for (plr in 0...parent.playerStates.length) for (id in modIds) getMod(id, plr)];
+		final auxed:Vector<Modifier> = cast [for (plr in 0...parent.playerStates.length) getMod(name, plr)];
 		for (i in 0...percents.length)
 			percents[i] = resolveValue(mods[i], percents[i]); // probably bad but idc
 		node([name], (plr, undo, run) ->
@@ -601,7 +608,7 @@ class ModNode
 
 	public function new(mods:Array<NodeModifier>, callback:NodeCallback, playerState:PlayerState)
 	{
-		this.mods = new Vector<NodeModifier>(mods.length, true, mods);
+		this.mods = cast mods;
 		this.callback = callback;
 		for (mod in this.mods)
 			mod.node = this;
@@ -656,8 +663,8 @@ class SimpleDefineModifier extends ScriptedModifier
 	{
 		super(id, playerState, true);
 		_len = values.length;
-		this.mods = new Vector<Modifier>(mods.length, true, mods);
-		this.values = new Vector<Float>(values.length, true, values);
+		this.mods = cast mods;
+		this.values = cast values;
 	}
 
 	override function set_value(v:Float):Float

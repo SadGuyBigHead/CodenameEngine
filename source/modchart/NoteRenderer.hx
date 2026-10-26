@@ -22,6 +22,7 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.group.FlxSpriteGroup;
 import funkin.game.PlayState;
+import dave.Vector;
 
 using flixel.util.FlxColorTransformUtil;
 using util.ColorTransformTools;
@@ -56,6 +57,9 @@ final class NoteRenderer extends flixel.FlxBasic
 	static final SPLASH_HUES = [19.58, 22.28, 21.18, 18.42];
 
 	public var graphics:PlayFieldGraphics = new PlayFieldGraphics();
+
+	// multiplier for the amount of players.. so like 2 would mean 4 players where 3 and 4 copies 1 and 2
+	public final playerMult:Int = 1;
 
 	var shaders:Array<ModsShader> = [new ModsShader(), new ModsShader()];
 	var simpleShader = new SimpleShader();
@@ -99,20 +103,24 @@ final class NoteRenderer extends flixel.FlxBasic
 
 	var clippedFrame:FlxFrame;
 
-	public function new(game:PlayState)
+	public function new(game:PlayState, playerMult:Int = 1)
 	{
 		super();
 		for (shader in shaders)
 			shader.fov.value = [90.0];
 		this.game = game;
-		mods = new ArrowEffects(new NotePositionMetrics(), game.strumLines.length, game.conductor);
+		this.playerMult = playerMult;
+		mods = new ArrowEffects(new NotePositionMetrics(), game.strumLines.length * playerMult, game.conductor);
+
+		for (pn in 0...mods.players)
+			playField(pn).active = pn < game.strumLines.length;
 
 		// final luaPath = ''
 		modchart = new Modchart(game.timeline, mods, "songs/" + PlayState.SONG.meta.name + "/modchart.lua");
 		mods.active = modchart.active;
 
-		wavyHolds = new Vector<Bool>(mods.players, true);
-		splashes = new Vector<Array<Splash>>(mods.players, true, [for (i in 0...mods.players) []]);
+		wavyHolds = new Vector<Bool>(mods.players);
+		splashes = cast [for (i in 0...mods.players) []];
 	}
 
 	public function getYOffset(pn:Int, column:Int, beat:Float, ms:Float):Float
@@ -210,9 +218,15 @@ final class NoteRenderer extends flixel.FlxBasic
 	{
 		super.draw();
 
-		for (pn => strumLine in game.strumLines.members)
+		final players = game.strumLines.length * playerMult;
+
+		for (pn in 0...players)
 		{
+			final realPlr = pn % game.strumLines.length;
+			final strumLine = game.strumLines.members[realPlr];
 			if (!strumLine.visible)
+				continue;
+			if (!playField(pn).active)
 				continue;
 			for (camera in strumLine.cameras)
 			{
@@ -479,8 +493,6 @@ final class NoteRenderer extends flixel.FlxBasic
 
 				inline function updateDrawInfo()
 				{
-					// get spiral holds
-					modPos.y += ArrowEffects.ARROW_SIZE_HALF;
 					//final angleX = spiralHolds2D(pn, p.set(modPos.z, modPos.y), p2.set(v3.z, v3.y));
 					//final angleY = spiralHolds2D(pn, p.set(modPos.x, modPos.z), p2.set(v3.x, v3.z)) + modRot.y;
 					final angleZ = spiralHolds2D(pn, p.set(modPos.x, modPos.y), p2.set(v3.x, v3.y));
@@ -526,7 +538,6 @@ final class NoteRenderer extends flixel.FlxBasic
 					{
 						getArrowEffectsPos(pn, startBeat, startMs, note.noteData, false, false, cap ? null : startYOffset);
 						v3.copyFrom(modPos); // just copy it for 0 holds :)
-						v3.y += ArrowEffects.ARROW_SIZE_HALF;
 						updateDrawInfo();
 					}
 
@@ -801,7 +812,7 @@ final class NoteRenderer extends flixel.FlxBasic
 	// get our codenames i dont like codenames
 	inline function strumLine(pn:Int)
 	{
-		return game.strumLines.members[pn];
+		return game.strumLines.members[pn % game.strumLines.length];
 	}
 
 	inline function pushColor(arr:Array<Float>, color:FlxColor)
@@ -884,12 +895,14 @@ final class NoteRenderer extends flixel.FlxBasic
 
 	public inline function splashAdded(splash:Splash)
 	{
-		splashes[splash.strum.strumLine.ID].push(splash);
+		for (m in 0...playerMult)
+			splashes[splash.strum.strumLine.ID + (m * mods.players)].push(splash);
 	}
 
 	public inline function splashKilled(splash:Splash)
 	{
-		splashes[splash.strum.strumLine.ID].remove(splash);
+		for (m in 0...playerMult)
+			splashes[splash.strum.strumLine.ID + (m * mods.players)].remove(splash);
 	}
 
 	override function destroy()

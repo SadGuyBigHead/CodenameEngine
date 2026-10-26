@@ -34,15 +34,7 @@ final class SplashGroup extends FlxTypedGroup<Splash>
 		spr.strum = event.strum;
 		spr.animation.play(Std.string(FlxG.random.int(1, 2)), true);
 		spr.angle = FlxG.random.float(-360, 360);
-		spr.updateHitbox();
-		spr.centerOffsets();
-		spr.centerOrigin();
-		spr.offset.x += 160 * .7 * .5;
-		spr.offset.x += 13;
-		spr.offset.y += 160 * .7 * .5;
-		spr.offset.y += 11;
-		spr.offset.x *= strumScale;
-		spr.offset.y *= strumScale;
+		spr.centerSprite();
 		return spr;
 	}
 }

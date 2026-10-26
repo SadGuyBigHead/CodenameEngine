@@ -3,7 +3,7 @@ package funkin.backend.scripting.events.sprite;
 /**
 	Contains all contexts possible for `PlayAnimEvent`.
 **/
-enum abstract PlayAnimContext(String)
+enum abstract PlayAnimContext(String) from String to String
 {
 	/**
 		No context was given for the animation.

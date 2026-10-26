@@ -92,7 +92,9 @@ class Main extends Sprite
 		addChild(ImGuiHandler.instance);
 		#end
 		// Before the game loop, so an uncaught error is drawn in-game instead of closing the window.
+		#if !debug
 		CrashHandler.init();
+		#end
 		ConsoleUI.init();
 
 		// i hate you hxcpp

@@ -5,7 +5,7 @@ package math;
 /**
  * Utilities for performing mathematical operations.
  */
-@:keep class MathUtil
+@:keep class DaveMathUtil
 {
 	/**
 	 * Euler's constant and the base of the natural logarithm.
