@@ -29,8 +29,6 @@
 
 	<section if="cpp">
 		<!-- Compile With Discord Rich Presence -->
-		<!-- TODO: Update Discord RPC Library & Rewrite DiscordUtil -->
-		<!-- NOTE before v1.1.0 release: PLEASE DO THIS ABOVE -->
 		<define name="DISCORD_RPC" if="desktop" />
 
 		<!-- Compile with video support (hxvlc) -->
@@ -92,9 +90,6 @@
 	<!--Switch
 	Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />
-
-	<!--<set
-	name="SWF_VERSION" value="11.8"/>-->
 
 	<!--Place
 	custom nodes like icons here (higher priority to override the HaxeFlixel icon)-->
@@ -174,7 +169,8 @@
 	<library name="assets" preload="true" if="PRELOAD_ALL" />
 	<library name="assets" preload="false" if="NO_PRELOAD_ALL" />
 
-	<define name="MODS_FROM_SOURCE" unless="DO_THE_MODS_FOLDER_THING_AND_FINISH_THE_MOD || ACTION_BUILD" />
+	<define name="MODS_FROM_SOURCE"
+		unless="DO_THE_MODS_FOLDER_THING_AND_FINISH_THE_MOD || ACTION_BUILD" />
 	<section unless="TEST_BUILD">
 		<assets path="assets/" rename="assets" />
 		<!-- TODO: make it copy this manually, instead of using assets node, so it doesn't manually
@@ -182,8 +178,6 @@
 		<assets path='mods' rename='mods' embed='false'
 			if="DO_THE_MODS_FOLDER_THING_AND_FINISH_THE_MOD" />
 	</section>
-
-	<!-- <assets path='art/readme.txt' rename='do NOT readme.txt' /> -->
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
@@ -201,8 +195,6 @@
 	<haxedef name="FLX_NO_DEBUG" unless="debug" />
 
 	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="DISCORD_RPC" />
-
-	<!-- <haxedef name="no-deprecation-warnings"/> -->
 
 	<!-- Fix compiling issues -->
 	<setenv name="HAXEPATH" value="./" />
@@ -274,12 +266,8 @@
 	<haxedef name="HXCPP_CHECK_POINTER" />
 	<haxedef name="HXCPP_STACK_LINE" />
 	<haxedef name="HXCPP_STACK_TRACE" />
-	<!--<haxedef
-	name="HXCPP_CATCH_SEGV"/>-->
-	<haxedef name="HXCPP_FAST_LINK" unless="debug" />
-	<!--<haxedef
-	name="HXCPP_ALIGN_ALLOC"/>--> <!--hxcpp.h(71):
-	warning C4005: 'HXCPP_ALIGN_ALLOC': macro redefinition-->
+	<haxedef name="HXCPP_OPTIMIZE_LINK" if="DO_THE_MODS_FOLDER_THING_AND_FINISH_THE_MOD" />
+	<haxedef name="HXCPP_FAST_LINK" unless="debug || HXCPP_OPTIMIZE_LINK" />
 
 	<haxedef name="analyzer-optimize" unless="debug" />
 </project>
