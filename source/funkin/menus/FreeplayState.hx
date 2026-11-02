@@ -159,15 +159,11 @@ class FreeplayState extends MusicBeatState
 
 			var icon:HealthIcon = new HealthIcon(songs[i].icon);
 			icon.sprTracker = songText;
-			if (Math.max(icon.width, icon.height) > 150)
-				icon.setUnstretchedGraphicSize(150, 150);
 
 			if (songs[i]._isHeader)
 			{
-				// songText.effects.push(new ColorWaveEffect(FlxColor.WHITE, FlxColor.GRAY, 30));
 				songText.scale.set(0.8, 0.8);
 				songText.updateHitbox();
-				icon.setUnstretchedGraphicSize(Std.int(150 * 0.75), Std.int(150 * 0.75));
 			}
 
 			// using a FlxGroup is too much fuss!
@@ -620,7 +616,7 @@ class FreeplaySonglist
 					songs.push({
 						_isHeader: true,
 						name: sect,
-						displayName: sect,
+						displayName: "",
 						icon: sect + "-header",
 						difficulties: [""]
 					});
