@@ -288,26 +288,35 @@ class StrumLine extends FlxTypedGroup<Strum>
 
 		if (__updateNote_event.__updateHitWindow && !daNote.wasGoodHit)
 		{
-			var hitWindow = Flags.USE_LEGACY_TIMING ? PlayState.instance.hitWindow : PlayState.instance.ratingManager.lastHitWindow;
-			daNote.canBeHit = (daNote.strumTime > __updateNote_songPos - (hitWindow * daNote.latePressWindow)
-				&& daNote.strumTime < __updateNote_songPos + (hitWindow * daNote.earlyPressWindow));
+			daNote.hitWindow = if (!daNote.mine)
+			{
+				Flags.USE_LEGACY_TIMING ? PlayState.instance.hitWindow : PlayState.instance.ratingManager.lastHitWindow;
+			}
+			else
+			{
+				PlayState.instance.ratingManager.mineHitWindow;
+			}
+			daNote.canBeHit = (daNote.strumTime > __updateNote_songPos - (daNote.hitWindow * daNote.latePressWindow)
+				&& daNote.strumTime < __updateNote_songPos + (daNote.hitWindow * daNote.earlyPressWindow));
 
-			if (daNote.strumTime < __updateNote_songPos - hitWindow && !daNote.wasGoodHit)
+			if (daNote.strumTime < __updateNote_songPos - daNote.hitWindow && !daNote.wasGoodHit)
 				daNote.tooLate = true;
 		}
 
-		if (cpu && __updateNote_event.__autoCPUHit && !daNote.avoid && !daNote.wasGoodHit && daNote.strumTime < __updateNote_songPos)
+		if (cpu && __updateNote_event.__autoCPUHit && !daNote.avoid && !daNote.mine && !daNote.wasGoodHit && daNote.strumTime < __updateNote_songPos)
 			PlayState.instance.goodNoteHit(this, daNote);
 
 		if (daNote.tooLate)
 		{
-			if (!cpu && !daNote.wasMissed)
+			if (!cpu && !daNote.wasMissed && !daNote.mine)
 			{
 				daNote.wasMissed = true;
 				PlayState.instance.noteMiss(this, daNote);
 			}
 			else if (!daNote.held && daNote.strum.getDistance(daNote, daNote.endTime) < drawDistanceMin)
+			{
 				deleteNote(daNote);
+			}
 			return;
 		}
 
@@ -321,6 +330,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 	var __justPressed:Array<Bool> = [];
 	var __justReleased:Array<Bool> = [];
 	var __notePerStrum:Array<Note> = [];
+	var __noteHitPerStrum:Array<Bool> = [];
 	var __heldTime:Array<Float> = [];
 
 	function __inputProcessHolds(note:Note):Bool
@@ -382,6 +392,32 @@ class StrumLine extends FlxTypedGroup<Strum>
 			__notePerStrum[strumID] = note;
 	}
 
+	function __inputProcessMinePressed(note:Note)
+	{
+		// look for mines
+		var strumID = note.strumID;
+		// if we hit a note this frame then DOOONT lol
+		if (__noteHitPerStrum[strumID] || !note.mine || !__pressed[strumID])
+			return;
+
+		var songPos = __updateNote_songPos;
+
+		var cur = __notePerStrum[strumID];
+		final noteDist:Float = note.strumTime - songPos;
+		final curDist:Float = cur == null ? 0 : cur.strumTime - songPos;
+		if ((cur == null || noteDist < curDist && noteDist + note.sustainLength > -note.hitWindow))
+		{
+			// check between the ranges of the mine and hold if its a weird hold mine wtf why
+			// note distance + hold length is within the range of being hit (not late)
+			// and the note distance itself is less than 0
+			final holdMineHit:Bool = noteDist + note.sustainLength > -note.hitWindow && noteDist < .0;
+			if (holdMineHit)
+			{
+				__notePerStrum[strumID] = note;
+			}
+		}
+	}
+
 	/**
 	 * Updates the input for the strumline, and handles the input.
 	 * @param id The ID of the STURMLINE NOT THE STRUM WE LOVE YUOU CODENAAAAAAAAAAAAAME
@@ -410,6 +446,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 			__pressed.resize(membersLength);
 			__justPressed.resize(membersLength);
 			__justReleased.resize(membersLength);
+			__noteHitPerStrum.resize(membersLength);
 		}
 
 		if (__notePerStrum.length != membersLength)
@@ -420,6 +457,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 			__pressed[i] = members[i].__getPressed(this);
 			__justPressed[i] = members[i].__getJustPressed(this);
 			__justReleased[i] = members[i].__getJustReleased(this);
+			__noteHitPerStrum[i] = false;
 		}
 
 		var event = EventManager.get(InputSystemEvent).recycle(__pressed, __justPressed, __justReleased, this, id);
@@ -444,11 +482,30 @@ class StrumLine extends FlxTypedGroup<Strum>
 
 					if (note != null)
 					{
-						PlayState.instance.goodNoteHit(this, note);
+						if (!note.mine)
+						{
+							PlayState.instance.goodNoteHit(this, note);
+							__noteHitPerStrum[k] = true;
+						}
+						else
+						{
+							PlayState.instance.noteMiss(this, note, k, ID);
+						}
 						__notePerStrum[k] = null;
 					}
 					else if (pr && !ghostTapping)
 						PlayState.instance.noteMiss(this, null, k, ID);
+				}
+			}
+			notes.forEachAlive(__inputProcessMinePressed);
+
+			for (k => pr in __pressed)
+			{
+				var note = __notePerStrum[k];
+				if (note != null)
+				{
+					PlayState.instance.noteMiss(this, note, k, ID);
+					__notePerStrum[k] = null;
 				}
 			}
 

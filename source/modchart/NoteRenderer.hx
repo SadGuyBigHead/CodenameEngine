@@ -697,10 +697,9 @@ final class NoteRenderer extends flixel.FlxBasic
 
 	function getMissDark(note:Note):Float
 	{
-		if (!note.tooLate)
+		if (!note.tooLate || note.mine)
 			return 0;
-		final hitWindow:Float = Flags.USE_LEGACY_TIMING ? PlayState.instance.hitWindow : PlayState.instance.ratingManager.lastHitWindow;
-		final dark:Float = FlxMath.remapToRange(note.strumTime - mods.conductor.songPosition, -hitWindow, -hitWindow - 100, 0, -100);
+		final dark:Float = FlxMath.remapToRange(note.strumTime - mods.conductor.songPosition, -note.hitWindow, -note.hitWindow - 100, 0, -100);
 		return dark.clamp(-100, 0);
 	}
 

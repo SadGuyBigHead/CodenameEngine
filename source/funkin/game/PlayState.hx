@@ -2442,12 +2442,15 @@ class PlayState extends MusicBeatState
 		var directionID:Null<Int> = hasNote ? note.strumID : direction;
 		if (playerID == null || directionID == null || playerID == -1)
 			return;
+		
+		final missSoundPath:String = Paths.sound(note.mine ? "mine" : FlxG.random.getObject(Flags.DEFAULT_MISS_SOUNDS));
+		final missVolume:Float = note.mine ? .75 : .5;
 
 		var event:NoteMissEvent = gameAndCharsEvent("onPlayerMiss",
 			EventManager.get(NoteMissEvent)
-				.recycle(note, -10, 1, muteVocalsOnMiss, hasNote ? -0.0475 : -0.04, Paths.sound(FlxG.random.getObject(Flags.DEFAULT_MISS_SOUNDS)), 0.5,
+				.recycle(note, -10, 1, muteVocalsOnMiss, hasNote ? -0.0475 : -0.04, missSoundPath, missVolume,
 					!hasNote, combo > 5, "sad", true, true, "miss", strumLines.members[playerID].characters, playerID, hasNote ? note.noteType : null,
-					directionID, 0));
+					directionID, 0, note.mine));
 		strumLine.onMiss.dispatch(event);
 		if (event.cancelled)
 		{
@@ -2494,6 +2497,11 @@ class PlayState extends MusicBeatState
 					char.stunned = true;
 				char.playSingAnim(directionID, event.animSuffix, MISS, event.forceAnim);
 			}
+		}
+
+		if (event.deleteNote)
+		{
+			strumLine.deleteNote(note);
 		}
 
 		gameAndCharsEvent("onPostPlayerMiss", event);
@@ -2883,8 +2891,11 @@ class PlayState extends MusicBeatState
 			return null;
 		}
 
+		final missSoundPath:String = Paths.sound(note.mine ? "mine" : FlxG.random.getObject(Flags.DEFAULT_MISS_SOUNDS));
+		final missVolume:Float = note.mine ? .5 : FlxG.random.float(0.1, 0.2);
+		
 		var event:SustainMissEvent = EventManager.get(SustainMissEvent)
-			.recycle(note, muteVocalsOnMiss, -0.0475, Paths.sound(FlxG.random.getObject(Flags.DEFAULT_MISS_SOUNDS)), FlxG.random.float(0.1, 0.2), combo > 5,
+			.recycle(note, muteVocalsOnMiss, -0.0475, missSoundPath, missVolume, combo > 5,
 				"sad", true, true, "miss", strumLine.characters, strumLine.ID, note.noteType, note.strumID);
 		event = scripts.event(strumLine != null && !strumLine.cpu ? "onPlayerSustainMiss" : "onDadSustainMiss", event);
 		gameAndCharsEvent("onSustainMiss", event);

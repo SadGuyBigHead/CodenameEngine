@@ -73,6 +73,11 @@ final class NoteMissEvent extends CancellableEvent
 	public var accuracy:Null<Float>;
 
 	/**
+	 * aghdfgsdfsd
+	 */
+	public var deleteNote:Bool;
+
+	/**
 	 * Prevents the miss sound from played.
 	 */
 	public function preventMissSound()
@@ -118,6 +123,14 @@ final class NoteMissEvent extends CancellableEvent
 	public function preventVocalsMute()
 	{
 		muteVocals = false;
+	}
+
+	/**
+	 * Prevents the note from being deleted.
+	 */
+	public function preventDeletion()
+	{
+		deleteNote = false;
 	}
 
 	private inline function get_character()

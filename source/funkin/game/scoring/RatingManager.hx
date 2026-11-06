@@ -17,6 +17,9 @@ class RatingManager
 	public var ratingData:Array<Rating> = [];
 	public var lastHitWindow:Float = -1;
 
+	// itg mine window
+	public var mineHitWindow:Float = 70;
+
 	public var vsliceSlope:Bool = true;
 
 	static inline final MAX_SCORE:Int = 500;

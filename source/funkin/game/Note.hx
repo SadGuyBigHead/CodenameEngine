@@ -65,6 +65,7 @@ class Note extends StrumLineSprite
 	}
 
 	public var noteData:Int = 0;
+	public var hitWindow:Float = 0;
 	public var canBeHit:Bool = false;
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
@@ -110,6 +111,15 @@ class Note extends StrumLineSprite
 
 	public var noteType(get, never):String;
 
+	private function get_noteType()
+	{
+		if (PlayState.instance == null)
+			return null;
+		return PlayState.instance.getNoteType(noteTypeID);
+	}
+
+	public var mine:Bool;
+
 	public var strum:Strum;
 
 	@:dox(hide) @:allow(funkin.game.Strum) @:noCompletion private var __strumCameras:Array<FlxCamera> = null;
@@ -119,21 +129,11 @@ class Note extends StrumLineSprite
 	@:dox(hide) @:noCompletion var __distance:Float;
 	@:dox(hide) @:noCompletion var __dark:Float;
 
-	private function get_noteType()
-	{
-		if (PlayState.instance == null)
-			return null;
-		return PlayState.instance.getNoteType(noteTypeID);
-	}
-
 	public static var swagWidth:Float = 160 * 0.7; // TODO: remove this
 
 	private static var __customNoteTypeExists:Map<String, Bool> = [];
 
 	public var animSuffix:String = null;
-
-	// Deprecated?
-	@:dox(hide) public var tripTimer:Float = 0; // ranges from 0 to 1
 
 	private static function customTypePathExists(path:String)
 	{
