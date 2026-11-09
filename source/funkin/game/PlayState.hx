@@ -1013,6 +1013,7 @@ class PlayState extends MusicBeatState
 		{
 			FlxG.sound.load(Paths.sound('missnote' + Std.string(i)));
 		}
+		FlxG.sound.load(Paths.sound("mine"));
 		#end
 
 		// STRUMS & NOTES INITIALIZATION
