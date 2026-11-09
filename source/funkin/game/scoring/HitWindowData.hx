@@ -30,9 +30,9 @@ class HitWindowData
 				map.set("shit", 180.0);
 			// volauem 2
 			case FNF_VSDAVE:
-				map.set("sick", 23.0);
-				map.set("good", 90.0);
-				map.set("bad", 130.0);
+				map.set("sick", 20.0);
+				map.set("good", 80.0);
+				map.set("bad", 120.0);
 				map.set("shit", 150.0);
 			// Default, taken from Etterna
 			case _:
