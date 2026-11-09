@@ -2448,7 +2448,7 @@ class PlayState extends MusicBeatState
 
 		var event:NoteMissEvent = gameAndCharsEvent("onPlayerMiss",
 			EventManager.get(NoteMissEvent)
-				.recycle(note, -10, 1, muteVocalsOnMiss, hasNote ? -0.0475 : -0.04, missSoundPath, missVolume,
+				.recycle(note, -10, 1, muteVocalsOnMiss, hasNote ? -0.125 : -0.08, missSoundPath, missVolume,
 					!hasNote, combo > 5, "sad", true, true, "miss", strumLines.members[playerID].characters, playerID, hasNote ? note.noteType : null,
 					directionID, 0, note.mine));
 		strumLine.onMiss.dispatch(event);
