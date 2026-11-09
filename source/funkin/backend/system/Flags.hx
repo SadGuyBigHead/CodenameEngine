@@ -156,6 +156,7 @@ class Flags {
 
 	public static var EARLY_HIT_WINDOW_RANGE:Float = 1.0; // was 0.5 for easier early hitting, but now 1 to demotivate mashing and getting away with it.
 	public static var LATE_HIT_WINDOW_RANGE:Float = 1.0;
+	public static var BADS_BREAK_COMBO:Bool = true;
 	public static var SHITS_BREAK_COMBO:Bool = true;
 	public static var USE_LEGACY_TIMING:Null<Bool> = null;
 

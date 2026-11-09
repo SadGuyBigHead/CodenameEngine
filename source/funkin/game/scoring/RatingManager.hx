@@ -94,7 +94,8 @@ class RatingManager
 			window: getWindow("bad"),
 			accuracy: 0.45,
 			score: 100,
-			health: 0
+			health: 0,
+			breaksCombo: Flags.BADS_BREAK_COMBO
 		});
 		addRating({
 			name: "shit",
