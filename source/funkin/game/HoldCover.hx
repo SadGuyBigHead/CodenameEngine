@@ -17,7 +17,7 @@ class HoldCover extends StrumLineSprite
 		this.noteSkin = noteSkin;
 		frames = Paths.getSparrowAtlas(noteSkin.covers.asset);
 
-		final anims = noteSkin.covers.anims[col];
+		final anims = noteSkin.covers.anims[col % 4];
 
 		animation.addByPrefix('start', anims.start.name, anims.start.fps ?? 24, false);
 		animation.addByPrefix('hold', anims.hold.name, anims.hold.fps ?? 24, true);
