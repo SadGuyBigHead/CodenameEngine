@@ -3283,7 +3283,7 @@ class PlayState extends MusicBeatState
 				{
 					for (char in strLine.characters)
 					{
-						if (char.lastAnimContext != LOCK)
+						if (char.lastAnimContext != LOCK && COMBO_LIST.contains(combo))
 						{
 							var played = false;
 							for (num in COMBO_LIST)
