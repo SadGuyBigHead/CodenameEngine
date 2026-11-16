@@ -2203,7 +2203,7 @@ class PlayState extends MusicBeatState
 					defaultCamZoom = finalZoom;
 				}
 				else if (event.params[4] == "CLASSIC")
-						defaultCamZoom = finalZoom;
+					defaultCamZoom = finalZoom;
 				else
 					eventsTween.set(name, FlxTween.tween(cam, {zoom: finalZoom}, (Conductor.instance.stepCrochet / 1000) * event.params[3], {
 						ease: CoolUtil.flxeaseFromString(event.params[4], event.params[5]),
@@ -2443,21 +2443,21 @@ class PlayState extends MusicBeatState
 		var directionID:Null<Int> = hasNote ? note.strumID : direction;
 		if (playerID == null || directionID == null || playerID == -1)
 			return;
-		
+
 		final missSoundPath:String = Paths.sound(note.mine ? "mine" : FlxG.random.getObject(Flags.DEFAULT_MISS_SOUNDS));
 		final missVolume:Float = note.mine ? .75 : .5;
 
 		var event:NoteMissEvent = gameAndCharsEvent("onPlayerMiss",
 			EventManager.get(NoteMissEvent)
-				.recycle(note, -10, 1, muteVocalsOnMiss, hasNote ? -0.125 : -0.08, missSoundPath, missVolume,
-					!hasNote, combo > 5, "sad", true, true, "miss", strumLines.members[playerID].characters, playerID, hasNote ? note.noteType : null,
-					directionID, 0, note.mine));
+				.recycle(note, -10, 1, muteVocalsOnMiss, hasNote ? -0.125 : -0.08, missSoundPath, missVolume, !hasNote, combo > 5, "sad", true, true, "miss",
+					strumLines.members[playerID].characters, playerID, hasNote ? note.noteType : null, directionID, 0, note.mine));
 		strumLine.onMiss.dispatch(event);
 		if (event.cancelled)
 		{
 			gameAndCharsEvent("onPostPlayerMiss", event);
 			return;
 		}
+		gfComboBreak(event);
 
 		if (strumLine != null)
 			strumLine.addHealth(event.healthGain);
@@ -2655,7 +2655,10 @@ class PlayState extends MusicBeatState
 
 		gameAndCharsEvent("onPostNoteHit", event);
 		if (!event.cancelled)
+		{
+			gfCombo(event);
 			strumLine?.holdCovers.noteHit(note);
+		}
 	}
 
 	public function displayRating(myRating:String, ?evt:NoteHitEvent):Void
@@ -2894,10 +2897,10 @@ class PlayState extends MusicBeatState
 
 		final missSoundPath:String = Paths.sound(note.mine ? "mine" : FlxG.random.getObject(Flags.DEFAULT_MISS_SOUNDS));
 		final missVolume:Float = note.mine ? .5 : FlxG.random.float(0.1, 0.2);
-		
+
 		var event:SustainMissEvent = EventManager.get(SustainMissEvent)
-			.recycle(note, muteVocalsOnMiss, -0.0475, missSoundPath, missVolume, combo > 5,
-				"sad", true, true, "miss", strumLine.characters, strumLine.ID, note.noteType, note.strumID);
+			.recycle(note, muteVocalsOnMiss, -0.0475, missSoundPath, missVolume, combo > 5, "sad", true, true, "miss", strumLine.characters, strumLine.ID,
+				note.noteType, note.strumID);
 		event = scripts.event(strumLine != null && !strumLine.cpu ? "onPlayerSustainMiss" : "onDadSustainMiss", event);
 		gameAndCharsEvent("onSustainMiss", event);
 
@@ -3263,6 +3266,93 @@ class PlayState extends MusicBeatState
 
 		SONG = Chart.parse(_name, _difficulty, _variation);
 		fromMods = SONG.fromMods;
+	}
+
+	// ==========================================
+	// DAVE STUFF VS DAVE VS DAVE AND BAMBI
+	// ==========================================
+	static final COMBO_LIST = [1000, 500, 250, 100, 50, -1, -2];
+
+	function gfCombo(e:NoteHitEvent)
+	{
+		if (e.player)
+		{
+			for (strLine in strumLines.members)
+			{
+				if (strLine.data.type == 2)
+				{
+					for (char in strLine.characters)
+					{
+						if (char.lastAnimContext != LOCK)
+						{
+							var played = false;
+							for (num in COMBO_LIST)
+							{
+								if (num < 0 || combo == num)
+								{
+									var anim = switch num
+									{
+										case -1: 'cheer';
+										case -2: 'hey';
+										default: 'combo$num';
+									}
+									if (char.hasAnim(anim + strLine.animSuffix))
+									{
+										anim += strLine.animSuffix;
+										played = true;
+									}
+									if (played || char.hasAnim(anim))
+									{
+										char.playAnim(anim, true);
+										played = true;
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	function gfComboBreak(e:NoteMissEvent)
+	{
+		for (strLine in strumLines.members)
+		{
+			if (strLine.data.type == 2)
+			{
+				for (char in strLine.characters)
+				{
+					if (char.lastAnimContext != LOCK)
+					{
+						var played = false;
+						for (num in COMBO_LIST)
+						{
+							if (num == -1 || combo >= num)
+							{
+								var anim = switch num
+								{
+									case -1: 'sad';
+									default: 'combo$num';
+								}
+								if (char.hasAnim(anim + strLine.animSuffix))
+								{
+									anim += strLine.animSuffix;
+									played = true;
+								}
+								if (played || char.hasAnim(anim))
+								{
+									char.playAnim(anim, true);
+									played = true;
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
