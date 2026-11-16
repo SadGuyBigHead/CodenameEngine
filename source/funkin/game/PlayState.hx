@@ -341,11 +341,6 @@ class PlayState extends MusicBeatState
 	public var combo:Int = 0;
 
 	/**
-	 * Whenever the misses should show "Combo Breaks" instead of "Misses".
-	 */
-	public var comboBreaks:Bool = !Options.ghostTapping;
-
-	/**
 	 * Health bar background.
 	 */
 	public var healthBarBG:FlxSprite;
@@ -780,20 +775,6 @@ class PlayState extends MusicBeatState
 		{
 			hits.set(rating.name, 0);
 		}
-
-		if (Options.ghostTapping)
-		{
-			comboBreaks = false;
-
-			for (rating in ratingManager.ratingData)
-			{
-				comboBreaks = comboBreaks || rating.breaksCombo;
-			}
-		}
-		else
-		{
-			comboBreaks = true;
-		}
 	}
 
 	private inline function set_health(v:Float)
@@ -903,20 +884,6 @@ class PlayState extends MusicBeatState
 		for (rating in [for (i in ratingManager.ratingData) i.name])
 		{
 			hits.set(rating, 0); // Ensure all keys exist as to prevent null errors.
-		}
-
-		if (Options.ghostTapping)
-		{
-			comboBreaks = false;
-
-			for (rating in ratingManager.ratingData)
-			{
-				comboBreaks = comboBreaks || rating.breaksCombo;
-			}
-		}
-		else
-		{
-			comboBreaks = true;
 		}
 
 		ratingManager.onRatingAdded.add(onRatingChange);
@@ -1833,13 +1800,12 @@ class PlayState extends MusicBeatState
 	// bypass the caching in FormatUtil by doing it manually so its faster
 	private var TEXT_GAME_SCORE = TU.getRaw("game.score");
 	private var TEXT_GAME_MISSES = TU.getRaw("game.misses");
-	private var TEXT_GAME_COMBOBREAKS = TU.getRaw("game.comboBreaks");
 	private var TEXT_GAME_ACCURACY = TU.getRaw("game.accuracy");
 
 	dynamic function updateRatingStuff()
 	{
 		scoreTxt.text = TEXT_GAME_SCORE.format([Std.int(songScore)]);
-		missesTxt.text = (comboBreaks ? TEXT_GAME_COMBOBREAKS : TEXT_GAME_MISSES).format([misses]);
+		missesTxt.text = TEXT_GAME_MISSES.format([misses]);
 
 		if (curRating == null)
 			curRating = new ComboRating(0, "[N/A]", 0xFF888888);
