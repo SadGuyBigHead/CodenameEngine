@@ -122,7 +122,7 @@ final class NoteSkinHoldCoverAnimations
 	public function clone(anims:NoteSkinHoldCoverAnimations)
 	{
 		anims ??= new NoteSkinHoldCoverAnimations();
-		this.merge(anims);
+		anims.merge(this);
 		return anims;
 	}
 }
