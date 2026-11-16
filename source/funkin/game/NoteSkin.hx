@@ -5,7 +5,7 @@ import haxe.io.Path;
 
 final class NoteSkin
 {
-	public static final DEFAULT_ID:String = 'game/notes/default';
+	public static final FALLBACK_ID:String = 'game/notes/fallback';
 
 	static var cache:Map<String, NoteSkin> = [];
 
@@ -33,9 +33,9 @@ final class NoteSkin
 		if (cache.exists(id))
 			return cache[id];
 
-		final jsonPath = Paths.getPath(Path.normalize("images/" + Path.withExtension(path, "json")));
-		final isDefault:Bool = id == DEFAULT_ID;
-		final def:NoteSkin = cache[DEFAULT_ID];
+		final jsonPath:String = Paths.getPath(Path.normalize("images/" + Path.withExtension(path, "json")));
+		final isFallback:Bool = id == FALLBACK_ID;
+		final def:NoteSkin = isFallback ? null : get(FALLBACK_ID);
 
 		final parser = new json2object.JsonParser<NoteSkin>();
 		final noteSkin:NoteSkin = parser.fromJson(Assets.getText(jsonPath)) ?? new NoteSkin();
@@ -43,7 +43,7 @@ final class NoteSkin
 		for (error in parser.errors)
 			trace('NoteSkin Error ($id): ' + json2object.ErrorUtils.convertError(error));
 
-		if (!isDefault)
+		if (!isFallback)
 		{
 			noteSkin.merge(def);
 		}
@@ -68,6 +68,7 @@ final class NoteSkin
 final class NoteSkinHoldCovers
 {
 	@:default("game/notes/cover")
+	@:optional
 	public var asset:String;
 
 	@:jcustomparse(dave.data.DataParse.scalePoint)
