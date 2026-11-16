@@ -2,8 +2,6 @@ package funkin.game;
 
 class HoldCover extends StrumLineSprite
 {
-	static final noteColors:Array<String> = ['Purple', 'Blue', 'Green', 'Red'];
-
 	public var timer:Float;
 
 	public final noteSkin:NoteSkin;
@@ -17,13 +15,13 @@ class HoldCover extends StrumLineSprite
 		this.noteSkin = noteSkin;
 		frames = Paths.getSparrowAtlas(noteSkin.covers.asset);
 
-		final anims = noteSkin.covers.anims[col % noteColors.length];
+		final anims = noteSkin.covers.anims[col % noteSkin.covers.anims.length];
 
 		animation.addByPrefix('start', anims.start.name, anims.start.fps ?? 24, false);
 		animation.addByPrefix('hold', anims.hold.name, anims.hold.fps ?? 24, true);
 		animation.addByPrefix('end', anims.end.name, anims.end.fps ?? 48, false);
 		final endAnim = animation.getByName('end');
-		endLength = endAnim.numFrames * (1 / endAnim.frameRate) * .25;
+		endLength = (endAnim?.numFrames ?? 0) * (1 / (endAnim?.frameRate ?? 1)) * .25;
 		animation.onFinish.add(onAnimFinish);
 		scale.copyFrom(noteSkin.covers.scale);
 		updateHitbox();

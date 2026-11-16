@@ -10,6 +10,7 @@ import openfl.geom.Rectangle;
 import openfl.geom.Matrix;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
+import dave.Vector;
 
 using flixel.util.FlxColorTransformUtil;
 
@@ -33,7 +34,7 @@ class PlayFieldGraphics implements IFlxDestroyable
 		final key = note.graphic.assetsKey;
 		if (holdFrames.exists(key))
 			return holdFrames.get(key);
-		final frames = new HoldFrames(note.frames, Options.antialiasing);
+		final frames = new HoldFrames(note, Options.antialiasing);
 		holdFrames.set(key, frames);
 		return frames;
 	}
@@ -66,84 +67,49 @@ class HoldFrames implements IFlxDestroyable
 	public var holdCapFrames = new Array<FlxFrame>();
 	public var graphics = new Array<FlxGraphic>();
 
-	function getFrameName(col:Int, cap:Bool)
+	public function new(note:Note, aa:Bool)
 	{
-		if (cap)
-		{
-			return (switch (col % 4)
-			{
-				case 0:
-					"purple hold end";
-				case 1:
-					"blue hold end";
-				case 2:
-					"green hold end";
-				case 3:
-					"red hold end";
-				default: throw "poo";
-			});
-		}
-		else
-		{
-			return (switch (col % 4)
-			{
-				case 0:
-					"purple hold piece";
-				case 1:
-					"blue hold piece";
-				case 2:
-					"green hold piece";
-				case 3:
-					"red hold piece";
-				default: throw "poo";
-			});
-		}
-	}
-
-	public function new(frames:FlxFramesCollection, aa:Bool)
-	{
-		final frames = frames;
+		final frames = note.frames;
+		final anims = note.noteSkin.arrows.anims;
 		final aa = aa;
 
-		var bodyFrames = new Array<FlxFrame>();
-		var capFrames = new Array<FlxFrame>();
+		var bodyFrames = new Vector<FlxFrame>(anims.length);
+		var capFrames = new Vector<FlxFrame>(anims.length);
 
-		var groups:Array<_HOLDFRAMEGROUP> = [];
+		var groups:Array<HoldFrameGroup> = [];
 
-		for (i in 0...4)
+		for (col => anim in anims)
 		{
-			final bodyName = getFrameName(i, false);
-			final capName = getFrameName(i, true);
+			final bodyName:String = anim.holdBody.name;
+			final capName:String = anim.holdCap.name;
 			final body = frames.getByName(bodyName + "0000") ?? frames.getByName(bodyName);
 			var cap = frames.getByName(capName + "0000") ?? frames.getByName(capName);
-			// KILL PHANTOM ARCADE
-			if (cap == null && i == 0)
-				cap = frames.getByName("pruple end hold0000") ?? frames.getByName("pruple end hold");
 
 			if (body == null || cap == null)
 				throw 'Cant find frames for body/cap! (look: $bodyName, $capName)'; 
 
-			bodyFrames.push(body);
-			capFrames.push(cap);
+
+			bodyFrames[col] = body;
+			capFrames[col] = cap;
 		}
 
 		final padding = aa ? 2 : 0;
 		// now that we've found out if we need to seperate caps..
-		for (i in 0...4)
+		for (col in 0...anims.length)
 		{
 			var foundGroup = false;
 
-			final body:_HOLDFRAMEENTRY = {
-				direction: i,
+			final body:HoldFrameEntry = {
+				direction: col,
 				array: holdBodyFrames,
-				frame: bodyFrames[i],
+				frame: bodyFrames[col],
 				pos: 0,
 				cap: false
 			}
-			final cap:_HOLDFRAMEENTRY = {
-				direction: i,
+			final cap:HoldFrameEntry = {
+				direction: col,
 				array: holdCapFrames,
-				frame: capFrames[i],
+				frame: capFrames[col],
 				pos: 0,
 				cap: true
 			}
@@ -263,7 +229,7 @@ class HoldFrames implements IFlxDestroyable
 	}
 }
 
-private typedef _HOLDFRAMEENTRY =
+private typedef HoldFrameEntry =
 {
 	direction:Int,
 	array:Array<FlxFrame>,
@@ -272,8 +238,8 @@ private typedef _HOLDFRAMEENTRY =
 	cap:Bool
 }
 
-private typedef _HOLDFRAMEGROUP =
+private typedef HoldFrameGroup =
 {
 	height:Int,
-	frames:Array<_HOLDFRAMEENTRY>
+	frames:Array<HoldFrameEntry>
 }

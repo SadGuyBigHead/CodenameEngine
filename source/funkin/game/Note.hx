@@ -135,6 +135,8 @@ class Note extends StrumLineSprite
 
 	public var animSuffix:String = null;
 
+	public var noteSkin:NoteSkin;
+
 	private static function customTypePathExists(path:String)
 	{
 		if (__customNoteTypeExists.exists(path))
@@ -180,22 +182,22 @@ class Note extends StrumLineSprite
 		var event = EventManager.get(NoteCreationEvent)
 			.recycle(this, strumID, this.noteType, noteTypeID, PlayState.instance.strumLines.members.indexOf(strumLine), mustPress, notePath, @:privateAccess
 				strumLine.strumScale * Flags.DEFAULT_NOTE_SCALE, animSuffix);
-		final skin = NoteSkin.get(event.noteSprite);
 
 		if (PlayState.instance != null)
 			event = PlayState.instance.gameAndCharsEvent("onNoteCreation", event);
+		noteSkin = NoteSkin.get(event.noteSprite);
 
 		this.animSuffix = event.animSuffix;
 		if (!event.cancelled)
 		{
 			frames = Paths.getFrames(event.noteSprite);
 
-			final anims = skin.arrows.anims[event.strumID % skin.arrows.anims.length];
+			final anims = noteSkin.arrows.anims[event.strumID % noteSkin.arrows.anims.length];
 
 			animation.addByPrefix("scroll", anims.scroll.name, anims.scroll.fps ?? 0);
 			animation.addByPrefix("hold", anims.holdBody.name, anims.holdBody.fps ?? 0);
 			animation.addByPrefix("holdend", anims.holdCap.name, anims.holdCap.fps ?? 0);
-			scale.set(event.noteScale, event.noteScale).scale(skin.scale); // skin scale always forced
+			scale.set(event.noteScale, event.noteScale).scale(noteSkin.scale); // skin scale always forced
 			antialiasing = true;
 		}
 		animation.play("scroll");

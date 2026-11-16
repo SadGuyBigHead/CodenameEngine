@@ -38,10 +38,13 @@ final class NoteSkin
 		final def:NoteSkin = isFallback ? null : get(FALLBACK_ID);
 
 		final parser = new json2object.JsonParser<NoteSkin>();
-		final noteSkin:NoteSkin = parser.fromJson(Assets.getText(jsonPath)) ?? new NoteSkin();
+		final noteSkin:NoteSkin = (!Assets.exists(jsonPath) ? null : parser.fromJson(Assets.getText(jsonPath))) ?? new NoteSkin();
 		
-		for (error in parser.errors)
-			trace('NoteSkin Error ($id): ' + json2object.ErrorUtils.convertError(error));
+		if (parser.errors != null)
+		{
+			for (error in parser.errors)
+				trace('NoteSkin Error ($id): ' + json2object.ErrorUtils.convertError(error));
+		}
 
 		if (!isFallback)
 		{
@@ -67,7 +70,6 @@ final class NoteSkin
 
 final class NoteSkinHoldCovers
 {
-	@:default("game/notes/cover")
 	@:optional
 	public var asset:String;
 
@@ -88,10 +90,11 @@ final class NoteSkinHoldCovers
 
 	public function merge(other:NoteSkinHoldCovers)
 	{
+		this.asset ??= other.asset;
 		this.scale ??= other.scale.clone();
 		this.offset ??= other.offset.clone();
 		this.anims ??= [];
-		for (i in 0...this.anims.length)
+		for (i in 0...other.anims.length)
 			this.anims[i] = other.anims[i].clone(this.anims[i]);
 	}
 
