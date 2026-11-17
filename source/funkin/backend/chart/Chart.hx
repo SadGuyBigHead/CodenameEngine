@@ -116,8 +116,10 @@ class Chart
 		return data;
 	}
 
-	inline public static function defaultChartMetaFields(data:ChartMetaData):ChartMetaData {
-		data.setFieldDefault("displayName", ~/(.*[\/])/g.map(data.name, _->''));
+	inline public static function defaultChartMetaFields(data:ChartMetaData):ChartMetaData
+	{
+		data.setFieldDefault("displayName", ~/(.*[\/])/g.map(data.name, _ -> ''));
+		data.setFieldDefault("ostName", ~/(.*[\/])/g.map(data.name, _ -> ''));
 
 		data.setFieldDefault("bpm", Flags.DEFAULT_BPM);
 		data.setFieldDefault("beatsPerMeasure", Flags.DEFAULT_BEATS_PER_MEASURE);
@@ -127,6 +129,7 @@ class Chart
 		data.setFieldDefault("opponentModeAllowed", Flags.DEFAULT_OPPONENT_MODE_ALLOWED);
 		data.setFieldDefault("instSuffix", "");
 		data.setFieldDefault("vocalsSuffix", "");
+		data.setFieldDefault("vinylId", "default");
 		data.setFieldDefault("needsVoices", true);
 		data.setFieldDefault("difficulties", []);
 		data.setFieldDefault("variants", []);
@@ -293,8 +296,10 @@ class Chart
 			fromMods: Paths.assetsTree.existsSpecific(chartPath, "TEXT", MODS)
 		};
 
-		var valid:Bool = true, namePrint = '$songName $difficulty' + ((variant != null && variant != '') ? ' ($variant)' : '');
-		if (!Assets.exists(chartPath)) {
+		var valid:Bool = true,
+			namePrint = '$songName $difficulty' + ((variant != null && variant != '') ? ' ($variant)' : '');
+		if (!Assets.exists(chartPath))
+		{
 			Logs.warn('Chart file was not found for "$namePrint" in path: $chartPath');
 			valid = false;
 		}

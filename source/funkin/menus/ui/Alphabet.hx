@@ -128,11 +128,19 @@ enum abstract AlphabetRenderMode(ByteUInt) from ByteUInt to ByteUInt
 	var MONOSPACE = 1;
 }
 
-enum abstract AdvanceMode(ByteUInt) from ByteUInt to ByteUInt {
+enum abstract AdvanceMode(ByteUInt) from ByteUInt to ByteUInt
+{
 	var EMPTY;
 	var GIVEN;
 	var AUTO;
 	var CALCULATED;
+}
+
+enum abstract AlphabetMenuScrollMode(ByteUInt) from ByteUInt to ByteUInt
+{
+	var DEFAULT;
+	var CSHAPE;
+	var DSHAPE;
 }
 
 @:allow(funkin.editors.alphabet.AlphabetEditor)
@@ -191,6 +199,7 @@ class Alphabet extends FlxSprite
 	public var renderMode:AlphabetRenderMode = DEFAULT;
 
 	// for menu shit
+	public var menuScrollMode:AlphabetMenuScrollMode = DEFAULT;
 	public var menuOffset:FlxPoint = FlxPoint.get();
 	public var targetY:Float = 0;
 	public var isMenuItem:Bool = false;
@@ -234,8 +243,34 @@ class Alphabet extends FlxSprite
 		{
 			var scaledY = targetY * 1.3;
 
-			y = CoolUtil.fpsLerp(y, (scaledY * itemHeight) + (FlxG.height - height) * 0.5 + menuOffset.y, 0.16);
-			x = CoolUtil.fpsLerp(x, (targetY * itemSlide) + 90 + menuOffset.x, 0.16);
+			switch (menuScrollMode)
+			{
+				case CSHAPE:
+					y = CoolUtil.fpsLerp(y, (scaledY * 65) + (FlxG.height * 0.39), 0.16);
+
+					x = CoolUtil.fpsLerp(x, Math.exp(scaledY * 0.8) * 70 + (FlxG.width * 0.1), 0.16);
+
+					if (scaledY < 0)
+					{
+						x = CoolUtil.fpsLerp(x, Math.exp(scaledY * -0.8) * 70 + (FlxG.width * 0.1), 0.16);
+					}
+
+					if (x > FlxG.width + 30)
+					{
+						x = FlxG.width + 30;
+					}
+				case DSHAPE:
+					y = CoolUtil.fpsLerp(y, (scaledY * 120) + (FlxG.height * 0.46), 0.16);
+					x = CoolUtil.fpsLerp(x, Math.exp(Math.abs(scaledY * 0.5)) * -70 + (FlxG.width * 0.425), 0.16);
+
+					if (x < -900)
+					{
+						x = -900;
+					}
+				default:
+					y = CoolUtil.fpsLerp(y, (scaledY * itemHeight) + (FlxG.height - height) * 0.5 + menuOffset.y, 0.16);
+					x = CoolUtil.fpsLerp(x, (targetY * itemSlide) + 90 + menuOffset.x, 0.16);
+			}
 		}
 	}
 
@@ -473,7 +508,8 @@ class Alphabet extends FlxSprite
 		origin.set(textWidth * 0.5 + originOffset.x, textHeight * 0.5 + originOffset.y);
 	}
 
-	function getAdvance(letter:String, data:AlphabetLetterData):Float {
+	function getAdvance(letter:String, data:AlphabetLetterData):Float
+	{
 		if (data == null || frames.numFrames <= 0)
 			return defaultAdvance;
 
@@ -482,7 +518,8 @@ class Alphabet extends FlxSprite
 
 		var result = 0.0;
 
-		for (i in 0...data.components.length) {
+		for (i in 0...data.components.length)
+		{
 			final compon = data.components[i];
 			final anim = getLetterAnim(letter, data, compon, i);
 			if (anim == null || anim.numFrames <= 0)
@@ -492,7 +529,8 @@ class Alphabet extends FlxSprite
 			result = Math.max(wid + (wid * compon.scaleX - wid) * 0.5 - compon.x, result);
 		}
 
-		if (data.advanceStyle == AUTO) {
+		if (data.advanceStyle == AUTO)
+		{
 			data.advance = result;
 			data.advanceStyle = CALCULATED;
 		}
@@ -603,8 +641,9 @@ class Alphabet extends FlxSprite
 					isDefault: true,
 					advance: 0.0,
 					advanceStyle: EMPTY,
-					components: [{
-						anim: node.firstChild().nodeValue.trim(),
+					components: [
+						{
+							anim: node.firstChild().nodeValue.trim(),
 
 							x: 0.0,
 							y: 0.0,
@@ -1002,7 +1041,8 @@ class Alphabet extends FlxSprite
 		this.failedLetters = from.failedLetters;
 	}
 
-	override function destroy():Void {
+	override function destroy():Void
+	{
 		menuOffset = FlxDestroyUtil.put(menuOffset);
 		originOffset = FlxDestroyUtil.put(originOffset);
 		__drawScale = FlxDestroyUtil.put(__drawScale);
