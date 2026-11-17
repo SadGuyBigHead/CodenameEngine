@@ -42,7 +42,8 @@ class PauseSubState extends MusicBeatSubstate
 
 	private var __cancelDefault:Bool = false;
 
-	public function new(?items:Array<String>, ?selectCall:NameEvent->Void, ?excludeList:Array<ParentDisableable>) {
+	public function new(?items:Array<String>, ?selectCall:NameEvent->Void, ?excludeList:Array<ParentDisableable>)
+	{
 		super();
 
 		parentDisablerExcludeList = excludeList != null ? excludeList : [];
@@ -175,8 +176,7 @@ class PauseSubState extends MusicBeatSubstate
 				close();
 			case "Restart Song":
 				parentDisabler.reset();
-				game.registerSmoothTransition();
-				FlxG.resetState();
+				FlxG.switchState(new PlayState());
 			case "Change Controls":
 				persistentDraw = false;
 				openSubState(new KeybindsOptions());
@@ -186,13 +186,21 @@ class PauseSubState extends MusicBeatSubstate
 				FlxG.switchState(new Charter(PlayState.SONG.meta.name, PlayState.difficulty, PlayState.variation, false));
 			case "Exit to menu":
 				if (PlayState.chartingMode && Charter.undos.unsaved)
+				{
 					game.saveWarn(false);
+				}
 				else
 				{
 					if (Charter.instance != null)
+					{
 						Charter.instance.__clearStatics();
+					}
 
-					CoolUtil.playMenuSong();
+					if (PlayState.isStoryMode)
+					{
+						CoolUtil.playMenuSong(false, true);
+					}
+
 					FlxG.switchState(PlayState.isStoryMode ? new StoryMenuState() : new FreeplayState());
 				}
 		}
