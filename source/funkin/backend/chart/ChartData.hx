@@ -22,6 +22,7 @@ typedef ChartMetaData =
 	public var name:String;
 	public var ?variant:String;
 	public var ?displayName:String;
+	public var ?ostName:String;
 
 	public var ?bpm:Float;
 	public var ?beatsPerMeasure:Float;
@@ -41,6 +42,8 @@ typedef ChartMetaData =
 	public var ?instSuffix:String;
 	public var ?vocalsSuffix:String;
 	public var ?needsVoices:Bool;
+
+	public var ?vinylId:String;
 
 	public var ?modchart:ModchartMetaData;
 

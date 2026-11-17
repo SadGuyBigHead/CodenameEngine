@@ -1,6 +1,6 @@
 package funkin.menus;
 
-import funkin.menus.ui.effects.ColorWaveEffect;
+import funkin.backend.system.Conductor;
 import funkin.menus.ui.MenuBackground;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
@@ -10,6 +10,10 @@ import funkin.backend.scripting.events.menu.MenuChangeEvent;
 import funkin.backend.scripting.events.menu.freeplay.*;
 import funkin.game.HealthIcon;
 import funkin.savedata.FunkinSave;
+import flixel.text.FlxBitmapText;
+import dave.DaveBitmapText;
+import funkin.backend.shaders.CustomShader;
+import flixel.util.FlxSort;
 
 using StringTools;
 
@@ -26,24 +30,9 @@ class FreeplayState extends MusicBeatState
 	public var curSong:Null<ChartMetaData>;
 
 	/**
-	 * Current song difficulties
-	 */
-	public var curDifficulties:Array<String>;
-
-	/**
-	 * songs[curSelected].metas.get(curDiffMetaIndices[curDifficulty])
-	 */
-	public var curDiffMetaKeys:Array<String> = [];
-
-	/**
 	 * Currently selected song
 	 */
 	public var curSelected:Int = 1;
-
-	/**
-	 * Currently selected difficulty
-	 */
-	public var curDifficulty:Int = 1;
 
 	/**
 	 * Currently selected coop/opponent mode
@@ -51,39 +40,9 @@ class FreeplayState extends MusicBeatState
 	public var curCoopMode:Int = 0;
 
 	/**
-	 * Text containing the score info (PERSONAL BEST: 0)
-	 */
-	public var scoreText:FlxText;
-
-	/**
-	 * Text containing the current difficulty (< HARD >)
-	 */
-	public var diffText:FlxText;
-
-	/**
-	 * Text containing the current coop/opponent mode ([KEYBINDS] Co-Op mode)
-	 */
-	public var coopText:FlxText;
-
-	/**
-	 * Currently lerped score. Is updated to go towards `intendedScore`.
-	 */
-	public var lerpScore:Float = 0;
-
-	/**
-	 * Destination for the currently lerped score.
-	 */
-	public var intendedScore:Int = 0;
-
-	/**
 	 * Assigned FreeplaySonglist item.
 	 */
 	public var songList:FreeplaySonglist;
-
-	/**
-	 * Black background around the score, the difficulty text and the co-op text.
-	 */
-	public var scoreBG:FlxSprite;
 
 	/**
 	 * Background.
@@ -115,9 +74,34 @@ class FreeplayState extends MusicBeatState
 	 */
 	public var interpColor:FlxInterpolateColor;
 
+	public var interpColorTwo:FlxInterpolateColor;
+
+	public var bgShader = new CustomShader("stillgradient");
+
+	public var accstrhead = "Best Accuracy";
+
+	var accBacker:FlxSprite;
+	var accBack:FlxSprite;
+	var accText:FlxBitmapText;
+	var oppBacker:FlxSprite;
+	var oppBack:FlxSprite;
+	var oppText:FlxBitmapText;
+	var targAcc:Float = 0;
+	var lerpAcc:Float = 0;
+	var tempacolor:FlxColor;
+	var tempaSlect:Int = -1;
+
+	public var vinylGraphic:FlxSprite;
+
+	var curVinylId:String;
+
+	var headerLocations:Array<Int> = [];
+
 	override function create()
 	{
 		CoolUtil.playMenuSong();
+
+		accstrhead = TU.translate("freeplay.acchead");
 		songList = FreeplaySonglist.get();
 		songs = songList.songs;
 
@@ -127,13 +111,9 @@ class FreeplayState extends MusicBeatState
 			{
 				curSelected = k;
 			}
-		}
 
-		updateCurDifficulties();
-		for (i => diff in curDifficulties)
-		{
-			if (curDiffMetaKeys[i] == Options.freeplayLastVariation && diff == Options.freeplayLastDifficulty)
-				curDifficulty = i;
+			// PRELOAD VINYL IMAGES
+			Paths.image("menus/vinyls/" + s.vinylId);
 		}
 
 		updateCurSong();
@@ -143,8 +123,18 @@ class FreeplayState extends MusicBeatState
 		super.create();
 
 		bg = new MenuBackground();
-		if (songs.length > 0)
-			bg.color = songs[0].color;
+		bg.setGraphicSize(FlxG.width, FlxG.height);
+		bg.scale.set(1, 1);
+		bg.updateHitbox();
+		bg.screenCenter();
+		tempacolor = curSong.color;
+		interpColor = new FlxInterpolateColor(curSong.color);
+		interpColorTwo = new FlxInterpolateColor(curSong.color);
+		bg.color = FlxColor.WHITE;
+		bgShader.hset("colora", [curSong.color.redFloat, curSong.color.greenFloat, curSong.color.blueFloat]);
+		bgShader.hset("colorb", [curSong.color.redFloat, curSong.color.greenFloat, curSong.color.blueFloat]);
+		bgShader.hset("angle", 0);
+		bg.shader = bgShader;
 		add(bg);
 
 		grpSongs = new FlxTypedGroup<Alphabet>();
@@ -153,8 +143,15 @@ class FreeplayState extends MusicBeatState
 		for (i in 0...songs.length)
 		{
 			var songText:Alphabet = new Alphabet(0, (70 * i) + 30, songs[i].displayName, "bold");
+			songText.menuScrollMode = AlphabetMenuScrollMode.DSHAPE;
 			songText.isMenuItem = true;
 			songText.targetY = i;
+			var leng = songs[i].displayName.length;
+			if (leng >= 12)
+			{
+				songText.scale.set(1 - (0.05 * (leng - 11)), 1);
+				songText.updateHitbox();
+			}
 			grpSongs.add(songText);
 
 			var icon:HealthIcon = new HealthIcon(songs[i].icon);
@@ -162,6 +159,7 @@ class FreeplayState extends MusicBeatState
 
 			if (songs[i]._isHeader)
 			{
+				headerLocations.push(i);
 				songText.scale.set(0.8, 0.8);
 				songText.updateHitbox();
 			}
@@ -171,52 +169,115 @@ class FreeplayState extends MusicBeatState
 			add(icon);
 		}
 
-		scoreText = new FlxText(FlxG.width * 0.7, 5, 0, "", 32);
-		scoreText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
+		curVinylId = curSong.vinylId;
+		vinylGraphic = new FlxSprite(-360, 0).loadGraphic(Paths.image("menus/vinyls/" + curVinylId));
+		vinylGraphic.setGraphicSize(720, 720);
+		vinylGraphic.updateHitbox();
+		vinylGraphic.x = -360;
+		vinylGraphic.y = 0;
+		vinylGraphic.antialiasing = Options.antialiasing;
+		add(vinylGraphic);
 
-		scoreBG = new FlxSprite(scoreText.x - 6, 0).makeGraphic(1, 1, 0xFF000000);
-		scoreBG.alpha = 0.6;
-		add(scoreBG);
+		accBacker = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		accBacker.alpha = 0.2;
+		add(accBacker);
 
-		diffText = new FlxText(scoreText.x, scoreText.y + 36, 0, "", 24);
-		diffText.font = scoreText.font;
-		add(diffText);
+		accBack = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		accBack.alpha = 0.4;
+		add(accBack);
 
-		coopText = new FlxText(diffText.x, diffText.y + diffText.height + 2, 0, "", 24);
-		coopText.font = scoreText.font;
-		add(coopText);
+		accText = new DaveBitmapText(0, 16, accstrhead + '\n0.00%', 64 * .4, "perep");
+		accText.antialiasing = Options.antialiasing;
+		accText.letterSpacing = 2;
+		accText.alignment = FlxTextAlign.CENTER;
+		add(accText);
 
-		add(scoreText);
+		oppBacker = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		oppBacker.alpha = 0.2;
+		add(oppBacker);
+
+		oppBack = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		oppBack.alpha = 0.4;
+		add(oppBack);
+
+		oppText = new DaveBitmapText(0, 16, "[TAB] Standard", 64 * .4, "perep");
+		oppText.antialiasing = Options.antialiasing;
+		oppText.letterSpacing = 2;
+		oppText.alignment = FlxTextAlign.RIGHT;
+		add(oppText);
+
+		updateAccBackScale();
+
+		for (songi in songs)
+		{
+			if (Reflect.hasField(songi.customValues, "colorTwo"))
+			{
+				songi.customValues.colorTwo = FlxColor.fromString(songi.customValues.colorTwo);
+			}
+		}
 
 		changeSelection(0, true);
 		changeCoopMode(0, true);
-
-		interpColor = new FlxInterpolateColor(bg.color);
 	}
-
-	private var TEXT_FREEPLAY_SCORE = TU.getRaw("freeplay.score");
 
 	override function update(elapsed:Float)
 	{
+		if (tempaSlect != curSelected)
+		{
+			if (Reflect.hasField(curSong.customValues, "colorTwo"))
+			{
+				tempacolor = curSong.customValues.colorTwo;
+			}
+			else
+			{
+				tempacolor = curSong.color;
+			}
+
+			tempaSlect = curSelected;
+		}
+
+		interpColor.fpsLerpTo(curSong.color, 0.0625);
+		interpColorTwo.fpsLerpTo(tempacolor, 0.0625);
+
+		bgShader.hset("colora", [interpColor.red, interpColor.green, interpColor.blue]);
+		bgShader.hset("colorb", [interpColorTwo.red, interpColorTwo.green, interpColorTwo.blue]);
+
+		targAcc = FunkinSave.getSongHighscore(curSong.name, "normal").accuracy * 100;
+		lerpAcc = CoolUtil.fpsLerp(lerpAcc, targAcc, 0.1);
+		accText.text = accstrhead + "\n" + formatAccuracy(lerpAcc) + "%";
+
+		updateAccBackScale();
+
 		super.update(elapsed);
+
+		if (vinylGraphic != null)
+		{
+			vinylGraphic.angle += elapsed * (Conductor.instance.bpm / 50);
+		}
 
 		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.7)
 		{
 			FlxG.sound.music.volume += 0.5 * elapsed;
 		}
 
-		lerpScore = lerp(lerpScore, intendedScore, 0.4);
-
-		if (Math.abs(lerpScore - intendedScore) <= 10)
-			lerpScore = intendedScore;
-
 		var selectedAnotherSong:Bool = false;
 		if (canSelect)
 		{
-			changeSelection((controls.UP_P ? -1 : 0) + (controls.DOWN_P ? 1 : 0) - FlxG.mouse.wheel);
-			changeDiff((controls.LEFT_P ? -1 : 0) + (controls.RIGHT_P ? 1 : 0));
-			changeCoopMode((controls.CHANGE_MODE ? 1 : 0)); // TODO: make this configurable
-			// putting it before so that its actually smooth
+			var changer = (controls.UP_P ? -1 : 0) + (controls.DOWN_P ? 1 : 0) - FlxG.mouse.wheel;
+
+			if (changer != 0)
+			{
+				if (FlxG.keys.pressed.CONTROL)
+				{
+					changeToCategoryInDirection(changer);
+				}
+				else
+				{
+					changeSelection(changer);
+				}
+			}
+
+			changeCoopMode((controls.CHANGE_MODE ? 1 : 0));
 
 			if (FlxG.mouse.justPressed && grpSongs != null)
 			{
@@ -233,17 +294,6 @@ class FreeplayState extends MusicBeatState
 
 			updateOptionsAlpha();
 		}
-
-		scoreText.text = TEXT_FREEPLAY_SCORE.format([Math.round(lerpScore)]);
-		scoreBG.scale.set(MathUtil.maxSmart(diffText.width, scoreText.width, coopText.width) + 8, (coopText.visible ? coopText.y + coopText.height : 66));
-		scoreBG.updateHitbox();
-		scoreBG.x = FlxG.width - scoreBG.width;
-
-		scoreText.x = coopText.x = scoreBG.x + 4;
-		diffText.x = Std.int(scoreBG.x + ((scoreBG.width - diffText.width) / 2));
-
-		interpColor.fpsLerpTo(curSong.color, 0.0625);
-		bg.color = interpColor.color;
 
 		if (controls.BACK || FlxG.mouse.justPressedRight)
 		{
@@ -295,78 +345,24 @@ class FreeplayState extends MusicBeatState
 	{
 		updateCoopModes();
 
-		if (curDifficulties.length == 0)
-			return;
-
-		var event = event("onSelect",
-			EventManager.get(FreeplaySongSelectEvent).recycle(curSong.name, curDifficulties[curDifficulty], curSong.variant, __opponentMode, __coopMode));
+		var event = event("onSelect", EventManager.get(FreeplaySongSelectEvent).recycle(curSong.name, "normal", curSong.variant, __opponentMode, __coopMode));
 
 		if (event.cancelled)
 			return;
 
 		Options.freeplayLastSong = curSong.name;
-		Options.freeplayLastDifficulty = curDifficulties[curDifficulty];
 		Options.freeplayLastVariation = curSong.variant;
 
-		PlayState.loadSong(event.song, event.difficulty, event.variant, event.opponentMode, event.coopMode);
+		PlayState.loadSong(event.song, "normal", event.variant, event.opponentMode, event.coopMode);
 
 		FlxG.switchState(new PlayState());
 	}
 
 	public function convertChart()
 	{
-		trace('Converting ${curSong.name} ${curDifficulties[curDifficulty]} ${curSong.variant} to Codename format...');
-		var chart = Chart.parse(curSong.name, curDifficulties[curDifficulty], curSong.variant);
-		Chart.save(chart, curDifficulties[curDifficulty], curSong.variant);
-	}
-
-	/**
-	 * Changes the current difficulty
-	 * @param change How much to change.
-	 * @param force Force the change if `change` is equal to 0
-	 */
-	public function changeDiff(change:Int = 0, force:Bool = false)
-	{
-		if (change == 0 && !force)
-			return;
-
-		var validDifficulties = curDifficulties.length > 0;
-		var event = event("onChangeDiff",
-			EventManager.get(MenuChangeEvent)
-				.recycle(curDifficulty, validDifficulties ? FlxMath.wrap(curDifficulty + change, 0, curDifficulties.length - 1) : 0, change));
-
-		if (event.cancelled)
-		{
-			if (force)
-				updateCurSong();
-			return;
-		}
-
-		var prevSong = curSong;
-		curDifficulty = event.value;
-		updateCurSong();
-		updateScore();
-
-		var text = validDifficulties ? curDifficulties[curDifficulty].toUpperCase()
-			+ (curSong != songs[curSelected] ? ' (${curSong.variant.toUpperCase()})' : '') : '-';
-		diffText.text = curDifficulties.length > 1 ? '< $text >' : text;
-	}
-
-	function updateScore()
-	{
-		if (curDifficulties.length == 0)
-		{
-			intendedScore = 0;
-			return;
-		}
-		updateCoopModes();
-		var changes:Array<HighscoreChange> = [];
-		if (__coopMode)
-			changes.push(CCoopMode);
-		if (__opponentMode)
-			changes.push(COpponentMode);
-		var saveData = FunkinSave.getSongHighscore(curSong.name, curDifficulties[curDifficulty], curSong.variant, changes);
-		intendedScore = saveData.score;
+		trace('Converting ${curSong.name} ${curSong.variant} to Codename format...');
+		var chart = Chart.parse(curSong.name, "normal", curSong.variant);
+		Chart.save(chart, "normal", curSong.variant);
 	}
 
 	/**
@@ -400,8 +396,6 @@ class FreeplayState extends MusicBeatState
 
 		curCoopMode = event.value;
 
-		updateScore();
-
 		var coopBinds = [
 			CoolUtil.keyToString(Options.P1_CHANGE_MODE[0]),
 			CoolUtil.keyToString(Options.P2_CHANGE_MODE[0])
@@ -413,14 +407,9 @@ class FreeplayState extends MusicBeatState
 
 		var key = '[${coopBinds.join(" / ")}] ';
 
-		if (bothEnabled)
-		{
-			coopText.text = key + coopLabels[curCoopMode];
-		}
-		else
-		{
-			coopText.text = key + coopLabels[curCoopMode * (curSong.coopAllowed ? 2 : 1)];
-		}
+		oppText.text = key + coopLabels[curCoopMode * (curSong.coopAllowed ? 2 : 1)];
+
+		updateAccBackScale();
 	}
 
 	/**
@@ -458,23 +447,62 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 
+		updateCurSong();
+
+		if (curVinylId != curSong.vinylId)
+		{
+			curVinylId = curSong.vinylId;
+			vinylGraphic.loadGraphic(Paths.image("menus/vinyls/" + curVinylId));
+			vinylGraphic.setGraphicSize(720, 720);
+			vinylGraphic.updateHitbox();
+			vinylGraphic.x = -360;
+			vinylGraphic.y = 0;
+		}
+
 		if (event.playMenuSFX)
 			CoolUtil.playMenuSFX(SCROLL, 0.7);
+	}
 
-		var prevDiff = curDifficulties[curDifficulty],
-			prevVariant = curDiffMetaKeys[curDifficulty];
-		updateCurDifficulties();
+	// THANK YOU MINYA FOR HELP BECAUSE I WOULD HAVE DIED BADLY + BLOOD IF NOT FOR THAT
+	public function changeToCategoryInDirection(change:Int = 0)
+	{
+		var targs:Int = -1;
 
-		for (i => diff in curDifficulties)
-			if (diff == prevDiff && curDiffMetaKeys[i] == prevVariant)
+		var mult:Int = 1;
+		if (change < 0)
+		{
+			mult = -1;
+		}
+
+		for (i in 0...headerLocations.length)
+		{
+			if (curSelected >= headerLocations[i])
 			{
-				curDifficulty = i;
-				break;
+				if (i != headerLocations.length - 1)
+				{
+					if (curSelected >= headerLocations[i + 1])
+					{
+						continue;
+					}
+				}
+
+				var new_i = i + mult;
+
+				// modulo doesnt work on negative numbers #Nice #ThanksHaxe
+				if (new_i < 0)
+				{
+					new_i = headerLocations.length + new_i;
+				}
+
+				targs = new_i;
 			}
+		}
 
-		changeDiff(0, true);
-
-		coopText.visible = false;
+		if (change != 0)
+		{
+			curSelected = headerLocations[targs];
+			changeSelection(1);
+		}
 	}
 
 	function updateOptionsAlpha()
@@ -508,33 +536,64 @@ class FreeplayState extends MusicBeatState
 		}
 	}
 
-	function updateCurDifficulties()
-	{
-		curDiffMetaKeys.resize(0);
-		curDifficulties = songs[curSelected].difficulties.copy();
-		for (i in 0...curDifficulties.length)
-			curDiffMetaKeys.push(null);
-
-		if (songs[curSelected].variants != null)
-		{
-			var meta:ChartMetaData;
-			for (variant in songs[curSelected].variants)
-				if ((meta = songs[curSelected].metas.get(variant)) != null)
-				{
-					curDifficulties = curDifficulties.concat(meta.difficulties);
-					for (i in 0...meta.difficulties.length)
-						curDiffMetaKeys.push(variant);
-				}
-		}
-	}
-
 	function updateCurSong()
 	{
 		var song = songs[curSelected];
 		if (song == null)
+		{
 			curSong = null;
-		else if ((curSong = song.metas.get(curDiffMetaKeys[curDifficulty])) == null)
+		}
+		else
+		{
 			curSong = song;
+		}
+	}
+
+	/**
+	 * Formats the accuracy value to always display 2 decimal values no matter the circumstances. (00.00)
+	 * @param value The raw, unrounded accuracy value.
+	 * @return Formatted string.
+	 */
+	public static function formatAccuracy(value:Float):String
+	{
+		var rounded:Float = FlxMath.roundDecimal(value, 2);
+		var str:String = Std.string(rounded);
+
+		var dotIndex:Int = str.indexOf(".");
+
+		if (dotIndex == -1)
+			return str + ".00";
+		else if (str.length - dotIndex == 2)
+			return str + "0";
+
+		return str;
+	}
+
+	function updateAccBackScale()
+	{
+		var charCount = accstrhead.length;
+		var charWidth = 13.1;
+
+		accBacker.scale.set((charCount * charWidth) + 16 + 8, 48 + 16 + 8);
+		accBacker.updateHitbox();
+		accBacker.setPosition((FlxG.width - accBack.width) - 12, 4);
+
+		accBack.scale.set((charCount * charWidth) + 16, 48 + 16);
+		accBack.updateHitbox();
+		accBack.setPosition((FlxG.width - accBack.width) - 8, 8);
+		accText.setPosition(accBack.x + 8, accBack.y + 8);
+
+		var charCount = oppText.text.length;
+		var charWidth = 13.1;
+
+		oppBacker.scale.set((charCount * charWidth) + 16, 46);
+		oppBacker.updateHitbox();
+		oppBacker.setPosition((FlxG.width - oppBack.width) - 12, (FlxG.height - oppBack.height) - 12);
+
+		oppBack.scale.set((charCount * charWidth) + 8, 38);
+		oppBack.updateHitbox();
+		oppBack.setPosition((FlxG.width - oppBack.width) - 8, (FlxG.height - oppBack.height) - 8);
+		oppText.setPosition(oppBack.x + 8, oppBack.y + 8);
 	}
 }
 
