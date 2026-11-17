@@ -6,6 +6,7 @@ import flixel.FlxState;
 import flixel.FlxSubState;
 import flixel.graphics.FlxGraphic;
 import flixel.math.FlxPoint;
+import flixel.sound.FlxSoundData;
 import flixel.sound.FlxSound;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
@@ -699,8 +700,6 @@ class PlayState extends MusicBeatState
 	@:noCompletion @:dox(hide) private var _startCountdownCalled:Bool = false;
 	@:noCompletion @:dox(hide) private var _endSongCalled:Bool = false;
 
-	@:noCompletion @:dox(hide) private static var _ONE_ARG:Array<Dynamic> = [null];
-
 	private function get_accuracy():Float
 	{
 		if (accuracyPressedNotes <= 0)
@@ -805,24 +804,39 @@ class PlayState extends MusicBeatState
 		return name;
 	}
 
-	public inline function callOnCharacters(func:String, ?parameters:Array<Dynamic>)
-	{
-		if (strumLines != null)
-		{
-			strumLines.forEachAlive(function(strLine:StrumLine)
-			{
-				if (strLine.characters != null)
-				{
-					for (character in strLine.characters)
-					{
-						if (character != null)
-						{
-							character.scripts.call(func, parameters);
-						}
-					}
-				}
-			});
+	private var __charCallFunc:String = null;
+	private var __charCallArgs:Array<Dynamic> = null;
+	private var __charCallFn:StrumLine->Void = null;
+
+	public inline function callOnCharacters(func:String, ?parameters:Array<Dynamic>) {
+		if (strumLines == null) return;
+
+		if (__charCallFn == null) {
+			__charCallFn = function(strLine:StrumLine) {
+				if (strLine.characters != null) for (character in strLine.characters)
+					if (character != null) character.scripts.call(__charCallFunc, __charCallArgs);
+			};
 		}
+
+		var prevFunc = __charCallFunc;
+		var prevArgs = __charCallArgs;
+		__charCallFunc = func;
+		__charCallArgs = parameters;
+		strumLines.forEachAlive(__charCallFn);
+		__charCallFunc = prevFunc;
+		__charCallArgs = prevArgs;
+	}
+
+	public inline function eventOnCharacters<T:CancellableEvent>(func:String, ?event:T):T {
+		if (strumLines == null) return event;
+
+		for (strLine in strumLines.members) {
+			if (strLine == null || !strLine.exists || !strLine.alive) continue;
+			if (strLine.characters != null) for (character in strLine.characters)
+				if (character != null) character.scripts.event(func, event);
+		}
+
+		return event;
 	}
 
 	public inline function gameAndCharsCall(func:String, ?parameters:Array<Dynamic>, ?charsFunc:String)
@@ -831,11 +845,9 @@ class PlayState extends MusicBeatState
 		callOnCharacters(charsFunc != null ? charsFunc : func, parameters);
 	}
 
-	public inline function gameAndCharsEvent<T:CancellableEvent>(func:String, ?event:T, ?charsFunc:String):T
-	{
+	public function gameAndCharsEvent<T:CancellableEvent>(func:String, ?event:T, ?charsFunc:String):T {
 		scripts.event(func, event);
-		callOnCharacters(charsFunc != null ? charsFunc : func, [event]);
-		return event;
+		return eventOnCharacters(charsFunc != null ? charsFunc : func, event);
 	}
 
 	public function new(?time:Null<Float>, scriptsAllowed:Bool = true, ?scriptName:String)
@@ -976,9 +988,8 @@ class PlayState extends MusicBeatState
 			graphicCache.cache(Paths.getPath(content));
 		}
 
-		for (i in 1...4)
-		{
-			FlxG.sound.load(Paths.sound('missnote' + Std.string(i)));
+		for (i in 1...4) {
+			FlxSoundData.fromAssetKey(Paths.sound('missnote' + Std.string(i)), false);
 		}
 		FlxG.sound.load(Paths.sound("mine"));
 		#end
@@ -1088,12 +1099,20 @@ class PlayState extends MusicBeatState
 		{
 			FlxG.camera.scroll.set(smoothTransitionData.camX, smoothTransitionData.camY);
 			FlxG.camera.zoom = smoothTransitionData.camZoom;
-			MusicBeatState.skipTransIn = true;
 			camFollow.setPosition(smoothTransitionData.camFollowX, smoothTransitionData.camFollowY);
+
+			if (smoothTransitionData.skipTransIn) MusicBeatState.skipTransIn = true;
 		}
-		else
-		{
+		else {
 			FlxG.camera.focusOn(camFollow.getPosition(FlxPoint.weak()));
+		}
+
+		for(event in SONG.events){
+			if(event.name == "Character Change"){
+				if(!event.params[3] || Character.cachedFrames.exists(event.params[2])) continue;
+
+				Character.cacheCharacter(event.params[2]);
+			}
 		}
 
 		smoothTransitionData = null;
@@ -1165,21 +1184,8 @@ class PlayState extends MusicBeatState
 
 		super.create();
 
-		for (s in introSprites)
-		{
-			if (s != null)
-			{
-				graphicCache.cache(Paths.image(s));
-			}
-		}
-
-		for (s in introSounds)
-		{
-			if (s != null)
-			{
-				FlxG.sound.load(Paths.sound(s));
-			}
-		}
+		for (s in introSprites) if (s != null) graphicCache.cache(Paths.image(s));
+		for (s in introSounds) if (s != null) FlxSoundData.fromAssetKey(Paths.sound(s));
 
 		if (chartingMode)
 		{
@@ -1336,6 +1342,12 @@ class PlayState extends MusicBeatState
 		Conductor.instance.songPosition = 0;
 		Conductor.instance.songPosition -= Conductor.instance.crochet * introLength - Conductor.instance.songOffset;
 
+		// prepare the soudns!!
+		final time = (chartingMode && Charter.startHere) ? Charter.startTime : 0.0;
+		inst.prepare(time);
+		vocals.prepare(time);
+		for (strumLine in strumLines.members) strumLine.vocals.prepare(time);
+
 		if (introLength > 0)
 		{
 			var swagCounter:Int = 0;
@@ -1366,11 +1378,7 @@ class PlayState extends MusicBeatState
 			if (event.spritePath != null)
 			{
 				var spr = event.spritePath;
-
-				if (!Assets.exists(spr))
-				{
-					spr = Paths.image('$spr');
-				}
+				if (!Assets.exists(spr)) spr = Paths.image(spr);
 
 				sprite = new FunkinSprite();
 				sprite.loadAnimatedGraphic(spr);
@@ -1429,6 +1437,8 @@ class PlayState extends MusicBeatState
 			vocals.play(true, time);
 			inst.play(true, time);
 		}
+		Conductor.instance.songPosition = (chartingMode && Charter.startHere) ? Charter.startTime : 0.0;
+		resyncVocals();
 
 		updateDiscordPresence();
 
@@ -1442,15 +1452,7 @@ class PlayState extends MusicBeatState
 			PlayState.instance.gameAndCharsCall("onStageDestroy", [stage]);
 		scripts.call("destroy");
 
-		for (g in __cachedGraphics)
-			g.decrementUseCount();
-		@:privateAccess {
-			for (strumLine in strumLines.members)
-				FlxG.sound.destroySound(strumLine.vocals);
-			if (FlxG.sound.music != inst)
-				FlxG.sound.destroySound(inst);
-			FlxG.sound.destroySound(vocals);
-		}
+		for (g in __cachedGraphics) g.decrementUseCount();
 
 		if (notNull)
 		{
@@ -1459,6 +1461,8 @@ class PlayState extends MusicBeatState
 		}
 
 		cameraFocusOffset.put();
+
+		Character.clearCache();
 
 		scripts = FlxDestroyUtil.destroy(scripts);
 
@@ -1493,7 +1497,7 @@ class PlayState extends MusicBeatState
 			songData = SONG;
 
 		var foundCam = false;
-		var foundSigs = songData.meta.beatsPerMeasure.getDefault(4) != 4 || songData.meta.stepsPerBeat.getDefault(4) != 4;
+		var foundSigs = Flags.FORCE_CAM_ZOOM_EVERY_MEASURE || songData.meta.beatsPerMeasure.getDefault(4) != 4 || songData.meta.stepsPerBeat.getDefault(4) != 4;
 
 		if (events == null)
 			events = [];
@@ -1537,11 +1541,14 @@ class PlayState extends MusicBeatState
 
 		var vocalsPath = Paths.voices(SONG.meta.name, difficulty, SONG.meta.vocalsSuffix);
 		if (SONG.meta.needsVoices && Assets.exists(vocalsPath))
-			vocals = FlxG.sound.load(Assets.getMusic(vocalsPath));
+			vocals = FlxG.sound.load(vocalsPath);
 		else
-			vocals = new FlxSound();
+		{
+			vocals = FlxG.sound.list.recycle(FlxSound);
+			vocals.alive = vocals.exists = true;
+		}
 
-		vocals.group = FlxG.sound.defaultMusicGroup;
+		FlxG.sound.defaultMusicGroup.add(vocals);
 		vocals.persist = false;
 
 		generatedMusic = true;
@@ -1669,8 +1676,10 @@ class PlayState extends MusicBeatState
 		super.onFocusLost();
 	}
 
-	@:dox(hide)
-	inline function resyncVocals():Void
+	/**
+	 * Resyncs vocals and play the song without checking
+	 */
+	public function resyncVocals():Void
 	{
 		// don't if we are skipping
 		if (skipping)
@@ -1695,6 +1704,21 @@ class PlayState extends MusicBeatState
 
 		gameAndCharsCall("onVocalsResync");
 	}
+
+	@:dox(hide)
+	function checkDesyncVocals():Void
+	{
+		final instTime = FlxG.sound.music.getSourceTime();
+		var isOffsync:Bool = vocals.loaded && Math.abs(instTime - vocals.getSourceTime()) > 1;
+		if (!isOffsync)
+			for (strumLine in strumLines.members)
+				if ((isOffsync = strumLine.vocals.loaded && Math.abs(instTime - strumLine.vocals.getSourceTime()) > 1))
+					break;
+
+		if (isOffsync)
+			resyncVocals();
+	}
+
 
 	/**
 	 * Pauses the game.
@@ -1872,17 +1896,8 @@ class PlayState extends MusicBeatState
 				startSong();
 			}
 		}
-		else if (FlxG.sound.music != null)
-		{
-			final instTime = FlxG.sound.music.getSourceTime();
-			var isOffsync:Bool = vocals.loaded && Math.abs(instTime - vocals.getSourceTime()) > 1;
-			if (!isOffsync)
-				for (strumLine in strumLines.members)
-					if ((isOffsync = strumLine.vocals.loaded && Math.abs(instTime - strumLine.vocals.getSourceTime()) > 1))
-						break;
-
-			if (isOffsync)
-				resyncVocals();
+		else if (FlxG.sound.music != null) {
+			checkDesyncVocals();
 		}
 
 		while (events.length > 0 && events.last().time <= Conductor.instance.songPosition)
@@ -1894,16 +1909,8 @@ class PlayState extends MusicBeatState
 		if (generatedMusic)
 			moveCamera();
 
-		if (camZooming)
-		{
-			if (useCamZoomMult)
-			{
-				camZoomingMult = lerp(camZoomingMult, defaultZoom, camZoomLerp) - defaultZoom;
-				FlxG.camera.zoomMultiplier = camZoomingMult * camGameZoomMult + defaultZoom;
-				camZoomingMult += defaultZoom;
-			}
-			FlxG.camera.zoom = lerp(FlxG.camera.zoom, defaultCamZoom, camGameZoomLerp);
-		}
+		if (camZooming) 
+			updateCamZoom();
 
 		// RESET = Quick Game Over Screen
 		if (startedCountdown && controls.RESET)
@@ -1951,6 +1958,16 @@ class PlayState extends MusicBeatState
 		scripts.event("postDraw", e);
 	}
 
+	@:dox(hide)
+	private inline function updateCamZoom() {
+		if (useCamZoomMult) {
+			camZoomingMult = lerp(camZoomingMult, defaultZoom, camZoomLerp) - defaultZoom;
+			FlxG.camera.zoomMultiplier = camZoomingMult * camGameZoomMult + defaultZoom;
+			camZoomingMult += defaultZoom;
+		}
+		FlxG.camera.zoom = lerp(FlxG.camera.zoom, defaultCamZoom, camGameZoomLerp);
+	}
+
 	public function doBopZoom()
 	{
 		var event:BopZoomEvent = EventManager.get(BopZoomEvent).recycle(useCamZoomMult, maxCamZoomMult, camZoomingStrength);
@@ -1976,30 +1993,32 @@ class PlayState extends MusicBeatState
 		gameAndCharsEvent("onPostBopZoom", event);
 	}
 
-	public function moveCamera()
-		if (strumLines.members[curCameraTarget] != null)
-		{
-			var data:CamPosData = getStrumlineCamPos(curCameraTarget);
-			data.pos.add(cameraFocusOffset.x, cameraFocusOffset.y);
-			if (data.amount > 0)
-			{
-				var event = gameAndCharsEvent("onCameraMove",
-					EventManager.get(CamMoveEvent).recycle(data.pos, strumLines.members[curCameraTarget], data.amount));
-				if (!event.cancelled)
-					camFollow.setPosition(event.position.x, event.position.y);
-			}
-			data.put();
+	@:noCompletion @:dox(hide) private var __camPos:FlxPoint = FlxPoint.get();
+	@:noCompletion @:dox(hide) private var __camPosData:CamPosData = null;
+	public function moveCamera() if (strumLines.members[curCameraTarget] != null) {
+		if (__camPosData == null) __camPosData = new CamPosData(__camPos, 0);
+
+		__camPos.set(0, 0);
+		var data:CamPosData = getStrumlineCamPos(curCameraTarget, __camPos, true, true, __camPosData);
+		data.pos.add(cameraFocusOffset.x, cameraFocusOffset.y);
+
+		if (data.amount > 0) {
+			var event = gameAndCharsEvent("onCameraMove", EventManager.get(CamMoveEvent).recycle(data.pos, strumLines.members[curCameraTarget], data.amount));
+			if (!event.cancelled)
+				camFollow.setPosition(event.position.x, event.position.y);
 		}
+	}
 
 	/**
 	 * Returns the camera position of the specified strumline.
 	 * @param strumLine The strumline to get the camera position of.
 	 * @param pos The position to put the camera position in. If `null`, a new FlxPoint will be created.
 	 * @param ignoreInvisible Whenever invisible characters should be ignored.
+	 * @param ignoreInactive Whether inactive characters should be ignored.
+	 * @param out If provided, fills and returns this instance instead of allocating a new one. The caller keeps ownership of `pos` (don't put it back to the pool).
 	**/
-	public inline function getStrumlineCamPos(strumLine:Int, ?pos:FlxPoint = null, ?ignoreInvisible:Bool = true):CamPosData
-	{
-		return getCharactersCamPos(strumLines.members[strumLine].characters, pos, ignoreInvisible);
+	public inline function getStrumlineCamPos(strumLine:Int, ?pos:FlxPoint = null, ?ignoreInvisible:Bool = true, ?ignoreInactive:Bool = true, ?out:CamPosData = null):CamPosData {
+		return getCharactersCamPos(strumLines.members[strumLine].characters, pos, ignoreInvisible, ignoreInactive, out);
 	}
 
 	/**
@@ -2007,27 +2026,32 @@ class PlayState extends MusicBeatState
 	 * @param chars The characters to get the camera position of.
 	 * @param pos The position to put the camera position in. If `null`, a new FlxPoint will be created.
 	 * @param ignoreInvisible Whenever invisible characters should be ignored.
+	 * @param ignoreInactive Whether inactive characters should be ignored.
+	 * @param out If provided, fills and returns this instance instead of allocating a new one. The caller keeps ownership of `pos` (don't put it back to the pool).
 	**/
-	public dynamic function getCharactersCamPos(chars:Array<Character>, ?pos:FlxPoint = null, ?ignoreInvisible:Bool = true):CamPosData
-	{
-		if (pos == null)
-			pos = FlxPoint.get();
-		var amount = 0;
-		for (c in chars)
-		{
-			if (c == null || (ignoreInvisible && !c.visible))
-				continue;
-			var cpos = c.getCameraPosition();
+	public dynamic function getCharactersCamPos(chars:Array<Character>, ?pos:FlxPoint = null, ?ignoreInvisible:Bool = true, ?ignoreInactive:Bool = true, ?out:CamPosData = null):CamPosData {
+		if (pos == null) pos = FlxPoint.get();
+		var amount:Int = 0;
+		final cpos = FlxPoint.get();
+		for(c in chars) {
+			if (c == null || (!ignoreInvisible && (c.alpha <= 0 || !c.visible || !c.exists)) || (!ignoreInactive && !c.active)) continue;
+			c.__getCameraPositionInto(cpos);
 			pos.x += cpos.x;
 			pos.y += cpos.y;
 			amount++;
 		}
-		if (amount > 0)
-		{
+		cpos.put();
+		if (amount > 0) {
 			pos.x /= amount;
 			pos.y /= amount;
 		}
-		return new CamPosData(pos, amount);
+
+		if (out == null)
+			return new CamPosData(pos, amount);
+
+		out.pos = pos;
+		out.amount = amount;
+		return out;
 	}
 
 	public var eventsTween:Map<String, FlxTween> = [];
@@ -2199,6 +2223,29 @@ class PlayState extends MusicBeatState
 				else // Not Reversed
 					camera.flash(event.params[1], (Conductor.instance.stepCrochet / 1000) * event.params[2], null, true);
 			case "BPM Change": // automatically handled by conductor
+			case "Character Change":
+				var oldChar:Character = strumLines.members[event.params[0]].characters[event.params[1]];
+				var newChar:Character = new Character(oldChar.x, oldChar.y, event.params[2], oldChar.isPlayer);
+				stage.applyCharStuff(newChar, !event.params[7] ? strumLines.members[event.params[0]].data.position : null, event.params[1], !event.params[7]);
+				if(event.params[6]) newChar.shader = oldChar.shader;
+
+				newChar.x += event.params[4];
+				newChar.y += event.params[5];
+
+				insert(members.indexOf(oldChar), newChar); remove(oldChar);
+				strumLines.members[event.params[0]].characters[event.params[1]] = newChar;
+
+				//refresh icons
+				switch(event.params[0]){
+					case 0:
+						iconP2.setIcon(dad.getIcon());
+					case 1:
+						iconP1.setIcon(bf.getIcon());
+				}
+				var leftColor:Int = dad != null && dad.iconColor != null && Options.colorHealthBar ? dad.iconColor : (opponentMode ? 0xFF66FF33 : 0xFFFF0000);
+				var rightColor:Int = boyfriend != null && boyfriend.iconColor != null && Options.colorHealthBar ? boyfriend.iconColor : (opponentMode ? 0xFFFF0000 : 0xFF66FF33); // switch the colors
+				healthBar.createFilledBar(leftColor, rightColor);
+				healthBar.updateBar();
 			case "Scroll Speed Change":
 				var tween = eventsTween.get("scrollSpeedTween");
 				if (tween != null)
@@ -2383,10 +2430,12 @@ class PlayState extends MusicBeatState
 			camY: FlxG.camera.scroll.y,
 			camFollowX: camFollow.x,
 			camFollowY: camFollow.y,
-			camZoom: FlxG.camera.zoom
+			camZoom: FlxG.camera.zoom,
+			skipTransIn: true
 		};
-		MusicBeatState.skipTransIn = true;
 		MusicBeatState.skipTransOut = true;
+
+		gameAndCharsCall("onRegisterSmoothTransition");
 	}
 
 	private inline function keyShit():Void
@@ -2460,9 +2509,8 @@ class PlayState extends MusicBeatState
 				if (char == null)
 					continue;
 
-				if (event.stunned)
-					char.stunned = true;
-				char.playSingAnim(directionID, event.animSuffix, MISS, event.forceAnim);
+				if(event.stunned) char.stunned = true;
+				char.playSingAnim(event.direction, event.animSuffix, MISS, event.forceAnim);
 			}
 		}
 
@@ -3191,16 +3239,9 @@ class PlayState extends MusicBeatState
 	 * @param opponentMode Whenever opponent mode is on
 	 * @param coopMode Whenever co-op mode is on.
 	 */
-	public static function loadSong(_name:String, ?_difficulty:String, ?_variation:Dynamic, _opponentMode:Bool = false, _coopMode:Bool = false)
-	{
-		if (_difficulty == null)
-		{
-			difficulty = Flags.DEFAULT_DIFFICULTY;
-		}
-
-		if (_variation is Bool)
-		{
-			// vackward cumpatibshit
+	public static function loadSong(_name:String, ?_difficulty:String, ?_variation:Dynamic, _opponentMode:Bool = false, _coopMode:Bool = false) {
+		_difficulty ??= Flags.DEFAULT_DIFFICULTY;
+		if (_variation is Bool) { // vackward cumpatibshit
 			_coopMode = _opponentMode;
 			_opponentMode = cast _variation;
 			_variation = null;
@@ -3346,6 +3387,7 @@ typedef PlayStateTransitionData =
 	var camFollowX:Float;
 	var camFollowY:Float;
 	var camZoom:Float;
+	var ?skipTransIn:Bool;
 }
 
 class CamPosData

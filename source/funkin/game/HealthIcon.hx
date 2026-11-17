@@ -76,6 +76,8 @@ class HealthIcon extends FunkinSprite
 	 */
 	public var extraOffsets:FlxPoint = FlxPoint.get();
 
+	private var _iconAnimData:IconAnimData;
+
 	/**
 	 * Theeee heaaaalth of uusssssssssssss
 	 */
@@ -387,7 +389,7 @@ class HealthIcon extends FunkinSprite
 	 * @param health Health percentage
 	 * @return Animation data (-1 if invalid)
 	 */
-	public dynamic function getIconAnim(health:Float):IconAnimData
+	public dynamic function getIconAnim(health:Float, ?out:IconAnimData):IconAnimData
 	{
 		var i:OneOfTwo<String, Int> = -1;
 		var oldKey:Int = -1;
@@ -402,7 +404,11 @@ class HealthIcon extends FunkinSprite
 
 		i = normalizeAnim(i);
 
-		return new IconAnimData(i, isValid);
+		if (out == null) return new IconAnimData(i, isValid);
+
+		out.animState = i;
+		out.isValid = isValid;
+		return out;
 	}
 
 	override function update(elapsed:Float):Void
@@ -419,19 +425,17 @@ class HealthIcon extends FunkinSprite
 			}) + sprTrackerOffset.x, sprTracker.y + sprTrackerOffset.y);
 		}
 
-		if (animation.curAnim != null || this.animated)
-		{
-			var data = getIconAnim(health);
-			var localAnimState = data.animState;
+		if (animation.curAnim != null || this.animated) {
+			_iconAnimData = getIconAnim(health, _iconAnimData);
+			var localAnimState = _iconAnimData.animState;
 
-			if (data.isValid && curAnimState != localAnimState)
-			{
+			if (_iconAnimData.isValid && curAnimState != localAnimState) {
 				var event = EventManager.get(HealthIconChangeEvent).recycle(localAnimState, this);
+				#if GLOBAL_SCRIPT
 				funkin.backend.scripting.GlobalScript.event("onHealthIconAnimChange", event);
-				if (!event.cancelled)
-				{
-					if (this.animated)
-					{
+				#end
+				if (!event.cancelled) {
+					if (this.animated) {
 						var transAnim = 'from-$curAnimState-to-${event.anim}';
 						playAnim(hasAnim(transAnim) ? transAnim : event.anim);
 					}

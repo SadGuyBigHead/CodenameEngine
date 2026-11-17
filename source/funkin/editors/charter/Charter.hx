@@ -650,13 +650,24 @@ class Charter extends UIState
 		Conductor.instance.setupSong(PlayState.SONG);
 		noteTypes = PlayState.SONG.noteTypes;
 
-		FlxG.sound.setMusic(FlxG.sound.load(FlxSoundData.fromAssetKey(Paths.inst(__song, __diff, PlayState.SONG.meta.instSuffix), false)));
+		// TODO: MAYBE MAKE WAVEFORMS WORK TOO FOR STREAMED SOUNDS??
+
+		var data = FlxSoundData.fromAssetKey(Paths.inst(__song, __diff, PlayState.SONG.meta.instSuffix), false);
+		if (data.isStreamable) data.buffer.load();
+
+		FlxG.sound.setMusic(FlxG.sound.load(data));
 
 		if (Assets.exists(Paths.voices(__song, __diff, PlayState.SONG.meta.vocalsSuffix))) {
-			vocals = FlxG.sound.load(FlxSoundData.fromAssetKey(Paths.voices(__song, __diff, PlayState.SONG.meta.vocalsSuffix)));
+			data = FlxSoundData.fromAssetKey(Paths.voices(__song, __diff, PlayState.SONG.meta.vocalsSuffix), false);
+			if (data.isStreamable) data.buffer.load();
+
+			vocals = FlxG.sound.load(data);
 		}
 		else
-			vocals = new FlxSound();
+		{
+			vocals = FlxG.sound.list.recycle(FlxSound);
+			vocals.alive = vocals.exists = true;
+		}
 
 		vocals.muted = !PlayState.SONG.meta.needsVoices;
 		vocals.group = FlxG.sound.defaultMusicGroup;
@@ -772,7 +783,7 @@ class Charter extends UIState
 		CharterGridSeperatorBase.lastConductorSprY = Math.NEGATIVE_INFINITY;
 
 		updateWaveforms();
-		updateCameraChanges();
+		updateEventChanges();
 	}
 
 	public function getWavesToGenerate():Array<{name:String, sound:FlxSound}>
@@ -839,45 +850,75 @@ class Charter extends UIState
 		}
 	}
 
-	public function updateCameraChanges()
-	{
-		if (!Options.charterShowCameraHighlights)
-			return;
+	public function updateEventChanges() {
+
+		var characterChanges:Array<Array<CharacterChange>> = [];
+		for(i in 0...strumLines.members.length)
+			characterChanges.push([]);
 
 		cameraMovementChanges = [];
 		for (grp in [leftEventsGroup, rightEventsGroup])
 		{
 			grp.filterEvents();
 			grp.sortEvents();
-			for (e in grp.members)
-			{
-				for (event in e.events)
-				{
-					if (event.name == "Camera Movement")
-					{
+			for(e in grp.members) {
+				for(event in e.events) {
+					if (event.name == "Camera Movement" && Options.charterShowCameraHighlights) {
 						cameraMovementChanges.push({
 							strumLineID: event.params[0],
 							step: e.step,
 							endStep: __endStep
+						});
+					} else if(event.name == "Character Change"){
+						characterChanges[event.params[0]].push({
+							index: event.params[1],
+							character: event.params[2],
+							step: e.step
 						});
 					}
 				}
 			}
 		}
 
-		// need to sort again for both local and global events to be used
-		cameraMovementChanges.sort(function(e1, e2)
-		{
+		//need to sort again for both local and global events to be used
+		cameraMovementChanges.sort(function(e1, e2) {
 			return FlxSort.byValues(FlxSort.ASCENDING, e1.step, e2.step);
 		});
-		// update previous change
-		if (cameraMovementChanges.length > 0)
-		{
-			for (i in 1...cameraMovementChanges.length)
-			{
-				cameraMovementChanges[i - 1].endStep = cameraMovementChanges[i].step;
+		//update previous change
+		if (cameraMovementChanges.length > 0) {
+			for (i in 1...cameraMovementChanges.length) {
+				cameraMovementChanges[i-1].endStep = cameraMovementChanges[i].step;
 			}
 		}
+
+		if(characterChanges.length != 0)
+			for(index => sl in strumLines.members){
+				//need to sort again for both local and global events to be used
+				characterChanges[index].sort(function(e1, e2) {
+					return FlxSort.byValues(FlxSort.ASCENDING, e1.step, e2.step);
+				});
+
+				strumLines.members[index].characterChanges = characterChanges[index];
+			}
+
+		for(e in leftEventsGroup.members) {
+			for(event in e.events) {
+				if (event.name == "Camera Movement"){
+					e.refreshEventIcons();
+					break;
+				}
+			}
+		}
+
+		for(e in rightEventsGroup.members) {
+			for(event in e.events) {
+				if (event.name == "Camera Movement"){
+					e.refreshEventIcons();
+					break;
+				}
+			}
+		}
+
 	}
 
 	public override function beatHit(curBeat:Int)
@@ -2345,19 +2386,18 @@ class Charter extends UIState
 		if (Conductor.instance.songPosition >= FlxG.sound.music.getDefault(vocals).length - Conductor.instance.songOffset)
 			return;
 
-		if (FlxG.sound.music.playing)
-		{
-			FlxG.sound.music.pause();
-			vocals.pause();
-			for (strumLine in strumLines.members) strumLine.vocals.pause();
+		if (FlxG.sound.music.playing) {
+			final arr = [FlxG.sound.music, vocals];
+			for (strumLine in strumLines.members) arr.push(strumLine.vocals);
+			FlxSound.pauseSounds(arr);
+
 			if (Options.charterPauseQuant) Conductor.instance.songPosition = Conductor.instance.getTimeForStep(quantStep(Conductor.instance.curStepFloat));
-		} else {
-			FlxG.sound.music.play(true, Conductor.instance.songPosition + Conductor.instance.songOffset);
-			vocals.play(true, FlxG.sound.music.getActualTime());
-			for (strumLine in strumLines.members)
-			{
-				strumLine.vocals.play(true, FlxG.sound.music.getActualTime());
-			}
+		}
+		else {
+			final time = Conductor.instance.songPosition + Conductor.instance.songOffset;
+			final arr = [FlxG.sound.music.prepare(time), vocals.prepare(time)];
+			for (strumLine in strumLines.members) arr.push(strumLine.vocals.prepare(time));
+			FlxSound.playSounds(arr);
 		}
 	}
 	function _playback_snap(t) {
@@ -2474,7 +2514,7 @@ class Charter extends UIState
 		__event.refreshEventIcons();
 		(__event.global ? rightEventsGroup : leftEventsGroup).add(__event);
 		undos.addToUndo(CEditEvent(__event, [], __event.events));
-		updateCameraChanges();
+		updateEventChanges();
 	}
 
 	public function getBookmarkList():Array<ChartBookmark>
@@ -2729,7 +2769,7 @@ class Charter extends UIState
 	function _view_showeventCameraHighlights(t)
 	{
 		t.icon = (Options.charterShowCameraHighlights = !Options.charterShowCameraHighlights) ? 1 : 0;
-		updateCameraChanges();
+		updateEventChanges();
 	}
 
 	function _view_switchWaveformRainbow(t)
@@ -3361,4 +3401,10 @@ typedef CameraChange =
 	var strumLineID:Int;
 	var step:Float;
 	var endStep:Float;
+}
+
+typedef CharacterChange = {
+	var character:String;
+	var index:Int;
+	var step:Float;
 }

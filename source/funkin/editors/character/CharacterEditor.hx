@@ -19,12 +19,19 @@ import haxe.xml.Printer;
 import funkin.editors.ui.UIImageExplorer.ImageSaveData;
 import sys.FileSystem;
 import sys.io.File;
+import funkin.backend.shaders.FunkinShader;
+import flixel.util.FlxColor;
 
 class CharacterEditor extends UIState
 {
 	static var __character:String;
 
 	public var character:CharacterGhost;
+	
+	public var charShader:FunkinShader;
+	public var dad:Character;
+	public var gf:Character;
+	public var boyfriend:Character;
 
 	public static var instance(get, never):CharacterEditor;
 
@@ -37,9 +44,7 @@ class CharacterEditor extends UIState
 	@:noCompletion private var stageIndex:Int = 3;
 
 	public var topMenuSpr:UITopMenu;
-
-	// public var dragOffsetsCheckbox:UICheckbox;
-	// public var lockCameraCheckbox:UICheckbox;
+	
 	public var axisGizmo:AxisGizmo;
 	public var characterGizmo:CharacterGizmos;
 	public var uiGroup:FlxTypedGroup<FlxSprite> = new FlxTypedGroup<FlxSprite>();
@@ -48,6 +53,7 @@ class CharacterEditor extends UIState
 
 	public var characterPropertiesWindow:CharacterPropertiesWindow;
 	public var characterAnimsWindow:CharacterAnimsWindow;
+	public var dragModeWindow:CharacterDragModeWindow;
 
 	public var charCamera:FlxCamera;
 	public var gizmosCamera:FlxCamera;
@@ -62,6 +68,8 @@ class CharacterEditor extends UIState
 	public var stagePosition:String = null;
 
 	public static var undos:UndoList<CharacterEditorChange>;
+
+	var dragTypeMenu:UIContextMenuOptionSpr = null;
 
 	public function new(character:String)
 	{
@@ -205,11 +213,6 @@ class CharacterEditor extends UIState
 					},
 					null,
 					{
-						label: translate("offset.dragOffsetsMouse"),
-						onSelect: _offsets_drag_offsets_mouse,
-						icon: Options.characterDragging ? 1 : 0
-					},
-					{
 						label: translate("offset.clearOffsets"),
 						keybind: [CONTROL, R],
 						onSelect: _offsets_clear,
@@ -253,7 +256,16 @@ class CharacterEditor extends UIState
 						label: translate("view.axis"),
 						onSelect: _view_character_show_axis,
 						icon: Options.characterAxis ? 1 : 0
-					}
+					},
+					{
+						label: translate("view.posGuide"),
+						slider: {
+							min: 0,
+							max: 1,
+							value: Options.characterPosGuideAlpha,
+							onChange: _view_position_guide_alpha
+						},
+					},
 				]
 			},
 			{
@@ -326,6 +338,9 @@ class CharacterEditor extends UIState
 		characterPropertiesWindow = new CharacterPropertiesWindow((FlxG.width - (440) - 16) - (((500 - 16) - (440)) / 2), 23 + 12 + 10, character);
 		uiGroup.add(characterPropertiesWindow);
 
+		dragModeWindow = new CharacterDragModeWindow(16, FlxG.height - 60 - 5);
+		uiGroup.add(dragModeWindow);
+
 		topMenuSpr = new UITopMenu(topMenu);
 		uiGroup.add(topMenuSpr);
 
@@ -336,6 +351,18 @@ class CharacterEditor extends UIState
 		uiGroup.add(characterPropertiesWindow.animsWindow = characterAnimsWindow);
 
 		add(uiGroup);
+
+		charShader = FunkinShader.fromFile('engine/characterPosGuide');
+		dad = new Character(0, 0, Flags.DEFAULT_OPPONENT, false, true, true);
+		gf = new Character(0, 0, Flags.DEFAULT_GIRLFRIEND, false, true, true);
+		boyfriend = new Character(0, 0, Flags.DEFAULT_CHARACTER, true, true, true);
+		for (i in [dad, boyfriend, gf]) {
+			i.cameras = [charCamera];
+			i.shader = charShader;
+			i.color = FlxColor.interpolate(i.iconColor ?? -1, -1, 0.4);
+			i.useRenderTexture = true;
+			i.alpha = Options.characterPosGuideAlpha;
+		}
 
 		playAnimation(character.getAnimOrder()[0]);
 		changeStage("stage");
@@ -414,7 +441,7 @@ class CharacterEditor extends UIState
 
 		StageEditor.calcSpriteBounds(character);
 
-		if (Options.characterDragging)
+		if (Options.characterDragging != NONE)
 			handleMouseOffsets();
 
 		WindowUtils.prefix = undos.unsaved ? Flags.UNDO_PREFIX : "";
@@ -429,12 +456,14 @@ class CharacterEditor extends UIState
 		{
 			cameraHoverDummy.cursor = DRAG;
 
-			if (FlxG.mouse.justReleased)
-			{
-				draggingOffset.x /= character.scale.x;
-				draggingOffset.y /= character.scale.y;
+			if (FlxG.mouse.justReleased) {
+				if(Options.characterDragging == OFFSET){
+					draggingOffset.x /= character.scale.x;
+					draggingOffset.y /= character.scale.y;
 
-				_change_offset((draggingOffset.x * (character.isFlippedOffsets() ? -1 : 1)), draggingOffset.y);
+					_change_offset((draggingOffset.x * (character.isFlippedOffsets()  ? -1 : 1)), draggingOffset.y);
+				} else
+					characterPropertiesWindow.changePosition(character.globalOffset.x + draggingOffset.x, character.globalOffset.y + draggingOffset.y);
 
 				draggingOffset.set(0, 0);
 				draggingCharacter = false;
@@ -472,8 +501,9 @@ class CharacterEditor extends UIState
 			height = FlxG.initialHeight;
 		}
 
-		characterPropertiesWindow.x = (FlxG.width - (440) - 16) - (((500 - 16) - (440)) / 2);
-		characterAnimsWindow.x = (FlxG.width - (500 - 16) - 16);
+		characterPropertiesWindow.x = (FlxG.width-(440)-16) - (((500-16)-(440))/2);
+		characterAnimsWindow.x = (FlxG.width-(500-16)-16);
+		dragModeWindow.y = (FlxG.height - 32 - 12);
 
 		characterAnimsWindow.bHeight = Std.int(FlxG.height - (characterPropertiesWindow.y + characterPropertiesWindow.bHeight) - (32));
 	}
@@ -488,7 +518,11 @@ class CharacterEditor extends UIState
 	{
 		#if sys
 		UIState.playEditorSound(Flags.DEFAULT_EDITOR_SAVE_SOUND);
-		CoolUtil.safeSaveFile('${Paths.getAssetsRoot()}/data/characters/${character.curCharacter}.xml', buildCharacter());
+		CoolUtil.safeSaveFile(
+			Paths.assetsTree.getPath(Paths.xml('characters/${character.curCharacter}'))
+				?? '${Paths.getAssetsRoot()}/data/characters/${character.curCharacter}.xml',
+			buildCharacter()
+		);
 		#else
 		_file_saveas(_);
 		#end
@@ -714,34 +748,14 @@ class CharacterEditor extends UIState
 	{
 	}
 
-	function _offsets_left(_)
-		_change_offset(-1, 0);
-
-	function _offsets_up(_)
-		_change_offset(0, -1);
-
-	function _offsets_down(_)
-		_change_offset(0, 1);
-
-	function _offsets_right(_)
-		_change_offset(1, 0);
-
-	function _offsets_extra_left(_)
-		_change_offset(-5, 0);
-
-	function _offsets_extra_up(_)
-		_change_offset(0, -5);
-
-	function _offsets_extra_down(_)
-		_change_offset(0, 5);
-
-	function _offsets_extra_right(_)
-		_change_offset(5, 0);
-
-	function _offsets_drag_offsets_mouse(t)
-	{
-		t.icon = (Options.characterDragging = !Options.characterDragging) ? 1 : 0;
-	}
+	function _offsets_left(_) _change_offset(-1, 0);
+	function _offsets_up(_) _change_offset(0, -1);
+	function _offsets_down(_) _change_offset(0, 1);
+	function _offsets_right(_) _change_offset(1, 0);
+	function _offsets_extra_left(_) _change_offset(-5, 0);
+	function _offsets_extra_up(_) _change_offset(0, -5);
+	function _offsets_extra_down(_) _change_offset(0, 5);
+	function _offsets_extra_right(_) _change_offset(5, 0);
 
 	function _offsets_clear(_)
 		clearOffsets();
@@ -827,6 +841,7 @@ class CharacterEditor extends UIState
 			stage = null;
 		}
 		remove(character);
+		remove(boyfriend); remove(dad); remove(gf);
 
 		if (__stage == null)
 		{
@@ -852,6 +867,17 @@ class CharacterEditor extends UIState
 				for (pose in stage.characterPoses.keys())
 					pose.toUpperCase()
 			]);
+
+			stage.characterPoses['dad'].revertCharacter(dad);
+			stage.characterPoses['boyfriend'].revertCharacter(boyfriend);
+			stage.characterPoses['girlfriend'].revertCharacter(gf);
+			stage.characterPoses['dad'].prepareCharacter(dad, 0);
+			stage.characterPoses['boyfriend'].prepareCharacter(boyfriend, 0);
+			stage.characterPoses['girlfriend'].prepareCharacter(gf, 0);
+
+			insert(members.indexOf(stage.characterPoses['girlfriend']), gf);
+			insert(members.indexOf(stage.characterPoses['dad']), dad);
+			insert(members.indexOf(stage.characterPoses['boyfriend']), boyfriend);
 
 			changeStagePosition(stagePosition);
 			changeCharacterDesginedAs(stagePosition.toUpperCase() == "BOYFRIEND", false);
@@ -881,7 +907,7 @@ class CharacterEditor extends UIState
 			remove(character);
 
 			if (stage.characterPoses.exists(stagePosition))
-				stage.applyCharStuff(character, stagePosition, 0);
+				stage.applyCharStuff(character, stagePosition, 0, true);
 			_animation_play(null);
 		}
 		else
@@ -916,7 +942,13 @@ class CharacterEditor extends UIState
 	{
 		remove(character);
 		if (stage.characterPoses.exists(stagePosition))
-			stage.applyCharStuff(character, stagePosition, 0);
+			stage.applyCharStuff(character, stagePosition, 0, true);
+	}
+
+	public function changeOffsetDragType(type:CharacterDragMode){
+		Options.characterDragging = type;
+
+		dragModeWindow.refreshText();
 	}
 
 	public function changeCharacterIsPlayer(player:Bool) @:privateAccess {
@@ -963,6 +995,10 @@ class CharacterEditor extends UIState
 	{
 		t.icon = (Options.characterAxis = !Options.characterAxis) ? 1 : 0;
 		axisGizmo.visible = Options.characterAxis;
+	}
+
+	function _view_position_guide_alpha(t) {
+		boyfriend.alpha = dad.alpha = gf.alpha = Options.characterPosGuideAlpha = t.slider.value;
 	}
 
 	function _view_focus_character(_)

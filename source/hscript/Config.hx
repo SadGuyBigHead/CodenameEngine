@@ -11,10 +11,6 @@ class Config
 		#if foxlite 
 		"foxlite", 
 		#end
-		#if MODCHARTING_FEATURES
-		"modchart.engine",
-		"modchart.backend.standalone",
-		#end
 		#end
 	];
 

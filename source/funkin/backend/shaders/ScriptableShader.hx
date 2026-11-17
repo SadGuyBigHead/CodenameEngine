@@ -4,6 +4,7 @@ import hscript.IHScriptCustomBehaviour;
 import funkin.backend.scripting.events.shader.ShaderProcessEvent;
 import funkin.backend.scripting.ScriptPack;
 import funkin.backend.scripting.Script;
+import haxe.io.Path;
 
 @:structInit
 class FieldInfo
@@ -27,18 +28,14 @@ class ScriptableShader extends FlxBasic implements IHScriptCustomBehaviour
 	{
 		super();
 
+		this.shader = shader;
+
 		if (parentScriptPack == null && PlayState.instance != null)
 			parentScriptPack = PlayState.instance.scripts;
 
-		if (scriptName == null)
-			if ((shader is CustomShader))
-				scriptName = cast(shader, CustomShader).fileName;
-			else
-				throw "Missing name for shader script, please provide a scriptName, or use CustomShader";
+		if (scriptName != null) script = Script.create(Paths.script('shaders/$scriptName'));
+		else script = Script.create(Paths.script(Path.withoutExtension(shader._fragmentFilePath ?? shader._vertexFilePath ?? ""), null, true));
 
-		this.shader = shader;
-
-		script = Script.create(Paths.script('shaders/$scriptName'));
 		script.setParent(shader);
 		script.set("shader", shader);
 		script.set("registerParameter", shader.registerParameter);
@@ -81,22 +78,15 @@ class ScriptableShader extends FlxBasic implements IHScriptCustomBehaviour
 		script.set("set_" + name, set);
 	}
 
-	public override function update(elapsed:Float)
-		script.call("update", [elapsed]);
-
-	public override function draw()
-		script.call("draw", []);
-
-	public function updateGL()
-		script.call("updateGL", []);
-
-	public function processGLData(source:String, storageType:String)
-	{
+	public override function update(elapsed:Float) script.callOne("update", elapsed);
+	public override function draw() script.call("draw");
+	public function updateGL() script.call("updateGL");
+	public function processGLData(source:String, storageType:String) {
 		var event = EventManager.get(ShaderProcessEvent).recycle(source, storageType);
-		script.call("processGLData", [event]);
-		if (event.cancelled)
+		script.callOne("processGLData", event);
+		if(event.cancelled)
 			shader.__cancelNextProcessGLData = true;
-		script.call("processGLDataPost", [event]);
+		script.callOne("processGLDataPost", event);
 	}
 
 	public override function destroy()

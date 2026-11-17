@@ -17,7 +17,8 @@ class EventsData
 		"Camera Position",
 		"Add Camera Zoom",
 		"Camera Bop",
-		"Camera Zoom",
+		"Camera Zoom", 
+		"Character Change",
 		"Camera Modulo Change",
 		"Camera Flash",
 		"BPM Change",
@@ -185,6 +186,16 @@ class EventsData
 			{name: "Target Numerator", type: TFloat(1), defValue: 4},
 			{name: "Target Denominator", type: TFloat(1), defValue: 4},
 			{name: "Denominator is Steps Per Beat", type: TBool, defValue: false}
+		],
+		"Character Change" => [
+			{name: "Target", type: TStrumLine, defValue: 0},
+			{name: "Character Index", type: TInt(0, 99), defValue: 0},
+			{name: "New Character", type: TCharacter, defValue: Flags.DEFAULT_CHARACTER},
+			{name: "Precache?", type: TBool, defValue: true},
+			{name: "Offset X", type: TFloat(null, null, 10, 3), defValue: 0},
+			{name: "Offset Y", type: TFloat(null, null, 10, 3), defValue: 0},
+			{name: "Copy Shader?", type: TBool, defValue: true},
+			{name: "Use Stage Node Position?", type: TBool, defValue: false}
 		],
 		"Scroll Speed Change" => [
 			{name: "Tween Speed?", type: TBool, defValue: true},

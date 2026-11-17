@@ -176,11 +176,11 @@ class Note extends StrumLineSprite
 		this.beatEndTime = Conductor.instance.getTimeInBeats(endTime);
 		this.noteData = noteData.id.getDefault(0);
 
-		var customType = Paths.image('game/notes/${this.noteType}');
+		var customType = this.noteType != null ? Paths.image('game/notes/${this.noteType}') : null;
 		var notePath = (this.noteType != null && customTypePathExists(customType)) ? 'game/notes/${this.noteType}' : 'game/notes/default';
 
 		var event = EventManager.get(NoteCreationEvent)
-			.recycle(this, strumID, this.noteType, noteTypeID, PlayState.instance.strumLines.members.indexOf(strumLine), mustPress, notePath, @:privateAccess
+			.recycle(this, strumID, this.noteType, noteTypeID, (PlayState.instance != null) ? (PlayState.instance.strumLines.members.indexOf(strumLine)) : strumLine.ID, mustPress, notePath, @:privateAccess
 				strumLine.strumScale * Flags.DEFAULT_NOTE_SCALE, animSuffix);
 
 		if (PlayState.instance != null)

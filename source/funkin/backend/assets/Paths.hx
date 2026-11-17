@@ -22,55 +22,56 @@ class Paths
 	public static var assetsTree:AssetsLibraryList;
 
 	public static var tempFramesCache:Map<String, FlxFramesCollection> = [];
-	#if (sys && !windows)
 	static var tempPathsCache:Map<String, Null<String>> = [];
-	#end
 
 	public static function init()
 	{
 		FlxG.signals.preStateSwitch.add(function()
 		{
 			tempFramesCache.clear();
-			#if (sys && !windows)
 			tempPathsCache.clear();
-			#end
 		});
 	}
 
 	static function getExistingPath(path:String, prefix:String, nullFail:Bool):Null<String> {
 		var fixedPath = prefix + path;
 
-		#if (sys && !windows)
 		if (Assets.exists(fixedPath)) return fixedPath;
-		else if (Flags.PATHS_UNIX_FIX) {
+		else if (Flags.PATHS_CASE_SENSITIVE_FIX || (prefix.contains("data/config")) || (prefix.contains("data") && path.contains("config"))) {
 			if (tempPathsCache.exists(fixedPath)) return tempPathsCache.get(fixedPath);
 
-			final isFile = path.lastIndexOf(".") != -1, parts = path.split("/");
-			final n = parts.length - 1, keyCache = fixedPath;
+			final isFile = path.lastIndexOf(".") != -1, parts = path.split("/"), keyCache = fixedPath;
+			var n = parts.length - 1, hasEndSlash = parts[n] == "", pass = true;
+			if (hasEndSlash) {
+				parts.pop();
+				n--;
+			}
 
 			fixedPath = prefix;
 			for (i => part in parts) {
+				if (pass) pass = false;
+				else {
+					fixedPath += (i == n && !hasEndSlash) ? part : part + "/";
+					continue;
+				}
+
 				final lower = part.toLowerCase(), entries = (isFile && i == n) ? assetsTree.getFiles(fixedPath) : assetsTree.getFolders(fixedPath);
-				var pass = false;
 
 				for (entry in entries) if (entry.toLowerCase() == lower) {
 					pass = true;
-					fixedPath += i == n ? entry : entry + "/";
+					fixedPath += (i == n && !hasEndSlash) ? entry : entry + "/";
 					break;
 				}
 
 				if (!pass) {
 					if (nullFail) return tempPathsCache[keyCache] = null;
-					else fixedPath += i == n ? part : part + "/";
+					else fixedPath += (i == n && !hasEndSlash) ? part : part + "/";
 				}
 			}
 
 			return tempPathsCache[keyCache] = fixedPath;
 		}
 		else if (!nullFail) return fixedPath;
-		#else
-		if (!nullFail || Assets.exists(fixedPath)) return fixedPath;
-		#end
 
 		return null;
 	}
@@ -79,28 +80,37 @@ class Paths
 		if (exts == null)
 			return library == null ? getExistingPath(file, 'assets/', false) : getExistingPath('$library/$file', '$library:assets/', false);
 
-		var idx = file.lastIndexOf("/");
-		var p:Null<String> = idx == -1 ? "" : file.substr(0, idx);
-		file = file.substr(idx + 1);
+		var idx = file.lastIndexOf("/") + 1;
+		var dir = file.substr(0, idx);
+		file = file.substr(idx);
 
-		final e:Array<String> = (exts is String) ? [exts] : (cast exts);
+		final extArr:Array<String> = (exts is String) ? null : (cast exts);
+		final ext:String = extArr != null ? extArr[0] : (cast exts);
+		var fileExt:Null<String> = null;
 
-		idx = file.lastIndexOf(".");
-		if (idx != -1) {
-			e.unshift(file.substr(idx + 1));
+		if ((idx = file.lastIndexOf(".")) != -1) {
+			fileExt = file.substr(idx + 1);
 			file = file.substr(0, idx);
 		}
 
-		p = library == null ? getExistingPath(p, 'assets/', true) : getExistingPath('$library/$p', '$library:assets/', true);
-		if (p == null) return library == null ? 'assets/$file.${e[0]}' : '$library:assets/$library/$file.${e[0]}';
-		else p += "/";
+		dir = library == null ? getExistingPath(dir, 'assets/', false) : getExistingPath('$library/$dir', '$library:assets/', false);
 
-		for (extension in e) {
-			final path = getExistingPath('$file.$extension', p, true);
-			if (path != null) return path;
+		var path:String;
+		if (fileExt != null && (path = getExistingPath('$file.$fileExt', dir, true)) != null) return path;
+
+		if (extArr == null) {
+			if ((path = getExistingPath('$file.$ext', dir, true)) != null) return path;
+			// If incorrectly assumed if filename is an extension ex: Paths.music("Sneaky Snitch (website.com)")
+			else if (fileExt != null && (path = getExistingPath('$file.$fileExt.$ext', dir, true)) != null) return path;
+		}
+		else {
+			for (extension in extArr) {
+				if ((path = getExistingPath('$file.$extension', dir, true)) != null) return path;
+				else if (fileExt != null && (path = getExistingPath('$file.$fileExt.$extension', dir, true)) != null) return path;
+			}
 		}
 
-		return '$p$file.${e[0]}';
+		return '$dir$file.${fileExt ?? ext}';
 	}
 
 	public static inline function video(key:String, ?ext:OneOfTwo<String, Array<String>>)
@@ -290,17 +300,20 @@ class Paths
 	public static function getMultiFrames(sheets:Array<String>, assetsPath:Bool = false, ?unique:Bool = false, ?key:String = null,
 			?skipMulti:Bool = false, ?ext:OneOfTwo<String, Array<String>> = null, ?animateSettings:FlxAnimateSettings):FlxFramesCollection
 	{
-		final assetKey = key != null ? key : "combo/" + sheets.join(",");
+		final cacheKey = key != null ? key : "combo/" + sheets.join(",");
 
-		var asset:FlxAtlasFrames = cast tempFramesCache.get(assetKey);
+		var asset:FlxAtlasFrames = cast tempFramesCache.get(cacheKey);
 
 		if (asset != null && asset.parent != null && !asset.parent.isDestroyed) return asset;
-		else tempFramesCache.remove(assetKey);
+		else {
+			tempFramesCache.remove(cacheKey);
+			asset = null;
+		}
 
 		if (!unique) {
-			final graphic = FlxG.bitmap.get(assetKey);
+			final graphic = FlxG.bitmap.get(cacheKey);
 			if (graphic != null && (asset = graphic.atlasFrames) != null) {
-				tempFramesCache.set(assetKey, asset);
+				tempFramesCache.set(cacheKey, asset);
 				return asset;
 			}
 		}
@@ -331,13 +344,14 @@ class Paths
 			frameCollections.push(frames);
 		}
 
-		if (frameCollections.length == 1 && (key == null || key == assetKey)) return frameCollections[0];
+		if (frameCollections.length == 1 && (key == null || key == cacheKey))
+			return unique ? frameCollections[0] : tempFramesCache[cacheKey] = frameCollections[0];
 
 		if (asset == null) {
-			asset = new FlxAtlasFrames(FlxGraphic.fromRectangle(1, 1, 0, unique, assetKey));
+			asset = new FlxAtlasFrames(FlxGraphic.fromRectangle(1, 1, 0, unique, cacheKey));
 		}
 		else {
-			@:privateAccess asset.parent.key = assetKey;
+			@:privateAccess asset.parent.key = cacheKey;
 			asset.parent.unique = unique;
 			asset.parent.bitmap = new openfl.display.BitmapData(1, 1, true, 0);
 			asset.parent.addFrameCollection(asset);
@@ -348,7 +362,7 @@ class Paths
 
 		for (frames in frameCollections) asset.addAtlas(cast frames); // wont compile in hashlink because of mismatch type
 
-		if (!unique) tempFramesCache.set(assetKey, asset);
+		if (!unique) tempFramesCache.set(cacheKey, asset);
 		return asset;
 	}
 

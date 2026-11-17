@@ -35,7 +35,7 @@ class SaveSubstate extends MusicBeatSubstate
 		#if lime_funkin
 		FileDialog.saveFile(FlxG.stage.window, "Save File", (fileName:String, activeFilter:FileDialogFilter) ->
 		{
-			CoolUtil.safeSaveFile(fileName, data);
+			if (fileName != null) CoolUtil.safeSaveFile(fileName, data);
 			close();
 		}, [
 				new FileDialogFilter("Specified File Extension", options.saveExt.getDefault(Path.extension(options.defaultSaveFile)))

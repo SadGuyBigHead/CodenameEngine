@@ -508,7 +508,7 @@ final class Conductor
 			{
 				if (state is IBeatCancellableReceiver)
 				{
-					final bstate = cast(FlxG.state, IBeatCancellableReceiver);
+					final bstate = cast(state, IBeatCancellableReceiver);
 					if (bstate.conductor == this && bstate.cancelConductorUpdate)
 						return;
 				}
@@ -584,7 +584,7 @@ final class Conductor
 			{
 				if (state is IBeatReceiver && (state.subState == null || state.persistentUpdate))
 				{
-					var st = cast(state, IBeatReceiver);
+					var st:IBeatReceiver = cast state;
 
 					if (__updateStep)
 					{
@@ -747,6 +747,8 @@ final class Conductor
 				return bpmChange.stepTime
 					+ (((bpmChange.endSongTime - bpmChange.songTime) * (bpmChange.bpm - prevBPM)) / Math.log(bpmChange.bpm / prevBPM)
 						+ (time - bpmChange.endSongTime) * bpm) / 15000;
+			else if (MathUtil.equal(bpm, prevBPM))
+				return bpmChange.stepTime + (time - bpmChange.songTime) * (15000 / prevBPM);
 			else
 				return bpmChange.stepTime + (time - bpmChange.songTime) * (bpm - prevBPM) / Math.log(bpm / prevBPM) / 15000;
 		}
@@ -787,6 +789,8 @@ final class Conductor
 		if (bpmChange.continuous && stepTime > bpmChange.stepTime && index > 0)
 		{
 			var prevBPM = bpmChangeMap[index - 1].bpm;
+			if (MathUtil.equal(bpm, prevBPM))
+				return bpmChange.songTime + (stepTime - bpmChange.stepTime) * (15000 / prevBPM);
 			var time = bpmChange.songTime + (stepTime - bpmChange.stepTime) / (bpm - prevBPM) * Math.log(bpm / prevBPM) * 15000;
 			if (time > bpmChange.endSongTime)
 				return (15000 * (stepTime - bpmChange.stepTime)

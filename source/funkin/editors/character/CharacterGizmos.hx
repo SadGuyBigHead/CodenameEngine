@@ -56,7 +56,12 @@ class CharacterGizmos extends FlxSprite
 			DrawUtil.line.camera = camera;
 			DrawUtil.line.alpha = 0.85;
 
-			DrawUtil.drawRect(character._rect, 1, 0xFF007B8F);
+			var _color = switch (Options.characterDragging) {
+				case NONE: 0xFFCCCCCC;
+				case POSITION: 0xFFDF7A40;
+				default: 0xFF007B8F;
+			};
+			DrawUtil.drawRect(character._rect, 1, _color);
 		}
 	}
 
@@ -67,16 +72,24 @@ class CharacterGizmos extends FlxSprite
 			var camPos:FlxPoint = character.getCameraPosition();
 			camPos -= camera.scroll;
 
-			if (DrawUtil.line == null)
-				DrawUtil.createDrawers();
-			DrawUtil.line.camera = camera;
-			DrawUtil.line.alpha = 1;
+			if (DrawUtil.line == null) DrawUtil.createDrawers();
+			DrawUtil.line.camera = camera; DrawUtil.line.alpha = 1;
 
-			DrawUtil.drawLine(CoolUtil.pointToScreenPosition(FlxPoint.weak(camPos.x - 8, camPos.y), FlxG.camera, FlxPoint.weak()),
-				CoolUtil.pointToScreenPosition(FlxPoint.weak(camPos.x + 8, camPos.y), FlxG.camera, FlxPoint.weak()), 1, 0xFF00A0B9);
+			var _color = switch (Options.characterDragging) {
+				case NONE: 0xFFFFFFFF;
+				case POSITION: 0xFFFA9357;
+				default: 0xFF00A0B9;
+			};
 
-			DrawUtil.drawLine(CoolUtil.pointToScreenPosition(FlxPoint.weak(camPos.x, camPos.y - 8), FlxG.camera, FlxPoint.weak()),
-				CoolUtil.pointToScreenPosition(FlxPoint.weak(camPos.x, camPos.y + 8), FlxG.camera, FlxPoint.weak()), 1, 0xFF00A0B9);
+			DrawUtil.drawLine(
+				CoolUtil.pointToScreenPosition(FlxPoint.weak(camPos.x - 8, camPos.y), FlxG.camera, FlxPoint.weak()),
+				CoolUtil.pointToScreenPosition(FlxPoint.weak(camPos.x + 8, camPos.y), FlxG.camera, FlxPoint.weak()),
+			1, _color);
+
+			DrawUtil.drawLine(
+				CoolUtil.pointToScreenPosition(FlxPoint.weak(camPos.x, camPos.y - 8), FlxG.camera, FlxPoint.weak()),
+				CoolUtil.pointToScreenPosition(FlxPoint.weak(camPos.x, camPos.y + 8), FlxG.camera, FlxPoint.weak()),
+			1, _color);
 
 			camPos.put();
 		}

@@ -2,48 +2,22 @@ package funkin.backend.utils;
 
 import openfl.display.Sprite;
 
-final class ShaderResizeFix
-{
-	public static var doResizeFix:Bool = true;
+// DEPRECATED, Done automatically in cne-openfl openfl.display.DisplayObjectRenderer
+final class ShaderResizeFix {
+	public static var doResizeFix:Bool = false;
 
-	public static function init()
-	{
-		FlxG.signals.gameResized.add((w:Int, h:Int) ->
-		{
-			fixSpritesShadersSizes();
-		});
-	}
+	public static function init() {}
 
-	public inline static function fixSpritesShadersSizes()
-	{
-		if (!doResizeFix)
-			return;
+	public inline static function fixSpritesShadersSizes() {}
 
-		fixSpriteShaderSize(Main.instance);
-		if (FlxG.game != null)
-			fixSpriteShaderSize(FlxG.game);
+	public inline static function fixSpriteShaderSize(sprite:Sprite)
+	@:privateAccess {
+		if (sprite == null) return;
 
-		if (FlxG.cameras == null)
-			return;
-		for (cam in FlxG.cameras.list)
-		{
-			@:privateAccess
-			if (cam != null && (cam.filters != null && cam.filters.length > 0))
-				fixSpriteShaderSize(cam.flashSprite);
-		}
-	}
-
-	public inline static function fixSpriteShaderSize(sprite:Sprite) // Shout out to Ne_Eo for bringing this to my attention
-	{
-		if (sprite == null)
-			return;
-
-		@:privateAccess {
-			sprite.__cacheBitmap = null;
-			sprite.__cacheBitmapData = null;
-			sprite.__cacheBitmapData2 = null;
-			sprite.__cacheBitmapData3 = null;
-			sprite.__cacheBitmapColorTransform = null;
-		}
+		sprite.__cacheBitmap = null;
+		sprite.__cacheBitmapData = null;
+		sprite.__cacheBitmapData2 = null;
+		sprite.__cacheBitmapData3 = null;
+		sprite.__cacheBitmapColorTransform = null;
 	}
 }
