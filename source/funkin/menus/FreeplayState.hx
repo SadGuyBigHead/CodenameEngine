@@ -247,7 +247,7 @@ class FreeplayState extends MusicBeatState
 	/**
 	 * How much time a song stays selected until it autoplays.
 	 */
-	public var timeUntilAutoplay:Float = 1;
+	public var timeUntilAutoplay:Float = .65;
 	/**
 	 * Whenever the song autoplays when hovered over.
 	 */
@@ -309,9 +309,9 @@ class FreeplayState extends MusicBeatState
 			vinylGraphic.angle += elapsed * (Conductor.instance.bpm / 50);
 		}
 
-		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.7)
+		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.7 && (disableAutoPlay || songInstPlaying))
 		{
-			FlxG.sound.music.volume += 0.5 * elapsed;
+			FlxG.sound.music.volume = Math.max(.7, FlxG.sound.music.volume + .9 * elapsed);
 		}
 
 		var selectedAnotherSong:Bool = false;
@@ -353,7 +353,7 @@ class FreeplayState extends MusicBeatState
 		var dontPlaySongThisFrame = false;
 		autoplayElapsed += elapsed;
 		if (!disableAutoPlay && !songInstPlaying && (autoplayElapsed > timeUntilAutoplay)) {
-			if (curPlayingInst != (curPlayingInst = Paths.inst(curSong.name, curDifficulties[curDifficulty], curSong.instSuffix))) {
+			if (curPlayingInst != (curPlayingInst = Paths.inst(curSong.name, "normal", curSong.instSuffix))) {
 				var data = FlxSoundData.fromAssetKey(curPlayingInst, true);
 
 				if (data != null && autoplayShouldPlay) {
@@ -538,6 +538,13 @@ class FreeplayState extends MusicBeatState
 
 		if (event.playMenuSFX)
 			CoolUtil.playMenuSFX(SCROLL, 0.7);
+
+		#if PRELOAD_ALL
+		autoplayElapsed = 0;
+		songInstPlaying = false;
+		if (!disableAutoPlay && FlxG.sound.music != null)
+			FlxG.sound.music.volume = .0;
+		#end
 	}
 
 	// THANK YOU MINYA FOR HELP BECAUSE I WOULD HAVE DIED BADLY + BLOOD IF NOT FOR THAT
@@ -580,11 +587,6 @@ class FreeplayState extends MusicBeatState
 			curSelected = headerLocations[targs];
 			changeSelection(1);
 		}
-
-		#if PRELOAD_ALL
-		autoplayElapsed = 0;
-		songInstPlaying = false;
-		#end
 	}
 
 	function updateOptionsAlpha()

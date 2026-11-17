@@ -8,6 +8,7 @@ import funkin.backend.chart.ChartData;
 import funkin.backend.scripting.events.note.*;
 import funkin.backend.system.Conductor;
 import funkin.backend.system.Controls;
+import flixel.sound.FlxSoundData;
 
 /**
  * Group of strums, that contains the strums and notes.
@@ -193,7 +194,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 
 		var v = (PlayState.instance != null) ? Paths.voices(PlayState.SONG.meta.name, PlayState.difficulty, vocalPrefix) : null;
 		if (v != null && vocalPrefix != "")
-			vocals = FlxG.sound.load(v);
+			vocals = FlxG.sound.load(FlxSoundData.fromAsset(v));
 		else
 		{
 			vocals = FlxG.sound.list.recycle(FlxSound);
