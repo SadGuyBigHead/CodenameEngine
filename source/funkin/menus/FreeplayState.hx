@@ -312,7 +312,7 @@ class FreeplayState extends MusicBeatState
 
 		if (vinylGraphic != null)
 		{
-			vinylGraphic.angle += elapsed * (Conductor.instance.bpm / 50);
+			vinylGraphic.angle += elapsed * (Conductor.instance.bpm / 18);
 		}
 
 		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.7 && (disableAutoPlay || songInstPlaying))
