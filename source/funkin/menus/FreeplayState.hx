@@ -378,6 +378,10 @@ class FreeplayState extends MusicBeatState
 		if (controls.BACK || FlxG.mouse.justPressedRight)
 		{
 			CoolUtil.playMenuSFX(CANCEL, 0.7);
+			if (FlxG.sound.music != null)
+			{
+				FlxG.sound.music.stop();
+			}
 			FlxG.switchState(new MainMenuState());
 		}
 
