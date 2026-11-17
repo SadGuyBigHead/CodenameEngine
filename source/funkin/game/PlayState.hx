@@ -677,7 +677,7 @@ class PlayState extends MusicBeatState
 	/**
 	 * Minimum Combo Count to display the combo digits. Anything less than 0 means it won't be shown.
 	 */
-	public var minDigitDisplay:Int = 10;
+	public var minDigitDisplay:Int = 0;
 
 	/**
 	 * Array containing all of the note types names.
@@ -689,6 +689,16 @@ class PlayState extends MusicBeatState
 	 * Don't use this, it's for mods that still uses the old judgement timing, instead use ratingManager.
 	 */
 	public var hitWindow:Float = Options.hitWindow;
+
+	/**
+	 * For songs where you don't want notesplashes
+	**/
+	public var forceHideSplashes:Bool = false;
+
+	/**
+	 * For songs where you don't want holdcovers
+	**/
+	public var forceHideHoldCovers:Bool = false;
 
 	@:noCompletion @:dox(hide) private var _legacyRating:Rating = {
 		name: "",
@@ -2698,7 +2708,7 @@ class PlayState extends MusicBeatState
 			{
 				if (!event.strumGlowCancelled)
 					event.note.strum.press(event.note.strumTime);
-				if (event.showSplash)
+				if (event.showSplash && Options.splashesEnabled && !forceHideSplashes)
 					splashHandler.showSplash(event.note.splash, event.note.strum);
 			}
 		}
@@ -2718,10 +2728,21 @@ class PlayState extends MusicBeatState
 			strumLine.holdNote(note); // start HOLDING..
 
 		gameAndCharsEvent("onPostNoteHit", event);
+
 		if (!event.cancelled)
 		{
 			gfCombo(event);
-			strumLine?.holdCovers.noteHit(note);
+
+			var coven:Bool = true;
+			if (FlxG.save.data.coversEnabled != null)
+			{
+				coven = FlxG.save.data.coversEnabled;
+			}
+
+			if (!forceHideHoldCovers && coven)
+			{
+				strumLine?.holdCovers.noteHit(note);
+			}
 		}
 	}
 
