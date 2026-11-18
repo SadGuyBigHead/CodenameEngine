@@ -700,6 +700,13 @@ class PlayState extends MusicBeatState
 	**/
 	public var forceHideHoldCovers:Bool = false;
 
+	/**
+	 * for songs where you want the classic countdown style
+	**/
+	public var classicCountdown:Bool = false;
+
+	public var countdownAnimated:FunkinSprite;
+
 	@:noCompletion @:dox(hide) private var _legacyRating:Rating = {
 		name: "",
 		window: 0,
@@ -1403,36 +1410,92 @@ class PlayState extends MusicBeatState
 		var event:CountdownEvent = gameAndCharsEvent("onCountdown",
 			EventManager.get(CountdownEvent).recycle(swagCounter, 1, introSounds[swagCounter], introSprites[swagCounter], 0.6, true, null, null, null));
 
-		var sprite:FunkinSprite = null;
-		var sound:FlxSound = null;
-		var tween:FlxTween = null;
-
-		if (!event.cancelled)
+		if (classicCountdown)
 		{
-			if (event.spritePath != null)
+			var sprite:FunkinSprite = null;
+			var sound:FlxSound = null;
+			var tween:FlxTween = null;
+
+			if (!event.cancelled)
 			{
-				var spr = event.spritePath;
-				if (!Assets.exists(spr))
-					spr = Paths.image(spr);
+				if (event.spritePath != null)
+				{
+					var spr = event.spritePath;
+					if (!Assets.exists(spr))
+						spr = Paths.image(spr);
 
-				sprite = new FunkinSprite();
-				sprite.loadAnimatedGraphic(spr);
-				sprite.scrollFactor.set();
-				sprite.scale.set(event.scale, event.scale);
-				sprite.updateHitbox();
-				sprite.screenCenter();
-				sprite.zoomFactor = 0.5;
-				sprite.angleFactor = 0.0;
-				sprite.antialiasing = event.antialiasing;
-				add(sprite);
+					sprite = new FunkinSprite();
+					sprite.loadAnimatedGraphic(spr);
+					sprite.scrollFactor.set();
+					sprite.scale.set(event.scale, event.scale);
+					sprite.updateHitbox();
+					sprite.screenCenter();
+					sprite.zoomFactor = 0.5;
+					sprite.angleFactor = 0.0;
+					sprite.antialiasing = event.antialiasing;
+					add(sprite);
 
-				tween = FlxTween.tween(sprite, {y: sprite.y + 100, alpha: 0}, Conductor.instance.crochet / 1000, {
-					ease: FlxEase.cubeInOut,
-					onComplete: function(twn:FlxTween)
+					tween = FlxTween.tween(sprite, {y: sprite.y + 100, alpha: 0}, Conductor.instance.crochet / 1000, {
+						ease: FlxEase.cubeInOut,
+						onComplete: function(twn:FlxTween)
+						{
+							sprite.destroy();
+							remove(sprite, true);
+						}
+					});
+				}
+
+				if (event.soundPath != null)
+				{
+					var sfx = event.soundPath;
+
+					if (!Assets.exists(sfx))
 					{
-						sprite.destroy();
-						remove(sprite, true);
+						sfx = Paths.sound(sfx);
 					}
+
+					sound = FlxG.sound.play(sfx, event.volume);
+				}
+			}
+
+			event.sprite = sprite;
+			event.sound = sound;
+			event.spriteTween = tween;
+			event.cancelled = false;
+		}
+		else
+		{
+			var sound:FlxSound = null;
+
+			if (countdownAnimated == null)
+			{
+				countdownAnimated = new FunkinSprite(0, 0).loadSprite(Paths.image("game/countdown"));
+
+				countdownAnimated.addAnim("0", "0", 24, false, true);
+				countdownAnimated.addAnim("1", "1", 24, false, true);
+				countdownAnimated.addAnim("2", "2", 24, false, true);
+				// HARDCODED AND BAD PROBABLY CHANGE SOME DAY
+				countdownAnimated.addAnim("3", "3", 24, false, true, 368);
+				countdownAnimated.playAnim("0", true);
+
+				countdownAnimated.scrollFactor.set(0, 0);
+				countdownAnimated.zoomFactor = 0;
+				countdownAnimated.angleFactor = 0;
+
+				countdownAnimated.antialiasing = Options.antialiasing;
+
+				add(countdownAnimated);
+			}
+
+			countdownAnimated.playAnim(Std.string(swagCounter), true);
+
+			if (swagCounter >= introLength - 1)
+			{
+				// lazy ass
+				var endTimer = new FlxTimer().start(3, (tmr:FlxTimer) ->
+				{
+					countdownAnimated.destroy();
+					remove(countdownAnimated, true);
 				});
 			}
 
@@ -1448,11 +1511,6 @@ class PlayState extends MusicBeatState
 				sound = FlxG.sound.play(sfx, event.volume);
 			}
 		}
-
-		event.sprite = sprite;
-		event.sound = sound;
-		event.spriteTween = tween;
-		event.cancelled = false;
 
 		gameAndCharsEvent("onPostCountdown", event);
 	}
