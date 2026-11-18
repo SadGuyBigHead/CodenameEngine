@@ -50,6 +50,7 @@ using util.ColorTransformTools;
 @:access(funkin.game.Note)
 @:access(funkin.game.StrumLine)
 @:access(funkin.game.PlayState)
+@:allow(funkin.game.JudgementDisplay)
 final class NoteRenderer extends flixel.FlxBasic
 {
 	static inline final HOLD_SEGMENT_VERTICES = 2;
@@ -61,7 +62,9 @@ final class NoteRenderer extends flixel.FlxBasic
 	// multiplier for the amount of players.. so like 2 would mean 4 players where 3 and 4 copies 1 and 2
 	public final playerMult:Int = 1;
 
-	var shaders:Array<ModsShader> = [new ModsShader(), new ModsShader()];
+	public var judgementShaders:Vector<ModsShader>;
+
+	var shaders:Vector<ModsShader>;
 	var simpleShader = new SimpleShader();
 
 	// var simpleHoldShader = new SimpleShader(); // ????
@@ -106,14 +109,22 @@ final class NoteRenderer extends flixel.FlxBasic
 	public function new(game:PlayState, playerMult:Int = 1)
 	{
 		super();
-		for (shader in shaders)
-			shader.fov.value = [90.0];
 		this.game = game;
 		this.playerMult = playerMult;
 		mods = new ArrowEffects(new NotePositionMetrics(), game.strumLines.length * playerMult, game.conductor);
 
+		shaders = new Vector<ModsShader>(mods.players);
+		judgementShaders = new Vector<ModsShader>(mods.players);
 		for (pn in 0...mods.players)
+		{
+			shaders[pn] = new ModsShader();
+			shaders[pn].fov.value = [90.0];
+			shaders[pn].judgement.value = [false];
+			judgementShaders[pn] = new ModsShader();
+			judgementShaders[pn].fov.value = [90.0];
+			judgementShaders[pn].judgement.value = [true];
 			playField(pn).active = pn < game.strumLines.length;
+		}
 
 		// final luaPath = ''
 		modchart = new Modchart(game.timeline, mods, "songs/" + PlayState.SONG.meta.name + "/modchart.lua");
@@ -203,7 +214,7 @@ final class NoteRenderer extends flixel.FlxBasic
 			mods.update(elapsed);
 			modchart.update(elapsed);
 		}
-		for (pn in 0...2)
+		for (pn in 0...mods.players)
 		{
 			if (mods.active)
 				wavyHolds[pn] = mods.needWavyHolds(mods.playerStates[pn]);
@@ -211,6 +222,24 @@ final class NoteRenderer extends flixel.FlxBasic
 			FlxG.watch.addQuick('numSplashes-$pn', splashes[pn].length);
 			FlxG.watch.addQuick('wavyHolds-$pn', wavyHolds[pn]);
 			#end
+			
+			final js:ModsShader = judgementShaders[pn];
+			
+			final r = playField(pn).matrix.rawData;
+			js.playFieldTransform.value ??= cast new Vector<Float>(16);
+			js.playFieldTransform.value.setRest( //
+				r[0], r[4], r[8], r[12], //
+				r[1], r[5], r[9], r[13], //
+				r[2], r[6], r[10], r[14], //
+				r[3], r[7], r[11], r[15], //
+			); //
+
+			v3.copyFrom(playField(pn).pos);
+			js.playFieldPos.value ??= cast new Vector<Float>(3);
+			js.playFieldPos.value.setRest(v3.x, v3.y, v3.z);
+
+			js.fov.value ??= cast new Vector<Float>(1);
+			js.fov.value[0] = playField(pn).fov;
 		}
 	}
 
@@ -803,7 +832,7 @@ final class NoteRenderer extends flixel.FlxBasic
 		}
 	}
 
-	inline function playField(pn:Int)
+	public inline function playField(pn:Int)
 	{
 		return mods.playerStates[pn].playField;
 	}
@@ -1009,6 +1038,8 @@ class ModsShader extends FlxShader
 		const float far = 100.;
 		const float near = 0.1;
 		uniform float fov;
+
+		uniform bool judgement;
 	
 		//varying vec3 _r;
 		//varying vec3 _g;
@@ -1057,12 +1088,31 @@ class ModsShader extends FlxShader
 		{
 			#pragma body
 
-			mat4 localTransform = mat4(
-				localTransform0, 
-				localTransform1, 
-				localTransform2, 
-				localTransform3
-			);
+			mat4 localTransform;
+			if (judgement)
+			{
+				localTransform = mat4(
+					vec4(1.0, 0.0, 0.0, 0.0),
+					vec4(0.0, 1.0, 0.0, 0.0),
+					vec4(0.0, 0.0, 1.0, 0.0),
+					vec4(0.0, 0.0, 0.0, 1.0)
+				);
+			}
+			else
+			{
+				localTransform = mat4(
+					localTransform0, 
+					localTransform1, 
+					localTransform2, 
+					localTransform3
+				);
+				
+				//_r = r;
+				//_g = g;
+				//_b = b;
+				//_rgb_mix = rgb_mix;
+				_hue = hue;
+			}
 			vec4 pos = openfl_Position * localTransform * playFieldTransform;
 			// yes this is just the shitty funkin modchart projection but here instead cause im too stupid to use a matrix
 			float projectedZ = depthStuff.x * min((pos.z / 1280.) - 1.0, 0.0) + depthStuff.y;
@@ -1072,11 +1122,6 @@ class ModsShader extends FlxShader
 			depth = projectedZ;
 
 			gl_Position = openfl_Matrix * (pos + vec4(playFieldPos, 0.0));
-			//_r = r;
-			//_g = g;
-			//_b = b;
-			//_rgb_mix = rgb_mix;
-			_hue = hue;
 		}
 	')
 	@:glFragmentSource('
@@ -1089,6 +1134,8 @@ class ModsShader extends FlxShader
 		varying float _hue;
 		varying float depth;
 
+		uniform bool judgement;
+
 		vec3 hueShift(vec3 col, float hue) 
 		{
 			const vec3 k = vec3(0.57735, 0.57735, 0.57735);
@@ -1098,12 +1145,19 @@ class ModsShader extends FlxShader
 
 		void main() 
 		{
-			vec4 color = flixel_texture2D(bitmap, openfl_TextureCoordv);
+			if (judgement)
+			{
+				gl_FragColor = flixel_texture2D(bitmap, openfl_TextureCoordv);
+			}
+			else
+			{
+				vec4 color = flixel_texture2D(bitmap, openfl_TextureCoordv);
 
-			vec4 new_color = color;
-			//new_color.rgb = mix(color.rgb, min(color.r * _r + color.g * _g + color.b * _b, vec3(color.a)), _rgb_mix);
-			//new_color.a = color.a;
-			gl_FragColor = vec4(hueShift(new_color.rgb, _hue), new_color.a);
+				vec4 new_color = color;
+				//new_color.rgb = mix(color.rgb, min(color.r * _r + color.g * _g + color.b * _b, vec3(color.a)), _rgb_mix);
+				//new_color.a = color.a;
+				gl_FragColor = vec4(hueShift(new_color.rgb, _hue), new_color.a);
+			}
 			gl_FragDepth = depth; // fix warping i think??
 		}')
 	public function new()

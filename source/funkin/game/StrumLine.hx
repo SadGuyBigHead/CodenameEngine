@@ -170,7 +170,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 		return this.ghostTapping = b;
 
 
-	private var startingPos:FlxPoint = FlxPoint.get(0, 0);
+	public var startingPos:FlxPoint = FlxPoint.get(0, 0);
 
 	/**
 	 * The scale of the strums.
