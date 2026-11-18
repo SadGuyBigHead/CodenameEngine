@@ -2507,7 +2507,7 @@ class PlayState extends MusicBeatState
 
 			if (storyPlaylist.length <= 0)
 			{
-				FlxG.switchState(new StoryMenuState());
+				FlxG.switchState(new EndingState(storyWeek.id, campaignAccuracy));
 
 				if (validScore)
 				{
