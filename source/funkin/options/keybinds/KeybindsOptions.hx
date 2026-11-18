@@ -92,10 +92,6 @@ class KeybindsOptions extends MusicBeatSubstate
 					control: 'BACK'
 				},
 				{
-					name: "ui.reset",
-					control: 'RESET'
-				},
-				{
 					name: "ui.pause",
 					control: 'PAUSE'
 				},

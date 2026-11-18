@@ -2013,10 +2013,6 @@ class PlayState extends MusicBeatState
 		if (camZooming)
 			updateCamZoom();
 
-		// RESET = Quick Game Over Screen
-		if (startedCountdown && controls.RESET)
-			gameOver();
-
 		if (health <= 0 && canDie)
 			gameOver(boyfriend);
 		else if (health >= maxHealth && canDadDie)
@@ -2741,7 +2737,7 @@ class PlayState extends MusicBeatState
 			{
 				missCombo = 0;
 				combo++;
-			}	
+			}
 
 			if (event.charsComboAnim && event.player && combo > 0)
 			{
@@ -2819,7 +2815,6 @@ class PlayState extends MusicBeatState
 
 	public function displayRating(myRating:String, ?evt:NoteHitEvent):Void
 	{
-		
 	}
 
 	/**

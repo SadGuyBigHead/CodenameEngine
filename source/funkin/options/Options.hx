@@ -160,7 +160,6 @@ class Options
 	 * PLAYER 1 CONTROLS
 	 */
 	public static var P1_NOTE_LEFT:Array<FlxKey> = [A];
-
 	public static var P1_NOTE_DOWN:Array<FlxKey> = [S];
 	public static var P1_NOTE_UP:Array<FlxKey> = [W];
 	public static var P1_NOTE_RIGHT:Array<FlxKey> = [D];
@@ -176,7 +175,6 @@ class Options
 	public static var P1_CHANGE_MODE:Array<FlxKey> = [TAB];
 
 	// Misc
-	public static var P1_RESET:Array<FlxKey> = [R];
 	public static var P1_SWITCHMOD:Array<FlxKey> = [TAB];
 	public static var P1_VOLUME_UP:Array<FlxKey> = [PLUS];
 	public static var P1_VOLUME_DOWN:Array<FlxKey> = [MINUS];
@@ -194,7 +192,6 @@ class Options
 	 */
 	// Notes
 	public static var P2_NOTE_LEFT:Array<FlxKey> = [LEFT];
-
 	public static var P2_NOTE_DOWN:Array<FlxKey> = [DOWN];
 	public static var P2_NOTE_UP:Array<FlxKey> = [UP];
 	public static var P2_NOTE_RIGHT:Array<FlxKey> = [RIGHT];
@@ -210,7 +207,6 @@ class Options
 	public static var P2_CHANGE_MODE:Array<FlxKey> = [];
 
 	// Misc
-	public static var P2_RESET:Array<FlxKey> = [];
 	public static var P2_SWITCHMOD:Array<FlxKey> = [];
 	public static var P2_VOLUME_UP:Array<FlxKey> = [NUMPADPLUS];
 	public static var P2_VOLUME_DOWN:Array<FlxKey> = [NUMPADMINUS];
@@ -244,7 +240,6 @@ class Options
 	public static var SOLO_CHANGE_MODE(get, null):Array<FlxKey>;
 
 	// Misc
-	public static var SOLO_RESET(get, null):Array<FlxKey>;
 	public static var SOLO_SWITCHMOD(get, null):Array<FlxKey>;
 	public static var SOLO_VOLUME_UP(get, null):Array<FlxKey>;
 	public static var SOLO_VOLUME_DOWN(get, null):Array<FlxKey>;

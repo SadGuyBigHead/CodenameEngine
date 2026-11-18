@@ -18,7 +18,6 @@ enum Control
 	NOTE_LEFT;
 	NOTE_RIGHT;
 	NOTE_DOWN;
-	RESET;
 	ACCEPT;
 	BACK;
 	PAUSE;
@@ -147,11 +146,6 @@ class Controls extends FlxActionSet
 	@:justPressed("pause") public var PAUSE(get, set):Bool;
 	@:pressed("pause") public var PAUSE_HOLD(get, set):Bool;
 	@:justReleased("pause") public var PAUSE_R(get, set):Bool;
-
-	@:gamepad([Y])
-	@:justPressed("reset") public var RESET(get, set):Bool;
-	@:pressed("reset") public var RESET_HOLD(get, set):Bool;
-	@:justReleased("reset") public var RESET_R(get, set):Bool;
 
 	@:gamepad([FlxGamepadInputID.BACK]) // select button
 	@:justPressed("change-mode") public var CHANGE_MODE(get, set):Bool;
