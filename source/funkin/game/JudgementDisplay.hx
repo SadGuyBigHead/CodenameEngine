@@ -167,6 +167,7 @@ class JudgementDisplay extends FlxContainer
 				spr.animation.addByPrefix(rating.name, rating.name, 24);
 			spr.animation.addByPrefix("miss", "miss", 24);
 		}
+		spr.antialiasing = Options.antialiasing;
 		spr.scale.set(judgementScale, judgementScale);
 		spr.updateHitbox();
 		spr.kill();
@@ -184,6 +185,7 @@ class JudgementDisplay extends FlxContainer
 				spr.animation.addByPrefix('$num', 'num$num', 24);
 		}
 		spr.scale.set(comboNumScale, comboNumScale);
+		spr.antialiasing = Options.antialiasing;
 		spr.updateHitbox();
 		spr.kill();
 		return spr;
