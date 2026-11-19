@@ -190,7 +190,7 @@ class Strum extends StrumLineSprite
 
 		if (cpu)
 		{
-			if (lastHit + (Conductor.instance.crochet * 0.5) < Conductor.instance.songPosition && getAnim().startsWith("confirm"))
+			if (lastHit + (Conductor.instance.crochet * 0.5) < Conductor.instance.songPosition && getAnim().substr(shapeMode ? "shape-".length : 0).startsWith("confirm"))
 			{
 				playAnim("static");
 			}
