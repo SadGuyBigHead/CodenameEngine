@@ -206,6 +206,8 @@ class Alphabet extends FlxSprite
 	public var itemSlide:Float = 20;
 	public var itemHeight:Float = 120;
 
+	var curY:Float;
+
 	public function new(?x:Float, ?y:Float, ?text:String = "", ?font:OneOfTwo<String, Bool> = "normal")
 	{
 		super(x, y);
@@ -241,18 +243,19 @@ class Alphabet extends FlxSprite
 
 		if (isMenuItem)
 		{
-			var scaledY = targetY * 1.3;
+			curY = CoolUtil.fpsLerp(curY, targetY, 0.16);
+			var scaledY = curY * 1.3;
 
 			switch (menuScrollMode)
 			{
 				case CSHAPE:
-					y = CoolUtil.fpsLerp(y, (scaledY * 65) + (FlxG.height * 0.39), 0.16);
+					y = (scaledY * 65) + (FlxG.height * 0.39);
 
-					x = CoolUtil.fpsLerp(x, Math.exp(scaledY * 0.8) * 70 + (FlxG.width * 0.1), 0.16);
+					x = Math.exp(scaledY * 0.8) * 70 + (FlxG.width * 0.1);
 
 					if (scaledY < 0)
 					{
-						x = CoolUtil.fpsLerp(x, Math.exp(scaledY * -0.8) * 70 + (FlxG.width * 0.1), 0.16);
+						x = Math.exp(scaledY * -0.8) * 70 + (FlxG.width * 0.1);
 					}
 
 					if (x > FlxG.width + 30)
@@ -260,16 +263,16 @@ class Alphabet extends FlxSprite
 						x = FlxG.width + 30;
 					}
 				case DSHAPE:
-					y = CoolUtil.fpsLerp(y, (scaledY * 120) + (FlxG.height * 0.46), 0.16);
-					x = CoolUtil.fpsLerp(x, Math.exp(Math.abs(scaledY * 0.5)) * -70 + (FlxG.width * 0.425), 0.16);
+					y = (scaledY * 120) + (FlxG.height * 0.46);
+					x = Math.exp(Math.abs(scaledY * 0.5)) * -70 + (FlxG.width * 0.425);
 
 					if (x < -900)
 					{
 						x = -900;
 					}
 				default:
-					y = CoolUtil.fpsLerp(y, (scaledY * itemHeight) + (FlxG.height - height) * 0.5 + menuOffset.y, 0.16);
-					x = CoolUtil.fpsLerp(x, (targetY * itemSlide) + 90 + menuOffset.x, 0.16);
+					y = (scaledY * itemHeight);
+					x = (curY * itemSlide) + 90 + menuOffset.x;
 			}
 		}
 	}
