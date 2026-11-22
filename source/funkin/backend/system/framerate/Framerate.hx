@@ -38,7 +38,7 @@ class Framerate extends Sprite
     public static var textFormat:TextFormat;
     public static var smallTextFormat:TextFormat;
 
-    public static var debugMode:DebugType = Options.fpsCounter ? BASIC : HIDDEN;
+    public static var debugMode:DebugType = HIDDEN;
     public static var showDebugInfo:Bool = false;
 
     public static var offset:FlxPoint = new FlxPoint();
