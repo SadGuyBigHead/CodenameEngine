@@ -170,7 +170,7 @@ class FreeplayState extends MusicBeatState
 			songText.isMenuItem = true;
 			songText.targetY = i;
 			var leng = songs[i].displayName.length;
-			if (leng >= 12)
+			if (leng >= 12 && !songs[i].displayName.contains("\n"))
 			{
 				songText.scale.set(1 - (0.05 * (leng - 11)), 1);
 				songText.updateHitbox();
