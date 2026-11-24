@@ -11,7 +11,7 @@ jobs:
   debug_build:
     name: Windows Debug Build
     permissions: write-all
-    runs-on: windows-latest
+    runs-on: windows-2022
     needs: build # since its low priority, it'll run after, so actions will concentrate first on normal builds
     steps:
       - uses: Swatinem/rust-cache@v2
