@@ -2860,6 +2860,14 @@ class PlayState extends MusicBeatState
 		return event;
 	}
 
+	public function sustainComplete(strumLine:StrumLine, note:Note)
+	{
+		if (!strumLine.cpu)
+		{
+			judgementDisplay.displayHold(strumLine, note.strumID, "yes");
+		}
+	}
+
 	/**
 	 * This KID was let go
 	 * @param strumLine 
@@ -2912,6 +2920,7 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+		judgementDisplay.displayHold(strumLine, note.strumID, "no");
 
 		gameAndCharsEvent("onPostSustainMiss", event);
 		return event;

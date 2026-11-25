@@ -11,12 +11,18 @@ class JudgementDisplay extends FlxContainer
 {
 	public var judgement:FlxSprite;
 	public var combo:FlxTypedContainer<FlxSprite>;
+	public var holdJudgements:FlxTypedContainer<FlxSprite>;
 
 	public var ratings:RatingManager;
 
 	public var judgementScale:Float = 0.5;
+	public var judgementAlpha:Float = 1.0;
 
 	public var comboNumScale:Float = 0.3;
+	public var comboNumAlpha:Float = 1.0;
+
+	public var holdJudgementScale:Float = 0.4;
+	public var holdJudgementAlpha:Float = 0.5;
 
 	public var bumpTweenScale:Float = 1.1;
 
@@ -35,18 +41,28 @@ class JudgementDisplay extends FlxContainer
 			}
 			judgement = constructJudgement(judgement);
 			allocateCombo(3);
+			holdJudgements.forEach(constructHoldJudgement);
 		}
 
 		return this.asset = asset;
 	}
 
-	public var yOffset:Float = 490.0;
+	public var judgementYOffset:Float = 490.0;
+
+	// added onto just below the receptor
+	public var holdJudgementYOffset:Float = 16.0;
 
 	var assetFrames:FlxFramesCollection;
 
 	var comboNumWidth:Float;
 
 	var tweens:Array<FlxTween> = [];
+
+	var x:Float;
+
+	var y:Float;
+
+	var shader:FlxShader;
 
 	public function new(ratings:RatingManager)
 	{
@@ -55,27 +71,33 @@ class JudgementDisplay extends FlxContainer
 		this.ratings = ratings;
 
 		combo = new FlxTypedContainer<FlxSprite>();
+		holdJudgements = new FlxTypedContainer<FlxSprite>();
 
 		asset = "game/judgement";
 		add(combo);
+		add(holdJudgements);
 	}
 
-	public function display(strumLine:StrumLine, rating:String, comboNum:Int):Void
+	function getDisplayInfo(strumLine:StrumLine, yOffset:Float, ?lane:Float)
 	{
-		var x:Float = FlxG.width * .5;
-		var y:Float = FlxG.height * .5;
-		var shader:FlxShader = null;
+		x = FlxG.width * .5;
+		y = FlxG.height * .5;
+		shader = null;
 
 		if (strumLine != null)
 		{
 			cameras = strumLine.cameras;
+
+			final size:Float = ArrowEffects.ARROW_SIZE * (strumLine.strumScale ?? 1.0) * (strumLine.data.strumSpacing ?? 1.0);
+			final lanes:Int = strumLine.data.keyCount ?? 4;
+			lane ??= (lanes * .5);
 
 			if (PlayState.instance?.noteRenderer.mods.active)
 			{
 				final renderer = PlayState.instance.noteRenderer;
 				final ofsY:Float = yOffset;
 				shader = renderer.judgementShaders[strumLine.ID];
-				x = .001; // i really gotta get rid of this weird ass shader stuff
+				x = .001 + size * (lane - (lanes * .5)); // i really gotta get rid of this weird ass shader stuff
 				y = -renderer.mods.position.reverseOffset * .5;
 				if ((PlayState.instance?.downscroll ?? Options.downscroll))
 				{
@@ -88,11 +110,8 @@ class JudgementDisplay extends FlxContainer
 			}
 			else
 			{
-				final size:Float = ArrowEffects.ARROW_SIZE * (strumLine.strumScale ?? 1.0) * (strumLine.data.strumSpacing ?? 1.0);
-				final lanes:Int = strumLine.data.keyCount ?? 4;
 				final ofsY:Float = yOffset + (ArrowEffects.ARROW_SIZE * .5);
-
-				x = strumLine.startingPos.x + (size * (lanes * .5) * .5) + (size * .5);
+				x = strumLine.startingPos.x + (size * lane) - (size * .5);
 				y = strumLine.startingPos.y;
 
 				if ((PlayState.instance?.downscroll ?? Options.downscroll))
@@ -109,12 +128,18 @@ class JudgementDisplay extends FlxContainer
 		{
 			cameras = (PlayState.instance != null ? [PlayState.instance.camHUD] : null);
 		}
+	}
+
+	public function display(strumLine:StrumLine, rating:String, comboNum:Int):Void
+	{
+		final size:Float = ArrowEffects.ARROW_SIZE * (strumLine.strumScale ?? 1.0) * (strumLine.data.strumSpacing ?? 1.0);
+		getDisplayInfo(strumLine, judgementYOffset);
 
 		judgement = constructJudgement(judgement.exists ? judgement : null);
 		judgement.revive();
-		judgement.animation.play(rating);
+		judgement.animation.play(rating, true);
 		judgement.updateHitbox();
-		judgement.alpha = 1.0;
+		judgement.alpha = judgementAlpha;
 		judgement.x = x - judgement.width * .5;
 		judgement.y = y - judgement.height;
 		judgement.shader = shader;
@@ -136,14 +161,48 @@ class JudgementDisplay extends FlxContainer
 			final digit:String = comboStr.charAt(i);
 			final digitSpr:FlxSprite = combo.members[i];
 			digitSpr.revive();
-			digitSpr.animation.play(digit);
+			digitSpr.animation.play(digit, true);
 			digitSpr.updateHitbox();
-			digitSpr.alpha = 1.0;
+			digitSpr.alpha = comboNumAlpha;
 			digitSpr.x = comboLeft + i * comboNumWidth;
 			digitSpr.y = y;
 			digitSpr.shader = shader;
 			tween(digitSpr);
 		}
+	}
+
+	public function displayHold(strumLine:StrumLine, column:Int, rating:String):Void
+	{
+		final size:Float = ArrowEffects.ARROW_SIZE * (strumLine.strumScale ?? 1.0) * (strumLine.data.strumSpacing ?? 1.0);
+		getDisplayInfo(strumLine, (size * .5) + holdJudgementYOffset, column + .5); // column + .5 cause i hate my life
+
+		final lanes:Int = strumLine.data.keyCount ?? 4;
+		final id:Int = column + (strumLine.ID * lanes);
+		var judgement:FlxSprite = null;
+		for (i => spr in holdJudgements.members)
+		{
+			if (spr.ID == id)
+			{
+				judgement = constructHoldJudgement(spr);
+				break;
+			}
+		}
+		if (judgement == null)
+		{
+			judgement = constructHoldJudgement(holdJudgements.recycle(null, FlxSprite.new.bind(0, 0, null)));
+		}
+		else
+		{
+			judgement.revive();
+		}
+		judgement.ID = id;
+		judgement.animation.play(rating, true);
+		judgement.updateHitbox();
+		judgement.x = x - judgement.width * .5;
+		judgement.y = y;
+		judgement.shader = shader;
+		judgement.alpha = holdJudgementAlpha;
+		tween(judgement);
 	}
 
 	function tween(spr:FlxSprite)
@@ -182,12 +241,26 @@ class JudgementDisplay extends FlxContainer
 		{
 			spr.frames = assetFrames;
 			for (num in 0...10)
-				spr.animation.addByPrefix('$num', 'num$num', 24);
+				spr.animation.addByPrefix('$num', 'num$num', 24, false);
 		}
 		spr.scale.set(comboNumScale, comboNumScale);
 		spr.antialiasing = Options.antialiasing;
 		spr.updateHitbox();
 		spr.kill();
+		return spr;
+	}
+
+	function constructHoldJudgement(?spr:FlxSprite):FlxSprite
+	{
+		spr ??= new FlxSprite();
+		if (spr.frames != assetFrames)
+		{
+			spr.frames = assetFrames;
+			spr.animation.addByPrefix("yes", "yes", 24, false);
+			spr.animation.addByPrefix("no", "no", 24, false);
+		}
+		spr.scale.set(holdJudgementScale, holdJudgementScale);
+		spr.antialiasing = Options.antialiasing;
 		return spr;
 	}
 

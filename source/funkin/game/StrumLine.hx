@@ -598,6 +598,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 				notes.held.splice(i, 1);
 				if (!note.holdMiss)
 				{
+					PlayState.instance?.sustainComplete(this, note);
 					deleteNote(note);
 				}
 				holdCovers.members[note.strumID]?.cancel();
