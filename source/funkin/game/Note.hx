@@ -31,6 +31,12 @@ class Note extends StrumLineSprite
 
 	public var holdScore:Float = 450;
 
+	public var holdLife:Float = 1.0;
+
+	public var holdMiss:Bool;
+
+	public var holdMissTime:Float;
+
 	// who cares
 	public var extra:Map<String, Dynamic> = [];
 

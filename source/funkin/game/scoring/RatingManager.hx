@@ -20,6 +20,9 @@ class RatingManager
 	// itg mine window
 	public var mineHitWindow:Float = 70;
 
+	// stepmania sustain life
+	public var holdLife:Float = 250;
+
 	public var vsliceSlope:Bool = true;
 
 	static inline final MAX_SCORE:Int = 500;

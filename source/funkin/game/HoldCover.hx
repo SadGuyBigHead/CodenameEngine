@@ -42,6 +42,8 @@ class HoldCover extends StrumLineSprite
 	public function cancel()
 	{
 		timer = 0;
+		active = false;
+		visible = false;
 	}
 
 	override function update(elapsed:Float)

@@ -16,8 +16,6 @@ import flixel.sound.FlxSoundData;
 **/
 class StrumLine extends FlxTypedGroup<Strum>
 {
-	static final SUSTAIN_GRACE_TIME = .25 * 1000;
-
 	/**
 	 * Signal that triggers whenever a note is hit. Similar to onPlayerHit and onDadHit, except strumline specific.
 	 * To add a listener, do
@@ -324,15 +322,15 @@ class StrumLine extends FlxTypedGroup<Strum>
 			else __dispatchOnHit(daNote);
 		}
 
-		if (daNote.tooLate)
+		if (daNote.tooLate || daNote.holdMiss)
 		{
-			if (!cpu && !daNote.wasMissed && !daNote.mine)
+			if (!cpu && !daNote.wasMissed && !daNote.mine && !daNote.holdMiss)
 			{
 				daNote.wasMissed = true;
 				if (PlayState.instance != null) PlayState.instance.noteMiss(this, daNote);
 				else __dispatchOnMiss(daNote);
 			}
-			else if (!daNote.held && daNote.strum.getDistance(daNote, daNote.endTime) < drawDistanceMin)
+			else if (daNote.strum.getDistance(daNote, daNote.endTime) < drawDistanceMin)
 			{
 				deleteNote(daNote);
 			}
@@ -351,21 +349,33 @@ class StrumLine extends FlxTypedGroup<Strum>
 	var __notePerStrum:Array<Note> = [];
 	var __noteHitPerStrum:Array<Bool> = [];
 	var __heldTime:Array<Float> = [];
+	var __heldActive:Array<Bool> = [];
+	@:allow(modchart.NoteRenderer)
+	var __heldLife:Array<Float> = [];
 
 	function __inputProcessHolds(note:Note):Bool
 	{
 		// TODO: move sustain event stuff here so it can be independent of playstate
 		var strumID = note.strumID;
+		final lifeWindow:Float = (PlayState.instance?.ratingManager.holdLife ?? 250);
 		if (PlayState.instance?.skipping || cpu || __pressed[strumID])
 		{
+			__heldLife[strumID] = note.holdLife = 1.0;
 			__heldTime[strumID] = __updateNote_songPos;
 		}
-		else if (__updateNote_songPos - __heldTime[strumID] > SUSTAIN_GRACE_TIME)
+		else if (__updateNote_songPos - __heldTime[strumID] > lifeWindow)
 		{
+			__heldLife[strumID] = note.holdLife = 0.0;
+			note.holdMiss = true;
+			note.holdMissTime = __heldTime[strumID] + lifeWindow;
 			final event = PlayState.instance.sustainMiss(this, note);
 			if (event.cancelled)
 				return false;
 			return true;
+		}
+		else
+		{
+			__heldLife[strumID] = note.holdLife = 1.0 - ((__updateNote_songPos - __heldTime[strumID]) / lifeWindow);
 		}
 		note.updateScoreProgress(__updateNote_songPos);
 		final endDist = note.endTime - __updateNote_songPos;
@@ -541,7 +551,7 @@ class StrumLine extends FlxTypedGroup<Strum>
 		updateHeldNotes();
 
 		for (i => s in members)
-			s.updatePlayerInput(__pressed[i], __justPressed[i], __justReleased[i]);
+			s.updatePlayerInput(__pressed[i] || __heldActive[i], __justPressed[i], __justReleased[i] && !__heldActive[i]);
 
 		if (PlayState.instance != null) PlayState.instance.gameAndCharsEvent("onPostInputUpdate", event);
 	}
@@ -582,10 +592,14 @@ class StrumLine extends FlxTypedGroup<Strum>
 		{
 			final note = notes.held[i];
 			final complete = __inputProcessHolds(note);
+			__heldActive[note.strumID] = !complete;
 			if (complete)
 			{
 				notes.held.splice(i, 1);
-				deleteNote(note);
+				if (!note.holdMiss)
+				{
+					deleteNote(note);
+				}
 				holdCovers.members[note.strumID]?.cancel();
 				len--;
 				continue;	

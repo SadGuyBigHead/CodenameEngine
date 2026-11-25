@@ -306,9 +306,13 @@ final class NoteRenderer extends flixel.FlxBasic
 					continue;
 			}
 
+			final heldLife:Float = 1.0 - (strumLine(pn).__heldActive[col] ? strumLine(pn).__heldLife[col] : 1.0);
+			final dark:Float = (heldLife * -100).clamp(-100, 0);
+
 			// apply colors
 			receptor.colorTransform.copyTo(ct);
 			receptor.colorTransform.alphaMultiplier *= modDark;
+			receptor.colorTransform.setOffsets(dark, dark, dark, 0);
 			drawSprite(camera, pn, receptor, null);
 			ct.copyTo(receptor.colorTransform);
 		}
@@ -338,24 +342,24 @@ final class NoteRenderer extends flixel.FlxBasic
 			if (!note?.exists)
 				continue;
 			// since holds are drawn first we always update these values no matter what
-			note.__distance = note.strum.getDistance(note);
+			note.__distance = note.strum.getDistance(note, note.holdMiss ? note.holdMissTime : null);
 			note.__dark = getMissDark(note);
 			note.colorTransform.setOffsets(note.__dark, note.__dark, note.__dark, 0);
 
 			if (note.__distance > strumLine.drawDistanceMax)
 				break;
-			else if (note.hold.invalid || note.sustainLength <= 0 || note.held && mods.conductor.songPosition > note.endTime)
+			else if (note.hold.invalid || note.sustainLength <= 0 || note.held && !note.holdMiss && mods.conductor.songPosition > note.endTime)
 				continue;
 			final hold = note.hold;
 
-			final startY = (note.held ? .0 : note.__distance);
+			final startY = ((note.held && !note.holdMiss) ? .0 : note.__distance);
 			final endY = note.strum.getDistance(note, hold.endMs);
 
 			var capY = endY - hold.capHeight;
 			final bodyHeight = capY - startY;
 
 			// check if we are really gonna draw
-			if (hold.hit && endY < .0 || !hold.hit && bodyHeight < .0)
+			if (hold.hit && !note.holdMiss && endY < .0 || !hold.hit && bodyHeight < .0)
 				continue;
 
 			final originalX = note.x;
@@ -638,7 +642,7 @@ final class NoteRenderer extends flixel.FlxBasic
 		while (i >= 0)
 		{
 			final note = ng.__loopSprite = ng.members[i--];
-			if (!note?.exists || note.held)
+			if (!note?.exists || note.held && !note.holdMiss)
 				continue;
 			// update mod positions (or not)
 			if (mods.active)
@@ -726,6 +730,8 @@ final class NoteRenderer extends flixel.FlxBasic
 
 	function getMissDark(note:Note):Float
 	{
+		if (note.holdLife < 1.0)
+			return ((1.0 - note.holdLife) * -100).clamp(-100, 0);
 		if (!note.tooLate || note.mine)
 			return 0;
 		final dark:Float = FlxMath.remapToRange(note.strumTime - mods.conductor.songPosition, -note.hitWindow, -note.hitWindow - 100, 0, -100);
