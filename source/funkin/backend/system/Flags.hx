@@ -19,7 +19,8 @@ import lime.utils.AssetType;
  * allowing to read settable Flags (customs too).
  */
 @:build(funkin.backend.system.macros.FlagMacro.build())
-class Flags {
+class Flags
+{
 	// -- Codename's Addon Config --
 	@:bypass public static var addonFlags:Map<String, Dynamic> = [];
 	public static var CURRENT_API_VERSION:Int = 3;
@@ -62,7 +63,7 @@ class Flags {
 	@:lazy public static var TITLE:String = Application.current.meta.get('name');
 	@:lazy public static var VERSION:String = Application.current.meta.get('version');
 
-	@:lazy public static var VERSION_MESSAGE:String = 'Codename Engine v$VERSION';
+	@:lazy public static var VERSION_MESSAGE:String = 'Codename Engine (SGBH Fork) v$VERSION';
 
 	public static var REPO_NAME:String = "CodenameEngine";
 	public static var REPO_OWNER:String = "SadGuyBigHead";
@@ -79,6 +80,7 @@ class Flags {
 	 * Preferred file extensions for the game's audio files.
 	 */
 	public static var SOUND_EXTS:Array<String> = [#if web "mp3", "ogg", #else "ogg", "mp3", #end "flac", "opus", "wav"];
+
 	public static var VIDEO_EXTS:Array<String> = ["mp4", "webm", "mkv", "mov"]; // is there any more? // yes frakits
 	public static var IMAGE_EXTS:Array<String> = ["png", "jpg", "jpeg"]; // TODO: Add more after another lime rebases for SDLImage
 
@@ -99,7 +101,7 @@ class Flags {
 	@:also(funkin.game.PlayState.difficulty)
 	public static var DEFAULT_DIFFICULTY:String = "normal";
 	public static var DEFAULT_STAGE:String = "stage";
-	public static var DEFAULT_SCROLL_SPEED:Float = 2.0;
+	public static var DEFAULT_SCROLL_SPEED:Float = 2.5;
 	public static var DEFAULT_HEALTH_ICON:String = "face";
 
 	public static var SONGS_LIST_MOD_MODE:Allow<"prepend", "override", "append"> = "override";
@@ -154,9 +156,9 @@ class Flags {
 	@:also(funkin.game.PlayState.coopMode)
 	public static var DEFAULT_COOP_MODE:Bool = false; // used in playstate if it doesn't find it
 	@:also(funkin.game.PlayState.opponentMode)
-	public static var DEFAULT_OPPONENT_MODE:Bool = false;
+	public static var DEFAULT_OPPONENT_MODE:Bool = true;
 
-	public static var ALLOW_CENTERED_FIELDS:Bool = true; // Whether or not, `Options.centeredFields` (AKA "Middlescroll") will have an effect.
+	public static var ALLOW_CENTERED_FIELDS:Bool = false; // Whether or not, `Options.centeredFields` (AKA "Middlescroll") will have an effect.
 
 	public static var EARLY_HIT_WINDOW_RANGE:Float = 1.0; // was 0.5 for easier early hitting, but now 1 to demotivate mashing and getting away with it.
 	public static var LATE_HIT_WINDOW_RANGE:Float = 1.0;
@@ -179,7 +181,6 @@ class Flags {
 
 	public static var DEFAULT_CAM_ZOOM_INTERVAL:Int = 1;
 	public static var DEFAULT_CAM_ZOOM_OFFSET:Float = 0;
-	// public static var DEFAULT_CAM_ZOOM_EVERY:BeatType = MEASURE;
 	public static var DEFAULT_CAM_ZOOM_STRENGTH:Int = 1;
 	public static var DEFAULT_CAM_ZOOM:Float = 1.05; // what zoom level it defaults to
 	public static var DEFAULT_HUD_ZOOM:Float = 1.0;
@@ -219,7 +220,7 @@ class Flags {
 	];
 	public static var DEFAULT_CUTSCENE_PAUSE_ITEMS:Array<String> = ['Resume Cutscene', 'Skip Cutscene', 'Restart Cutscene', 'Exit to menu'];
 	public static var DEFAULT_GITAROO:Bool = false;
-	public static var GITAROO_CHANCE:Float = 0.1;
+	public static var GITAROO_CHANCE:Float = 0.005;
 	public static var DEFAULT_MUTE_VOCALS_ON_MISS:Bool = true;
 
 	public static var DEFAULT_MAX_HEALTH:Float = 2.0;
@@ -254,10 +255,8 @@ class Flags {
 	public static var JSON_PRETTY_PRINT:String = "\t";
 
 	public static var DISABLE_EDITORS:Bool = false;
-	public static var DISABLE_WARNING_SCREEN:Bool = true;
 	public static var DISABLE_TRANSITIONS:Bool = false;
 	public static var DISABLE_LANGUAGES:Bool = false;
-	public static var DISABLE_AUTOUPDATER:Bool = true;
 
 	@:also(funkin.backend.MusicBeatTransition.script)
 	public static var DEFAULT_TRANSITION_SCRIPT:String = "";
@@ -331,7 +330,6 @@ class Flags {
 	public static var USER_AGENT:String = 'request';
 
 	// -- End of Codename's Default Flags --
-
 	@:bypass public static var modIconImages:Array<Image>;
 	@:lazy public static var overridenFlags:Map<String, Bool> = [];
 
@@ -376,54 +374,88 @@ class Flags {
 		}
 	}
 
-	private static function loadPost() {
-		if (MOD_API_VERSION == null) MOD_API_VERSION = CURRENT_API_VERSION;
-		if (WINDOW_TITLE_USE_MOD_NAME == null) WINDOW_TITLE_USE_MOD_NAME = !overridenFlags.exists('TITLE') && overridenFlags.exists('MOD_NAME');
-		if (DEFAULT_GLSL_VERSION == null) DEFAULT_GLSL_VERSION = openfl.utils.GLSLSourceAssembler.getDefaultVersion();
-		if (PATHS_CASE_SENSITIVE_FIX == null) {
+	private static function loadPost()
+	{
+		if (MOD_API_VERSION == null)
+			MOD_API_VERSION = CURRENT_API_VERSION;
+		if (WINDOW_TITLE_USE_MOD_NAME == null)
+			WINDOW_TITLE_USE_MOD_NAME = !overridenFlags.exists('TITLE') && overridenFlags.exists('MOD_NAME');
+		if (DEFAULT_GLSL_VERSION == null)
+			DEFAULT_GLSL_VERSION = openfl.utils.GLSLSourceAssembler.getDefaultVersion();
+		if (PATHS_CASE_SENSITIVE_FIX == null)
+		{
 			#if windows
-			for (l in Paths.assetsTree.libraries) {
+			for (l in Paths.assetsTree.libraries)
+			{
 				final lib = AssetsLibraryList.getCleanLibrary(l);
-				if (!(lib is IModsAssetLibrary) || (lib is TranslatedAssetLibrary)) continue;
+				if (!(lib is IModsAssetLibrary) || (lib is TranslatedAssetLibrary))
+					continue;
 
-				if (PATHS_CASE_SENSITIVE_FIX = !(lib is ModsFolderLibrary)) break;
+				if (PATHS_CASE_SENSITIVE_FIX = !(lib is ModsFolderLibrary))
+					break;
 			}
 
-			if (PATHS_CASE_SENSITIVE_FIX == null) PATHS_CASE_SENSITIVE_FIX = false;
+			if (PATHS_CASE_SENSITIVE_FIX == null)
+				PATHS_CASE_SENSITIVE_FIX = false;
 			#else
 			PATHS_CASE_SENSITIVE_FIX = true;
 			#end
 		}
 
-		if (USE_LEGACY_TIMING == null) USE_LEGACY_TIMING = MOD_API_VERSION < 2;
-		if (SUSTAINS_AS_ONE_NOTE == null) SUSTAINS_AS_ONE_NOTE = MOD_API_VERSION >= 2;
-		if (DEFAULT_SOUND_TIME_SCALED_PITCH == null) DEFAULT_SOUND_TIME_SCALED_PITCH = MOD_API_VERSION >= 2;
-		if (USE_SOUND_VOLUME_CURVE == null) USE_SOUND_VOLUME_CURVE = MOD_API_VERSION >= 2;
-		if (USE_FLXTRAIL_FRAMES == null) USE_FLXTRAIL_FRAMES = MOD_API_VERSION < 2;
-		if (USE_LEGACY_CENTER_CAM == null) USE_LEGACY_CENTER_CAM = MOD_API_VERSION < 3;
-		if (USE_LEGACY_FLXANIMATE_STAGE_MATRIX == null) USE_LEGACY_FLXANIMATE_STAGE_MATRIX = MOD_API_VERSION < 3;
+		if (USE_LEGACY_TIMING == null)
+			USE_LEGACY_TIMING = MOD_API_VERSION < 2;
+		if (SUSTAINS_AS_ONE_NOTE == null)
+			SUSTAINS_AS_ONE_NOTE = MOD_API_VERSION >= 2;
+		if (DEFAULT_SOUND_TIME_SCALED_PITCH == null)
+			DEFAULT_SOUND_TIME_SCALED_PITCH = MOD_API_VERSION >= 2;
+		if (USE_SOUND_VOLUME_CURVE == null)
+			USE_SOUND_VOLUME_CURVE = MOD_API_VERSION >= 2;
+		if (USE_FLXTRAIL_FRAMES == null)
+			USE_FLXTRAIL_FRAMES = MOD_API_VERSION < 2;
+		if (USE_LEGACY_CENTER_CAM == null)
+			USE_LEGACY_CENTER_CAM = MOD_API_VERSION < 3;
+		if (USE_LEGACY_FLXANIMATE_STAGE_MATRIX == null)
+			USE_LEGACY_FLXANIMATE_STAGE_MATRIX = MOD_API_VERSION < 3;
 
 		flixel.sound.FlxSound.defaultTimeScaledPitch = cast DEFAULT_SOUND_TIME_SCALED_PITCH;
 		flixel.addons.effects.FlxTrail.defaultDelayBackwardCompatibility = cast USE_FLXTRAIL_FRAMES;
 
-		if (SOUND_EXT == null) SOUND_EXT = SOUND_EXTS[0]; else SOUND_EXTS = [SOUND_EXT];
-		if (VIDEO_EXT == null) VIDEO_EXT = VIDEO_EXTS[0]; else VIDEO_EXTS = [VIDEO_EXT];
-		if (IMAGE_EXT == null) IMAGE_EXT = IMAGE_EXTS[0]; else IMAGE_EXTS = [IMAGE_EXT];
+		if (SOUND_EXT == null)
+			SOUND_EXT = SOUND_EXTS[0];
+		else
+			SOUND_EXTS = [SOUND_EXT];
+		if (VIDEO_EXT == null)
+			VIDEO_EXT = VIDEO_EXTS[0];
+		else
+			VIDEO_EXTS = [VIDEO_EXT];
+		if (IMAGE_EXT == null)
+			IMAGE_EXT = IMAGE_EXTS[0];
+		else
+			IMAGE_EXTS = [IMAGE_EXT];
 
 		final compIcons = [];
-		if (MOD_ICON != null) compIcons.push(MOD_ICON);
-		if (MOD_ICON16 != null) compIcons.push(MOD_ICON16);
-		if (MOD_ICON24 != null) compIcons.push(MOD_ICON24);
-		if (MOD_ICON32 != null) compIcons.push(MOD_ICON32);
-		if (MOD_ICON64 != null) compIcons.push(MOD_ICON64);
+		if (MOD_ICON != null)
+			compIcons.push(MOD_ICON);
+		if (MOD_ICON16 != null)
+			compIcons.push(MOD_ICON16);
+		if (MOD_ICON24 != null)
+			compIcons.push(MOD_ICON24);
+		if (MOD_ICON32 != null)
+			compIcons.push(MOD_ICON32);
+		if (MOD_ICON64 != null)
+			compIcons.push(MOD_ICON64);
 
-		if (compIcons.length > 0) MOD_ICONS = compIcons;
+		if (compIcons.length > 0)
+			MOD_ICONS = compIcons;
 
 		modIconImages = [];
 		var path:String;
-		for (icon in MOD_ICONS) {
-			if (Assets.exists(icon)) path = icon;
-			else if (!Assets.exists(path = Paths.image(icon))) continue;
+		for (icon in MOD_ICONS)
+		{
+			if (Assets.exists(icon))
+				path = icon;
+			else if (!Assets.exists(path = Paths.image(icon)))
+				continue;
 
 			modIconImages.push(Image.fromBytes(Assets.getBytes(path)));
 		}
@@ -487,8 +519,10 @@ class Flags {
 
 			if (l is IModsAssetLibrary)
 			{
-				if (cast(l, IModsAssetLibrary).modName == "assets") continue;
-				if (cast(l, IModsAssetLibrary).modName == "source") continue;
+				if (cast(l, IModsAssetLibrary).modName == "assets")
+					continue;
+				if (cast(l, IModsAssetLibrary).modName == "source")
+					continue;
 
 				var flagsTxt = "";
 				if (l.exists(Paths.ini("config/modpack"), AssetType.TEXT))

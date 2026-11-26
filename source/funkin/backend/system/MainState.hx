@@ -16,7 +16,6 @@ import funkin.menus.TitleState;
 import haxe.io.Path;
 import openfl.Lib;
 
-
 @dox(hide)
 typedef AddonInfo =
 {
@@ -34,7 +33,8 @@ class MainState extends FlxState
 	public override function create()
 	{
 		super.create();
-		if (!initiated) Main.loadGameSettings();
+		if (!initiated)
+			Main.loadGameSettings();
 
 		#if sys
 		CoolUtil.deleteFolder('./.temp/'); // delete temp folder
@@ -110,7 +110,8 @@ class MainState extends FlxState
 					else
 						continue;
 				}
-				if (Options.disabledAddons.contains(addon)) continue;
+				if (Options.disabledAddons.contains(addon))
+					continue;
 
 				var data:AddonInfo = {
 					name: addon,
@@ -180,10 +181,12 @@ class MainState extends FlxState
 			Framerate.instance.reload();
 
 		#if sys
-		try {
+		try
+		{
 			CoolUtil.safeAddAttributes('./.temp/', NativeAPI.FileAttribute.HIDDEN);
 		}
-		catch (e) {
+		catch (e)
+		{
 			Logs.warn("Unable to make the .temp directory... is the game unpacked?");
 		}
 		#end
@@ -196,10 +199,14 @@ class MainState extends FlxState
 				cast(lib, ZipFolderLibrary).precacheVideos();
 		}
 
-		if (!initiated) {
-			if (Main.goToSong != null) {
-				if (Main.goToCharter) FlxG.switchState(new funkin.editors.charter.Charter(Main.goToSong, Main.goToDifficulty, Main.goToVariation));
-				else {
+		if (!initiated)
+		{
+			if (Main.goToSong != null)
+			{
+				if (Main.goToCharter)
+					FlxG.switchState(new funkin.editors.charter.Charter(Main.goToSong, Main.goToDifficulty, Main.goToVariation));
+				else
+				{
 					PlayState.loadSong(Main.goToSong, Main.goToDifficulty, Main.goToVariation);
 					FlxG.switchState(new PlayState());
 				}
@@ -207,20 +214,24 @@ class MainState extends FlxState
 		}
 		initiated = true;
 
-		if (@:privateAccess FlxG.game._nextState == null) {
-			var startState:Class<FlxState> = Flags.DISABLE_WARNING_SCREEN ? TitleState : funkin.menus.WarningState;
+		if (@:privateAccess FlxG.game._nextState == null)
+		{
+			var startState:Class<FlxState> = TitleState;
 			var outdatedAPI:Bool = (Flags.MOD_API_VERSION ?? Flags.CURRENT_API_VERSION) < Flags.CURRENT_API_VERSION;
 			// In this case if the mod we just loaded a compressed modpack, we can't edit or modify files without decompressing it.
-			if (Options.devMode && Options.allowConfigWarning && !isZipMod) {
+			if (Options.devMode && Options.allowConfigWarning && !isZipMod)
+			{
 				var lib:ModsFolderLibrary;
-				for (e in Paths.assetsTree.libraries) if ((lib = cast AssetsLibraryList.getCleanLibrary(e)) is ModsFolderLibrary
-					&& lib.modName == ModsFolder.currentModFolder)
-				{
-					if (!outdatedAPI && lib.exists(Paths.ini("config/modpack"), lime.utils.AssetType.TEXT)) break;
+				for (e in Paths.assetsTree.libraries)
+					if ((lib = cast AssetsLibraryList.getCleanLibrary(e)) is ModsFolderLibrary
+						&& lib.modName == ModsFolder.currentModFolder)
+					{
+						if (!outdatedAPI && lib.exists(Paths.ini("config/modpack"), lime.utils.AssetType.TEXT))
+							break;
 
-					FlxG.switchState(new ModConfigWarning(lib, startState, outdatedAPI));
-					return;
-				}
+						FlxG.switchState(new ModConfigWarning(lib, startState, outdatedAPI));
+						return;
+					}
 			}
 
 			FlxG.switchState(cast Type.createInstance(startState, []));
